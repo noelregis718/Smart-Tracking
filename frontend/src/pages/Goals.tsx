@@ -1,0 +1,1 @@
+export const Goals = () => <div className='card'><h1>Goals</h1><p style={{marginTop: '1rem', color: 'var(--text-muted)'}}>This page is currently under development to match our new fintech dashboard style.</p></div>;
