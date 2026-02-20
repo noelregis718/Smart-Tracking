@@ -7,6 +7,13 @@ import { supabase } from './lib/supabase';
 dotenv.config();
 
 const app = express();
+
+// Global Logger Middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
 import { createConsent, createDataSession, fetchData } from './services/setu';
 const PORT = process.env.PORT || 5000;
 
@@ -75,12 +82,26 @@ app.delete('/api/expenses/:id', (async (req: AuthRequest, res: Response) => {
 // Setu Routes
 app.post('/api/setu/consent', (async (req: AuthRequest, res: Response) => {
     try {
+        console.log('=== Setu Consent Request Start ===');
+        console.log('Raw req.auth:', req.auth);
+
         const { mobileNumber } = req.body;
+        console.log('Mobile Number:', mobileNumber);
+        console.log('Auth userId:', req.auth?.userId);
+
         if (!mobileNumber) {
             return res.status(400).json({ error: 'Mobile number is required' });
         }
 
         const consent = await createConsent(mobileNumber);
+        console.log('Setu Consent Service Response:', JSON.stringify(consent, null, 2));
+
+        if (!consent || !consent.id) {
+            console.error('Invalid consent response from Setu');
+            return res.status(500).json({ error: 'Failed to create consent with Setu' });
+        }
+
+        console.log('Setu Consent Created:', consent.id);
 
         // Store consent in Supabase
         const { error } = await supabase
@@ -91,10 +112,16 @@ app.post('/api/setu/consent', (async (req: AuthRequest, res: Response) => {
                 status: 'PENDING'
             });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase Upsert Error:', error);
+            throw error;
+        }
 
         res.json(consent);
     } catch (error: any) {
+        console.error('--- 500 Error Caught in /api/setu/consent ---');
+        console.error('Error Message:', error.message);
+        console.error('Stack Trace:', error.stack);
         res.status(500).json({ error: error.message });
     }
 }) as any);
@@ -169,6 +196,16 @@ app.post('/api/setu/webhook', (async (req: Request, res: Response) => {
         res.sendStatus(500);
     }
 }) as any);
+
+// Error Handler Middleware
+app.use((err: any, req: Request, res: Response, next: any) => {
+    console.error('GLOBAL ERROR HANDLER CAUGHT AN ERROR:');
+    console.error(err);
+    res.status(500).json({
+        error: 'Global error handler caught something',
+        details: err.message || err
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

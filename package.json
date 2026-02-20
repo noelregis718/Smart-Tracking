@@ -1,0 +1,24 @@
+{
+  "name": "college-project---smart-expense-tracker",
+  "version": "1.0.0",
+  "description": "The **Smart Expense Tracker** is a premium, modern fintech application built with React and Node.js. It features a stunning dashboard UI inspired by top-tier financial apps and deep integration with **Setu Account Aggregator** to fetch real-time bank data securely.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noelregis718/Smart-Tracking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/noelregis718/Smart-Tracking/issues"
+  },
+  "homepage": "https://github.com/noelregis718/Smart-Tracking#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

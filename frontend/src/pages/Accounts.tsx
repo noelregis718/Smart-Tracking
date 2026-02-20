@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '@clerk/clerk-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import {
@@ -74,14 +75,19 @@ const SummaryItem = ({ color, label, value }: any) => (
 export const Accounts = () => {
     const [mobileNumber, setMobileNumber] = React.useState('');
     const [isConnecting, setIsConnecting] = React.useState(false);
+    const { getToken } = useAuth();
 
     const handleConnectBank = async () => {
         if (!mobileNumber) return alert('Please enter mobile number');
         setIsConnecting(true);
         try {
+            const token = await getToken();
             const response = await fetch('/api/setu/consent', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ mobileNumber })
             });
             const data = await response.json();
