@@ -1,5 +1,3 @@
-import React from 'react';
-import { useAuth } from '@clerk/clerk-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import {
@@ -73,59 +71,12 @@ const SummaryItem = ({ color, label, value }: any) => (
 );
 
 export const Accounts = () => {
-    const [mobileNumber, setMobileNumber] = React.useState('');
-    const [isConnecting, setIsConnecting] = React.useState(false);
-    const { getToken } = useAuth();
-
-    const handleConnectBank = async () => {
-        if (!mobileNumber) return alert('Please enter mobile number');
-        setIsConnecting(true);
-        try {
-            const token = await getToken();
-            const response = await fetch('/api/setu/consent', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ mobileNumber })
-            });
-            const data = await response.json();
-            if (data.url) {
-                window.location.href = data.url; // Redirect to Setu Bridge
-            } else {
-                alert('Error starting connection: ' + (data.error || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Connection error:', error);
-            alert('Failed to connect to bank');
-        } finally {
-            setIsConnecting(false);
-        }
-    };
-
     return (
         <div>
             {/* Page Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Accounts</h1>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'white', padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                        <input
-                            type="text"
-                            placeholder="Enter Mobile (e.g. 9999999999)"
-                            value={mobileNumber}
-                            onChange={(e) => setMobileNumber(e.target.value)}
-                            style={{ border: 'none', outline: 'none', fontSize: '0.875rem' }}
-                        />
-                        <Button
-                            onClick={handleConnectBank}
-                            disabled={isConnecting}
-                            style={{ background: '#ff5f1f', color: 'white', gap: '0.5rem', fontSize: '0.875rem', padding: '0.375rem 0.75rem' }}
-                        >
-                            {isConnecting ? 'Linking...' : 'Connect Bank'}
-                        </Button>
-                    </div>
                     <Button variant="secondary" style={{ gap: '0.5rem', fontSize: '0.875rem' }}>
                         <RefreshCcw size={16} /> Refresh all
                     </Button>

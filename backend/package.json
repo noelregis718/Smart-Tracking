@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon --exec \"node --dns-result-order=ipv4first -r ts-node/register\" src/index.ts",
     "build": "tsc"
   },
   "keywords": [],

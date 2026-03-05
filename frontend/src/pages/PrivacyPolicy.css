@@ -1,0 +1,67 @@
+.privacy-page {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #dbeafe 0%, #f3f4f6 40%);
+    color: #000000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 0;
+}
+
+
+.privacy-header {
+    text-align: center;
+    padding: 4rem 0 6rem;
+}
+
+.privacy-header h1 {
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.last-updated {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.privacy-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    line-height: 1.6;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.privacy-content section {
+    margin-bottom: 3rem;
+}
+
+.privacy-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #000;
+}
+
+.privacy-content p {
+    margin-bottom: 1.5rem;
+}
+
+.contact-info {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .privacy-header h1 {
+        font-size: 2.5rem;
+    }
+
+
+    .privacy-content {
+        font-size: 1rem;
+    }
+}

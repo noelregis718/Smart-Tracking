@@ -1,7 +1,7 @@
 {
   "name": "college-project---smart-expense-tracker",
   "version": "1.0.0",
-  "description": "The **Smart Expense Tracker** is a premium, modern fintech application built with React and Node.js. It features a stunning dashboard UI inspired by top-tier financial apps and deep integration with **Setu Account Aggregator** to fetch real-time bank data securely.",
+  "description": "The Smart Expense Tracker is a premium, modern fintech application built with React and Node.js, featuring a stunning dashboard UI inspired by top-tier financial apps.",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",

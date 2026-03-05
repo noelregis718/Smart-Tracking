@@ -1,5 +1,10 @@
 import { Layout } from './components/Layout';
 import { Landing } from './pages/Landing';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfUse from './pages/TermsOfUse';
+import Contact from './pages/Contact';
+import About from './pages/About';
+import Features from './pages/Features';
 import { Auth } from './pages/Auth';
 import { Dashboard } from './pages/Dashboard';
 import { Accounts } from './pages/Accounts';
@@ -48,6 +53,11 @@ const App = () => {
       <ExpensesProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfUse />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/features" element={<Features />} />
           <Route path="/auth" element={<Auth />} />
           <Route
             path="/dashboard/*"
