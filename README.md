@@ -9,6 +9,7 @@ The **Smart Expense Tracker** is a premium, modern fintech application built wit
 -   **Secure Authentication**: Powered by **Clerk** with support for multi-factor authentication and social logins.
 -   **Supabase Data Management**: Real-time database and secure storage with Row Level Security (RLS).
 -   **Assets & Liabilities Summary**: Dedicated accounts page with a breakdown of investments, cash, credit, and real estate.
+-   **Informational Pages**: Beautifully designed `Landing`, `About`, `Features`, `Contact`, `Privacy Policy`, and `Terms of Use` pages with a consistent premium dark and gradient theme.
 
 ## 🛠️ Technology Stack
 
