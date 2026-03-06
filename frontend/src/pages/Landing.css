@@ -100,12 +100,17 @@
 .nav-logo {
     display: flex;
     align-items: center;
-    gap: 1.2rem;
-    /* Increased gap to push text towards the right */
+    gap: 0;
+    /* Removed gap entirely to bring text closer to logo */
     font-size: 1.5rem;
     font-weight: 600;
     color: #000;
     margin-left: 1rem;
+}
+
+.nav-logo span {
+    transform: translateX(-20px);
+    /* explicitly shifting only the text left */
 }
 
 .logo-icon-nova {
@@ -140,8 +145,7 @@
     height: 24px;
     width: auto;
     object-fit: contain;
-    margin-right: 8px;
-    /* small space between logo and text */
+    /* small space between logo and text handled by gap */
 }
 
 .nav-links {

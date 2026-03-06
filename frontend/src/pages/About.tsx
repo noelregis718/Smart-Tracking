@@ -1,80 +1,136 @@
 import { Link } from 'react-router-dom';
-import { Footer } from '../components/Footer';
+import { ArrowRight, Workflow, ShieldCheck, ScanEye, Linkedin } from 'lucide-react';
+import { SiteFooter } from '@/components/SiteFooter';
 import './About.css';
+
+// Modern X Logo SVG Component
+const XIcon = ({ size = 18 }: { size?: number }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+    >
+        <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932zm-1.292 19.487h2.039L6.486 3.24H4.298l13.311 17.399z" />
+    </svg>
+);
 
 const About = () => {
     return (
         <div className="about-page">
+            {/* Navbar (Shared Layout) */}
+            <nav className="navbar">
+                <div className="nav-logo">
+                    <img src="/2-removebg-preview.png" alt="Expensify Logo" className="logo-image" />
+                    <span>Expensify</span>
+                </div>
+                <div className="nav-links">
+                    <Link to="/features">Features</Link>
+                    <Link to="/contact">Contact</Link>
+                    <Link to="/about">About</Link>
+                </div>
+                <div className="nav-cta">
+                    <a
+                        href="https://cal.com/noel-regis/30min"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="nav-demo-link"
+                    >
+                        Get a Demo
+                    </a>
+                    <Link to="/auth" className="nav-download-link">
+                        Start now <ArrowRight size={16} />
+                    </Link>
+                </div>
+            </nav>
+
             <div className="about-hero">
                 <header className="about-header">
-                    <p className="about-eyebrow">Our Story</p>
-                    <h1>Built for people who care about their money</h1>
+                    <h1>AI and Intelligence<br />Driving Real Impact</h1>
                     <p className="about-subtitle">
-                        Expensify was founded with one belief: managing your finances shouldn't be complicated. We build tools that are powerful, simple, and human.
+                        Powered by advanced AI and guided by a team of experts, we are redefining possibilities and the future of global finance.
                     </p>
                 </header>
             </div>
 
-            <section className="about-section">
-                <div className="about-grid">
-                    <div className="about-card">
-                        <div className="about-card-icon">🎯</div>
-                        <h3>Our Mission</h3>
-                        <p>
-                            To give every person the tools they need to understand, control, and grow their personal finances — without needing a finance degree.
-                        </p>
+            {/* AI Features Section - Refined Light Theme */}
+            <section className="about-ai-features">
+                <div className="ai-feature-grid">
+                    <div className="ai-feature-card">
+                        <div className="ai-card-icon-wrapper">
+                            <Workflow className="ai-card-icon" />
+                        </div>
+                        <h3>Tailored workflows</h3>
+                        <p>Configure workflows around your processes and investment strategies.</p>
                     </div>
-                    <div className="about-card">
-                        <div className="about-card-icon">💡</div>
-                        <h3>Our Vision</h3>
-                        <p>
-                            A world where financial clarity is the default, not the exception. Where anyone can make smart, informed decisions about their money every single day.
-                        </p>
+
+                    <div className="ai-feature-card">
+                        <div className="ai-card-icon-wrapper">
+                            <ShieldCheck className="ai-card-icon" />
+                        </div>
+                        <h3>Audited & tested</h3>
+                        <p>Continuously audited and tested to meet compliance requirements.</p>
                     </div>
-                    <div className="about-card">
-                        <div className="about-card-icon">🤝</div>
-                        <h3>Our Values</h3>
-                        <p>
-                            Transparency, simplicity, and trust. We believe your data belongs to you — and we design every feature with your privacy and security at the forefront.
-                        </p>
+
+                    <div className="ai-feature-card">
+                        <div className="ai-card-icon-wrapper">
+                            <ScanEye className="ai-card-icon" />
+                        </div>
+                        <h3>Full data visibility</h3>
+                        <p>Gain complete visibility into data usage and activity.</p>
                     </div>
                 </div>
             </section>
 
-            <section className="about-section about-section-alt">
-                <div className="about-story">
-                    <div className="about-story-text">
-                        <h2>Why we built this</h2>
-                        <p>
-                            Most finance apps are either too complicated or too simple. They're cluttered with features you'll never use, or they barely scratch the surface of what you actually need.
-                        </p>
-                        <p>
-                            We built Expensify to be different — a focused, beautifully designed platform that gives you a real, live picture of your finances without the noise.
-                        </p>
-                        <p>
-                            From tracking daily expenses to visualising monthly trends, Expensify puts the numbers in context so you can make decisions that actually move the needle.
-                        </p>
+            {/* Founding Team Section */}
+            <section className="about-team">
+                <header className="team-header">
+                    <h2>Founding Team<br />Behind the Fintechy</h2>
+                    <p className="team-subtitle">
+                        Powered by smart technology and built by a strong founding<br />team, we are shaping the future of global finance together.
+                    </p>
+                </header>
+
+                <div className="team-founder-grid">
+                    <div className="founder-card">
+                        <div className="founder-avatar-placeholder">
+                            {/* Image placeholder - to be updated by user later */}
+                        </div>
+                        <h3>Mantosh Kumar Yadav</h3>
+                        <p className="founder-role">CEO & Founder</p>
+                        <div className="founder-socials">
+                            <Link to="#" className="social-link"><XIcon size={18} /></Link>
+                            <Link to="#" className="social-link"><Linkedin size={18} /></Link>
+                        </div>
                     </div>
-                    <div className="about-stats">
-                        <div className="stat-item">
-                            <span className="stat-number">10K+</span>
-                            <span className="stat-label">Active Users</span>
+
+                    <div className="founder-card">
+                        <div className="founder-avatar-placeholder">
+                            {/* Image placeholder - to be updated by user later */}
                         </div>
-                        <div className="stat-item">
-                            <span className="stat-number">₹50Cr+</span>
-                            <span className="stat-label">Expenses Tracked</span>
+                        <h3>Noel Regis</h3>
+                        <p className="founder-role">CTO & Co-Founder</p>
+                        <div className="founder-socials">
+                            <Link to="#" className="social-link"><XIcon size={18} /></Link>
+                            <Link to="#" className="social-link"><Linkedin size={18} /></Link>
                         </div>
-                        <div className="stat-item">
-                            <span className="stat-number">99.9%</span>
-                            <span className="stat-label">Uptime</span>
+                    </div>
+
+                    <div className="founder-card">
+                        <div className="founder-avatar-placeholder">
+                            {/* Image placeholder - to be updated by user later */}
                         </div>
-                        <div className="stat-item">
-                            <span className="stat-number">4.9★</span>
-                            <span className="stat-label">User Rating</span>
+                        <h3>Md. Raqib Alam</h3>
+                        <p className="founder-role">CTO & Co-Founder</p>
+                        <div className="founder-socials">
+                            <Link to="#" className="social-link"><XIcon size={18} /></Link>
+                            <Link to="#" className="social-link"><Linkedin size={18} /></Link>
                         </div>
                     </div>
                 </div>
             </section>
+
+
 
             <section className="about-cta-section">
                 <div className="about-cta-box">
@@ -87,7 +143,7 @@ const About = () => {
                 </div>
             </section>
 
-            <Footer />
+            <SiteFooter />
         </div>
     );
 };

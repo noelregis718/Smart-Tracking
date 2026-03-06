@@ -1,4 +1,4 @@
-import { Footer } from '../components/Footer';
+import { SiteFooter } from '@/components/SiteFooter';
 import './TermsOfUse.css';
 
 const TermsOfUse = () => {
@@ -60,7 +60,7 @@ const TermsOfUse = () => {
                     noel.regis04@gmail.com
                 </p>
             </main>
-            <Footer />
+            <SiteFooter />
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { Footer } from '../components/Footer';
+import { SiteFooter } from '@/components/SiteFooter';
 import './PrivacyPolicy.css';
 
 const PrivacyPolicy = () => {
@@ -59,7 +59,7 @@ const PrivacyPolicy = () => {
                     noel.regis04@gmail.com
                 </p>
             </main>
-            <Footer />
+            <SiteFooter />
         </div>
     );
 };

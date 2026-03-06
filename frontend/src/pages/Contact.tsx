@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { ChevronDown, Check, Loader2 } from 'lucide-react';
-import { Footer } from '../components/Footer';
+import { SiteFooter } from '@/components/SiteFooter';
 import './Contact.css';
 
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -150,7 +150,7 @@ const Contact = () => {
                     )}
                 </main>
             </div>
-            <Footer />
+            <SiteFooter />
         </div>
     );
 };

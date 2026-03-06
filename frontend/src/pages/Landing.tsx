@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
     ArrowRight, ChevronDown
 } from 'lucide-react';
-import { Footer } from '../components/Footer';
+import { SiteFooter } from '@/components/SiteFooter';
 import './Landing.css';
 
 export const Landing = () => {
@@ -203,7 +203,7 @@ export const Landing = () => {
                 </div>
             </section>
 
-            <Footer />
+            <SiteFooter />
         </div>
     );
 };
