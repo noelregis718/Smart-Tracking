@@ -38,10 +38,10 @@ export const Landing = () => {
 
             {/* Navbar */}
             <nav className="navbar">
-                <div className="nav-logo">
+                <Link to="/" className="nav-logo">
                     <img src="/2-removebg-preview.png" alt="Expensify Logo" className="logo-image" />
                     <span>Expensify</span>
-                </div>
+                </Link>
                 <div className="nav-links">
                     <Link to="/features">Features</Link>
                     <Link to="/contact">Contact</Link>

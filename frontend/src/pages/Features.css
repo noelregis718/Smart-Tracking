@@ -1,6 +1,6 @@
 .features-page {
     min-height: 100vh;
-    background: linear-gradient(180deg, #dbeafe 0%, #f3f4f6 20%);
+    background: linear-gradient(180deg, #dbeafe 0%, #f3f4f6 15%, #f3f4f6 85%, #dbeafe 100%);
     color: #000000;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     position: relative;
@@ -282,48 +282,113 @@
 
 /* CTA Section */
 .features-cta-section {
-    padding: 8rem 1rem;
-    background: #f3f4f6;
+    padding: 4.25rem 1rem 4rem;
+    background: transparent;
     display: flex;
     justify-content: center;
 }
 
 .features-cta-box {
-    max-width: 800px;
+    max-width: 750px;
+    width: 90%;
+    margin: 0 auto;
     text-align: center;
-    background: #ffffff;
-    padding: 5rem 2rem;
-    border-radius: 32px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+    background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+    padding: 2rem 4rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.features-cta-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+    background-size: 16px 16px;
+    pointer-events: none;
 }
 
 .features-cta-box h2 {
-    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-size: clamp(1.4rem, 3.2vw, 2rem);
     font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #000;
+    margin-bottom: 0.75rem;
+    color: #ffffff;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
 .features-cta-box p {
-    font-size: 1.125rem;
-    color: #4b5563;
-    margin-bottom: 3rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
 }
 
-.features-btn-primary {
-    background: linear-gradient(135deg, #1d4ed8 0%, #1132cb 100%);
-    color: #ffffff;
-    padding: 1rem 2.5rem;
+.features-btn-premium-cta {
+    background: #ffffff;
+    color: #000000;
+    padding: 0.6rem 0.6rem 0.6rem 2rem;
     border-radius: 100px;
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1.25rem;
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 25px rgba(29, 78, 216, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.features-btn-premium-cta::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    background: linear-gradient(to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.5) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    transform: rotate(25deg);
+    transition: all 0.6s ease;
+}
+
+.features-btn-premium-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.features-btn-premium-cta:hover::after {
+    left: 120%;
+}
+
+.btn-icon-circle {
+    width: 44px;
+    height: 44px;
+    background: #000000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.features-btn-premium-cta:hover .btn-icon-circle {
+    transform: translateX(2px);
 }
 
 .features-btn-primary:hover {
@@ -592,7 +657,7 @@
 /* ===================== Process Section ===================== */
 .features-process-section {
     max-width: 1200px;
-    margin: 8rem auto 10rem;
+    margin: 6.75rem auto 4rem;
     padding: 0 4rem;
 }
 
@@ -725,4 +790,10 @@
     .process-heading {
         font-size: 2rem;
     }
+}
+
+/* Footer Override for Symmetrical Design */
+.features-page .site-footer-main {
+    background-color: transparent !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }

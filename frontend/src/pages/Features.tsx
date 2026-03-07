@@ -15,10 +15,10 @@ const Features = () => {
 
             {/* Navbar (Shared Layout) */}
             <nav className="navbar">
-                <div className="nav-logo">
+                <Link to="/" className="nav-logo">
                     <img src="/2-removebg-preview.png" alt="Expensify Logo" className="logo-image" />
                     <span>Expensify</span>
-                </div>
+                </Link>
                 <div className="nav-links">
                     <Link to="/features">Features</Link>
                     <Link to="/contact">Contact</Link>
@@ -181,11 +181,14 @@ const Features = () => {
 
             <section className="features-cta-section">
                 <div className="features-cta-box">
-                    <h2>Ready to experience these features?</h2>
-                    <p>Join Expensify today and take the first step towards financial freedom.</p>
+                    <h2>Ready to Elevate Your<br />Financial Infrastructure?</h2>
+                    <p>Join over 50,000 businesses worldwide using our intelligent platform<br />to automate workflows, secure assets, and accelerate global growth.</p>
                     <div className="features-cta-buttons">
-                        <Link to="/auth" className="features-btn-primary">
-                            Get started free <ArrowRight size={20} />
+                        <Link to="/auth" className="features-btn-premium-cta">
+                            <span>Get started for free</span>
+                            <div className="btn-icon-circle">
+                                <ArrowRight size={18} color="white" />
+                            </div>
                         </Link>
                     </div>
                 </div>

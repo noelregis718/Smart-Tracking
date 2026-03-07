@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 
 interface AnimatedVectorIconProps {
-    type: 'api' | 'support' | 'whiteLabel' | 'categorization' | 'budget' | 'insights' | 'security' | 'ai' | 'accessible';
+    type: 'api' | 'support' | 'whiteLabel' | 'categorization' | 'budget' | 'insights' | 'security' | 'ai' | 'accessible' | 'barChart';
     size?: number;
     className?: string;
     color?: string;
@@ -111,6 +111,15 @@ export const AnimatedVectorIcon: React.FC<AnimatedVectorIconProps> = ({ type, si
                     <motion.svg {...svgProps}>
                         <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
                         <path d="M12 18h.01" />
+                    </motion.svg>
+                );
+            case 'barChart':
+                return (
+                    <motion.svg {...svgProps}>
+                        <path d="M3 3v18h18" />
+                        <rect x="7" y="10" width="3" height="7" rx="1" />
+                        <rect x="12" y="6" width="3" height="11" rx="1" />
+                        <rect x="17" y="14" width="3" height="3" rx="1" />
                     </motion.svg>
                 );
             default:

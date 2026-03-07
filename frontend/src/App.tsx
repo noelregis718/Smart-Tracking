@@ -7,17 +7,10 @@ import About from './pages/About';
 import Features from './pages/Features';
 import { Auth } from './pages/Auth';
 import { Dashboard } from './pages/Dashboard';
-import { Accounts } from './pages/Accounts';
 import { Transactions } from './pages/Transactions';
-import { CashFlow } from './pages/CashFlow';
 import { Reports } from './pages/Reports';
 import { Budget } from './pages/Budget';
-import { Recurring } from './pages/Recurring';
 import { Goals } from './pages/Goals';
-import { Investments } from './pages/Investments';
-import { Advice } from './pages/Advice';
-import { Documents } from './pages/Documents';
-import { Notes } from './pages/Notes';
 import { Settings } from './pages/Settings';
 import { Help } from './pages/Help';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -29,17 +22,10 @@ const DashboardRoutes = () => {
     <Layout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/accounts" element={<Accounts />} />
         <Route path="/transactions" element={<Transactions />} />
-        <Route path="/cashflow" element={<CashFlow />} />
-        <Route path="/reports" element={<Reports />} />
         <Route path="/budget" element={<Budget />} />
-        <Route path="/recurring" element={<Recurring />} />
         <Route path="/goals" element={<Goals />} />
-        <Route path="/investments" element={<Investments />} />
-        <Route path="/advice" element={<Advice />} />
-        <Route path="/documents" element={<Documents />} />
-        <Route path="/notes" element={<Notes />} />
+        <Route path="/analytics" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/help" element={<Help />} />
       </Routes>

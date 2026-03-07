@@ -1,78 +1,144 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
 import {
-    LayoutDashboard,
-    Wallet,
+    Home,
     ArrowLeftRight,
-    BarChart3,
-    PieChart,
-    Repeat,
     Target,
-    TrendingUp,
-    MessageSquare,
     Search,
-    Bell,
     Settings,
     HelpCircle,
-    FileText,
-    StickyNote
+    PanelLeft,
+    PanelRight,
+    Wallet,
+    BarChart3,
+    Plus
 } from 'lucide-react';
-import { UserButton, useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
+import { Button } from './Button';
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
     const { user } = useUser();
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const sidebarWidth = isCollapsed ? '80px' : '240px';
 
     return (
         <div className="layout" style={{ minHeight: '100vh', display: 'flex', background: 'var(--background)' }}>
             {/* Sidebar */}
             <aside style={{
-                width: '240px',
+                width: sidebarWidth,
                 background: 'var(--surface)',
                 borderRight: '1px solid var(--border)',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'fixed',
                 height: '100vh',
-                zIndex: 100
+                zIndex: 100,
+                transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
-                <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
-                    <div style={{ background: 'var(--primary)', padding: '6px', borderRadius: '8px', color: 'white' }}>
-                        <Wallet size={20} />
-                    </div>
-                    <span>Expensify</span>
+                <div style={{
+                    padding: isCollapsed ? '1rem 0' : '0.75rem 0.5rem',
+                    display: 'flex',
+                    flexDirection: isCollapsed ? 'column' : 'row',
+                    alignItems: 'center',
+                    justifyContent: isCollapsed ? 'center' : 'space-between',
+                    gap: isCollapsed ? '1rem' : '0.5rem'
+                }}>
+                    <Link to="/dashboard" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        overflow: 'hidden'
+                    }}>
+                        <img src="/2-removebg-preview.png" alt="Expensify Logo" style={{ height: '34px', width: 'auto', objectFit: 'contain', marginLeft: isCollapsed ? '0' : '-4px' }} />
+                        {!isCollapsed && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0', transform: 'translateY(3px)' }}>
+                                <span style={{ fontSize: '1.25rem', fontWeight: 'bold', lineHeight: '1.1', transform: 'translateX(-2px)' }}>Expensify</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '500', transform: 'translateX(-2px)' }}>Track Smart</span>
+                            </div>
+                        )}
+                    </Link>
+
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--text-muted)',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background 0.2s',
+                            marginRight: isCollapsed ? '0' : '0.5rem'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--background)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                    >
+                        {isCollapsed ? <PanelRight size={18} /> : <PanelLeft size={18} />}
+                    </button>
                 </div>
 
-                <nav style={{ flex: 1, padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <p style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', padding: '1rem 0.5rem 0.5rem', textTransform: 'uppercase' }}>Main Menu</p>
-                    <SidebarLink to="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
-                    <SidebarLink to="/dashboard/accounts" icon={<Wallet size={18} />} label="Accounts" />
-                    <SidebarLink to="/dashboard/transactions" icon={<ArrowLeftRight size={18} />} label="Transactions" />
-                    <SidebarLink to="/dashboard/cashflow" icon={<TrendingUp size={18} />} label="Cash Flow" />
-                    <SidebarLink to="/dashboard/reports" icon={<BarChart3 size={18} />} label="Reports" />
-                    <SidebarLink to="/dashboard/budget" icon={<PieChart size={18} />} label="Budget" />
-                    <SidebarLink to="/dashboard/recurring" icon={<Repeat size={18} />} label="Recurring" />
-                    <SidebarLink to="/dashboard/goals" icon={<Target size={18} />} label="Goals" />
-                    <SidebarLink to="/dashboard/investments" icon={<TrendingUp size={18} />} label="Investments" />
-                    <SidebarLink to="/dashboard/advice" icon={<MessageSquare size={18} />} label="Advice" />
-
-                    <p style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', padding: '1.5rem 0.5rem 0.5rem', textTransform: 'uppercase' }}>Shared</p>
-                    <SidebarLink to="/dashboard/documents" icon={<FileText size={18} />} label="Documents" />
-                    <SidebarLink to="/dashboard/notes" icon={<StickyNote size={18} />} label="Notes" />
-
-                    <p style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', padding: '1.5rem 0.5rem 0.5rem', textTransform: 'uppercase' }}>Support</p>
-                    <SidebarLink to="/dashboard/settings" icon={<Settings size={18} />} label="Settings" />
-                    <SidebarLink to="/dashboard/help" icon={<HelpCircle size={18} />} label="Help" />
+                <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    {!isCollapsed && (
+                        <p style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', padding: '1rem 0.5rem 0.5rem', textTransform: 'uppercase' }}>Menu</p>
+                    )}
+                    <SidebarLink to="/dashboard" icon={<Home size={18} />} label="Dashboard" collapsed={isCollapsed} />
+                    <SidebarLink to="/dashboard/transactions" icon={<ArrowLeftRight size={18} />} label="Transactions" collapsed={isCollapsed} />
+                    <SidebarLink to="/dashboard/budget" icon={<Wallet size={18} />} label="Budget" collapsed={isCollapsed} />
+                    <SidebarLink to="/dashboard/goals" icon={<Target size={18} />} label="Goals" collapsed={isCollapsed} />
+                    <SidebarLink to="/dashboard/analytics" icon={<BarChart3 size={18} />} label="Analytics" collapsed={isCollapsed} />
                 </nav>
 
-                <div style={{ padding: '1rem', borderTop: '1px solid var(--border)' }}>
-                    <button className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-                        Upgrade Plan
-                    </button>
+                <div style={{ padding: '1rem 0.75rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <SidebarLink to="/dashboard/settings" icon={<Settings size={18} />} label="Settings" collapsed={isCollapsed} />
+                    <SidebarLink to="/dashboard/help" icon={<HelpCircle size={18} />} label="Help" collapsed={isCollapsed} />
+
+                    <div style={{
+                        marginTop: '1.5rem',
+                        padding: isCollapsed ? '0' : '0 0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isCollapsed ? 'center' : 'flex-start',
+                        gap: '0.75rem'
+                    }}>
+                        <img
+                            src={user?.imageUrl}
+                            alt="Profile"
+                            style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border)',
+                                objectFit: 'cover'
+                            }}
+                        />
+                        {!isCollapsed && (
+                            <div style={{ overflow: 'hidden' }}>
+                                <div style={{ fontSize: '0.875rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {user?.fullName}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {user?.primaryEmailAddress?.emailAddress}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </aside>
 
             {/* Content Area */}
-            <div style={{ flex: 1, marginLeft: '240px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{
+                flex: 1,
+                marginLeft: sidebarWidth,
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}>
                 {/* Header */}
                 <header style={{
                     height: '64px',
@@ -103,16 +169,23 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <button style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                            <Bell size={20} />
-                        </button>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>{user?.fullName}</div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{user?.publicMetadata?.role as string || 'Member'}</div>
-                            </div>
-                            <UserButton afterSignOutUrl="/" />
-                        </div>
+                        <Button
+                            variant="secondary"
+                            onClick={() => { }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.4rem 1rem',
+                                fontSize: '0.875rem',
+                                height: '36px',
+                                borderRadius: '8px',
+                                background: 'white'
+                            }}
+                        >
+                            <Plus size={16} />
+                            <span>Create invoice</span>
+                        </Button>
                     </div>
                 </header>
 
@@ -124,26 +197,38 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     );
 };
 
-const SidebarLink = ({ to, icon, label }: { to: string, icon: React.ReactNode, label: string }) => (
+const SidebarLink = ({ to, icon, label, collapsed }: { to: string, icon: React.ReactNode, label: string, collapsed?: boolean }) => (
     <NavLink
         to={to}
         end={to === '/dashboard'}
         className={({ isActive }) => isActive ? 'sidebar-active' : ''}
+        title={collapsed ? label : ''}
         style={({ isActive }) => ({
             display: 'flex',
             alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'flex-start',
             gap: '0.75rem',
             padding: '0.625rem 0.75rem',
             borderRadius: '8px',
-            color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+            color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
             fontWeight: isActive ? '600' : '500',
-            fontSize: '0.875rem',
-            background: isActive ? '#fff5f0' : 'transparent',
-            transition: 'all 0.2s',
-            borderRight: isActive ? '3px solid var(--primary)' : 'none'
+            background: isActive ? '#f9fafb' : 'transparent',
+            border: isActive ? '1px solid #e5e7eb' : '1px solid transparent',
+            boxShadow: isActive ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            margin: '0 4px'
         })}
     >
-        {icon}
-        {label}
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '18px'
+        }}>
+            {icon}
+        </div>
+        {!collapsed && <span>{label}</span>}
     </NavLink>
 );

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
-import { ChevronDown, Check, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronDown, Check, Loader2, ArrowRight } from 'lucide-react';
 import { SiteFooter } from '@/components/SiteFooter';
 import './Contact.css';
 
@@ -47,6 +48,32 @@ const Contact = () => {
 
     return (
         <div className="contact-page">
+            {/* Navbar (Shared Layout) */}
+            <nav className="navbar">
+                <Link to="/" className="nav-logo">
+                    <img src="/2-removebg-preview.png" alt="Expensify Logo" className="logo-image" />
+                    <span>Expensify</span>
+                </Link>
+                <div className="nav-links">
+                    <Link to="/features">Features</Link>
+                    <Link to="/contact">Contact</Link>
+                    <Link to="/about">About</Link>
+                </div>
+                <div className="nav-cta">
+                    <a
+                        href="https://cal.com/noel-regis/30min"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="nav-demo-link"
+                    >
+                        Get a Demo
+                    </a>
+                    <Link to="/auth" className="nav-download-link">
+                        Start now <ArrowRight size={16} />
+                    </Link>
+                </div>
+            </nav>
+
             <div className="contact-hero">
                 <header className="contact-header">
                     <h1>Let's connect</h1>

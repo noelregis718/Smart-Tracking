@@ -20,10 +20,10 @@ const About = () => {
         <div className="about-page">
             {/* Navbar (Shared Layout) */}
             <nav className="navbar">
-                <div className="nav-logo">
+                <Link to="/" className="nav-logo">
                     <img src="/2-removebg-preview.png" alt="Expensify Logo" className="logo-image" />
                     <span>Expensify</span>
-                </div>
+                </Link>
                 <div className="nav-links">
                     <Link to="/features">Features</Link>
                     <Link to="/contact">Contact</Link>
@@ -133,12 +133,11 @@ const About = () => {
 
 
             <section className="about-cta-section">
-                <div className="about-cta-box">
-                    <h2>Ready to take control of your finances?</h2>
-                    <p>Join thousands of users who've already made the switch to smarter expense tracking.</p>
+                <div className="about-cta-content">
+                    <h2>Ready to get started</h2>
+                    <p>Experience the future of intelligent expense management with our secure platform.</p>
                     <div className="about-cta-buttons">
-                        <Link to="/auth" className="about-btn-primary">Get started free</Link>
-                        <Link to="/contact" className="about-btn-secondary">Talk to us</Link>
+                        <Link to="/auth" className="about-btn-black">Try Expensify free</Link>
                     </div>
                 </div>
             </section>
