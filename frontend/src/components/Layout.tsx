@@ -11,9 +11,10 @@ import {
     PanelRight,
     Wallet,
     BarChart3,
-    Plus
+    Plus,
+    LogOut
 } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, SignOutButton } from '@clerk/clerk-react';
 import { Button } from './Button';
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -27,8 +28,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             {/* Sidebar */}
             <aside style={{
                 width: sidebarWidth,
-                background: 'var(--surface)',
-                borderRight: '1px solid var(--border)',
+                background: 'var(--background)',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'fixed',
@@ -85,7 +85,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 
                 <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     {!isCollapsed && (
-                        <p style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', padding: '1rem 0.5rem 0.5rem', textTransform: 'uppercase' }}>Menu</p>
+                        <p style={{ fontSize: '0.975rem', fontWeight: '600', color: 'var(--text-muted)', padding: '1rem 0.5rem 0.5rem' }}>Menu</p>
                     )}
                     <SidebarLink to="/dashboard" icon={<Home size={18} />} label="Dashboard" collapsed={isCollapsed} />
                     <SidebarLink to="/dashboard/transactions" icon={<ArrowLeftRight size={18} />} label="Transactions" collapsed={isCollapsed} />
@@ -95,6 +95,30 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 </nav>
 
                 <div style={{ padding: '1rem 0.75rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <SignOutButton>
+                        <button style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: isCollapsed ? 'center' : 'flex-start',
+                            gap: '0.75rem',
+                            padding: '0.625rem 0.75rem',
+                            borderRadius: '8px',
+                            color: 'var(--text-muted)',
+                            fontWeight: '500',
+                            background: 'transparent',
+                            border: '1px solid transparent',
+                            cursor: 'pointer',
+                            fontSize: '1rem',
+                            margin: '0 4px',
+                            width: 'calc(100% - 8px)',
+                            textAlign: 'left'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '18px' }}>
+                                <LogOut size={18} />
+                            </div>
+                            {!isCollapsed && <span>Log out</span>}
+                        </button>
+                    </SignOutButton>
                     <SidebarLink to="/dashboard/settings" icon={<Settings size={18} />} label="Settings" collapsed={isCollapsed} />
                     <SidebarLink to="/dashboard/help" icon={<HelpCircle size={18} />} label="Help" collapsed={isCollapsed} />
 
@@ -142,8 +166,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 {/* Header */}
                 <header style={{
                     height: '64px',
-                    background: 'var(--surface)',
-                    borderBottom: '1px solid var(--border)',
+                    background: 'var(--background)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -162,7 +185,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                                 padding: '8px 12px 8px 40px',
                                 border: '1px solid var(--border)',
                                 borderRadius: '8px',
-                                background: 'var(--background)',
+                                background: 'var(--surface)',
                                 fontSize: '0.875rem'
                             }}
                         />
@@ -212,9 +235,9 @@ const SidebarLink = ({ to, icon, label, collapsed }: { to: string, icon: React.R
             borderRadius: '8px',
             color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
             fontWeight: isActive ? '600' : '500',
-            background: isActive ? '#f9fafb' : 'transparent',
-            border: isActive ? '1px solid #e5e7eb' : '1px solid transparent',
-            boxShadow: isActive ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+            background: isActive ? 'var(--surface)' : 'transparent',
+            border: isActive ? '1px solid var(--border)' : '1px solid transparent',
+            boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
