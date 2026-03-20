@@ -10,7 +10,8 @@ export const LoanBook = () => {
             display: 'flex',
             flexDirection: 'column',
             gap: '1rem',
-            height: '100%'
+            height: '100%',
+            transform: 'translateX(-6mm)'
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Loan Book</h3>
@@ -55,7 +56,8 @@ export const Investments = () => {
             display: 'flex',
             flexDirection: 'column',
             gap: '1rem',
-            height: '100%'
+            height: '100%',
+            transform: 'translateX(-4mm)'
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Investments</h3>

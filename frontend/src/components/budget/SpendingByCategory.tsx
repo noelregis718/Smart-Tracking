@@ -24,7 +24,8 @@ export const SpendingByCategory = () => {
             padding: '1rem 1.25rem',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            transform: 'translateX(-6mm)'
         }}>
             {/* Header */}
             <div style={{
@@ -138,7 +139,7 @@ export const SpendingByCategory = () => {
                             </Pie>
                             <Tooltip
                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                                formatter={(value: number | undefined) => value !== undefined ? [`$${value.toLocaleString()}`, 'Amount'] : ['', 'Amount']}
+                                formatter={(value: number | undefined) => value !== undefined ? [`₹${value.toLocaleString()}`, 'Amount'] : ['', 'Amount']}
                             />
                         </PieChart>
                     </ResponsiveContainer>
@@ -160,7 +161,7 @@ export const SpendingByCategory = () => {
                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0ea5e9' }} />
                             Mortgage
                         </div>
-                        <div style={{ fontSize: '1rem', fontWeight: '700' }}>$1,385.00 (37.2%)</div>
+                        <div style={{ fontSize: '1rem', fontWeight: '700' }}>₹1,385.00 (37.2%)</div>
                     </div>
                 </div>
 

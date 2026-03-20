@@ -12,7 +12,7 @@ export const Budget = () => {
             gap: '2rem'
         }}>
             {/* Main Content (4 / 5) */}
-            <div style={{ flex: '4', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '-1.5rem' }}>
+            <div style={{ flex: '3', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: 'calc(-1.5rem - 2mm)' }}>
                 <SpendingByCategory />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                     <LoanBook />
@@ -21,7 +21,7 @@ export const Budget = () => {
             </div>
 
             {/* Sidebar (1 / 5) */}
-            <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '-1.5rem' }}>
+            <div style={{ flex: '1.2', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: 'calc(-1.5rem - 2mm)' }}>
                 <LeftToBudget />
                 <RecurringPayments />
             </div>

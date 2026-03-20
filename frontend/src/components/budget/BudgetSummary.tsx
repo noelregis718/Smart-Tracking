@@ -5,12 +5,12 @@ export const LeftToBudget = () => {
         <div style={{
             background: 'white',
             borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
             overflow: 'hidden',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            transform: 'translateX(-4mm)'
         }}>
             {/* Header Banner */}
             <div style={{
@@ -20,7 +20,7 @@ export const LeftToBudget = () => {
                 borderBottom: '1px solid #dcfce7'
             }}>
                 <div style={{ fontSize: '2rem', fontWeight: '800', color: '#166534', marginBottom: '4px', letterSpacing: '-0.02em' }}>
-                    $3,210
+                    ₹3,210
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', color: '#15803d', fontSize: '0.9rem', fontWeight: '600' }}>
                     Left to budget <Info size={16} />
@@ -72,18 +72,24 @@ export const LeftToBudget = () => {
 
 export const RecurringPayments = () => {
     return (
-        <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <div style={{ 
+            background: 'white', 
+            padding: '1.25rem', 
+            borderRadius: '16px', 
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+            transform: 'translateX(-2mm)'
+        }}>
             <div style={{ marginBottom: '1rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '700', color: '#1e293b' }}>Recurring Payments</h3>
+                <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Recurring Payments</h3>
             </div>
 
-            <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <div>
                     <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', lineHeight: '1' }}>14</div>
                     <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>Active subscriptions</div>
                 </div>
                 <div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', lineHeight: '1' }}>$1,240</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', lineHeight: '1' }}>₹1,240</div>
                     <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>Monthly total</div>
                 </div>
             </div>
@@ -149,7 +155,7 @@ const BudgetCategoryRow = ({ label, budget, spent, remaining, color, overlayColo
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>{label}</span>
-                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>${budget.toLocaleString()} budget</span>
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>₹{budget.toLocaleString()} budget</span>
             </div>
 
             <div style={{
@@ -179,9 +185,9 @@ const BudgetCategoryRow = ({ label, budget, spent, remaining, color, overlayColo
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>${spent.toLocaleString()} spent</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>₹{spent.toLocaleString()} spent</span>
                 <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#15803d', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ color: overlayColor || '#15803d' }}>${remaining.toLocaleString()}</span> remaining
+                    <span style={{ color: overlayColor || '#15803d' }}>₹{remaining.toLocaleString()}</span> remaining
                 </span>
             </div>
         </div>
@@ -197,6 +203,6 @@ const RecurringRow = ({ label, count, amount, last }: { label: string, count: nu
         borderBottom: last ? 'none' : '1px solid #f1f5f9'
     }}>
         <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>{label} ({count})</span>
-        <span style={{ fontSize: '0.8rem', color: '#1e293b', fontWeight: '700' }}>${amount}/mo</span>
+        <span style={{ fontSize: '0.8rem', color: '#1e293b', fontWeight: '700' }}>₹{amount}/mo</span>
     </div>
 );
