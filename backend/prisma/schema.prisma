@@ -18,6 +18,8 @@ model User {
   investments Investment[]
   budgets   Budget[]
   goals     Goal[]
+  recurringPayments RecurringPayment[]
+  tasks     Task[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -32,6 +34,7 @@ model Goal {
   status        String   @default("Ahead")
   user          User     @relation(fields: [userId], references: [id])
   userId        String
+  tasks         Task[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -93,4 +96,28 @@ model Budget {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, category])
+}
+
+model RecurringPayment {
+  id        String   @id @default(uuid())
+  name      String
+  amount    Float
+  category  String
+  status    String   @default("Active")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  title     String
+  completed Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  goal      Goal?    @relation(fields: [goalId], references: [id])
+  goalId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

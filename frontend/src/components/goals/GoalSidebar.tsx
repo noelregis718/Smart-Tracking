@@ -21,7 +21,7 @@ const GoalSidebar: React.FC<GoalSidebarProps> = ({
     return (
         <div style={{
             background: 'white',
-            borderRadius: '12px',
+            borderRadius: '4px',
             padding: '1.5rem',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
             display: 'flex',
@@ -30,7 +30,7 @@ const GoalSidebar: React.FC<GoalSidebarProps> = ({
         }}>
             <div style={{ 
                 background: '#e6f4ea', 
-                borderRadius: '12px', 
+                borderRadius: '4px', 
                 padding: '1.5rem', 
                 textAlign: 'center' 
             }}>
@@ -62,7 +62,7 @@ const GoalSidebar: React.FC<GoalSidebarProps> = ({
                     background: '#2563eb',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '12px',
+                    borderRadius: '4px',
                     padding: '0.85rem',
                     fontSize: '0.95rem',
                     fontWeight: '800',
@@ -98,17 +98,6 @@ const GoalSidebar: React.FC<GoalSidebarProps> = ({
                 ` }} />
             </button>
 
-            <button style={{
-                background: 'none',
-                border: 'none',
-                color: '#64748b',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                textDecoration: 'underline',
-                cursor: 'pointer'
-            }}>
-                Edit goal accounts
-            </button>
         </div>
     );
 };

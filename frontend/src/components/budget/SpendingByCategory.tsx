@@ -133,7 +133,7 @@ export const SpendingByCategory = () => {
     };
 
     if (loading) return (
-        <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', textAlign: 'center' }}>
+        <div style={{ background: 'white', borderRadius: '4px', padding: '2rem', textAlign: 'center' }}>
             <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '600' }}>Loading spending analytics...</div>
         </div>
     );
@@ -141,7 +141,7 @@ export const SpendingByCategory = () => {
     return (
         <div style={{
             background: 'white',
-            borderRadius: '16px',
+            borderRadius: '4px',
             padding: '1.5rem',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
             display: 'flex',
@@ -168,7 +168,7 @@ export const SpendingByCategory = () => {
                                 cursor: 'pointer',
                                 border: '1px solid #e2e8f0',
                                 padding: '4px 12px',
-                                borderRadius: '6px',
+                                borderRadius: '4px',
                                 fontSize: '0.85rem',
                                 color: '#64748b',
                                 background: selectedCategory ? '#eff6ff' : 'white',
@@ -189,7 +189,7 @@ export const SpendingByCategory = () => {
                                 marginTop: '4px',
                                 background: 'white',
                                 border: '1px solid #e2e8f0',
-                                borderRadius: '8px',
+                                borderRadius: '4px',
                                 boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                                 zIndex: 100,
                                 minWidth: '180px',
@@ -258,7 +258,7 @@ export const SpendingByCategory = () => {
                 marginBottom: '2rem',
                 background: '#f8fafc',
                 padding: '1rem',
-                borderRadius: '12px',
+                borderRadius: '4px',
                 border: '1px solid #f1f5f9'
             }}>
                 <div>
@@ -274,13 +274,6 @@ export const SpendingByCategory = () => {
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                         <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b' }}>
                             {totalBudget > 0 ? ((totalSpent / totalBudget) * 100).toFixed(0) + '%' : '0%'}
-                        </div>
-                        <div style={{
-                            fontSize: '0.85rem',
-                            fontWeight: '600',
-                            color: (totalBudget - totalSpent) >= 0 ? '#22c55e' : '#ef4444'
-                        }}>
-                            (₹{(totalBudget - totalSpent).toLocaleString()} left)
                         </div>
                     </div>
                 </div>
@@ -311,7 +304,7 @@ export const SpendingByCategory = () => {
                                 ))}
                             </Pie>
                             <Tooltip
-                                contentStyle={{ borderRadius: '8px', border: 'none', background: '#1e293b', color: 'white' }}
+                                contentStyle={{ borderRadius: '4px', border: 'none', background: '#1e293b', color: 'white' }}
                                 itemStyle={{ color: 'white' }}
                                 labelStyle={{ display: 'none' }}
                                 formatter={(value: any) => [`₹${Number(value || 0).toLocaleString()}`, '']}
@@ -346,7 +339,7 @@ export const SpendingByCategory = () => {
                                     flexDirection: 'column',
                                     gap: '4px',
                                     padding: '8px 12px',
-                                    borderRadius: '8px',
+                                    borderRadius: '4px',
                                     transition: 'all 0.2s',
                                     cursor: 'pointer',
                                     background: selectedCategory === item.name ? '#f1f5f9' : 'transparent',
@@ -407,7 +400,7 @@ export const SpendingByCategory = () => {
                 }}>
                     <div style={{
                         background: 'white', width: '100%', maxWidth: '500px',
-                        borderRadius: '12px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+                        borderRadius: '4px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
                         display: 'flex', flexDirection: 'column', maxHeight: '85vh'
                     }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -428,7 +421,7 @@ export const SpendingByCategory = () => {
                             ))}
                         </div>
                         <div style={{ padding: '1rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                            <button onClick={() => setIsBudgetModalOpen(false)} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>
+                            <button onClick={() => setIsBudgetModalOpen(false)} style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>
                             <button onClick={handleBulkSaveBudgets} className="btn-premium-shine" style={{ padding: '0.5rem 1.5rem' }}>Save All</button>
                         </div>
                     </div>

@@ -114,3 +114,59 @@ export const deleteGoal = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const transferToGoal = async (req: AuthRequest, res: Response) => {
+  const userId = req.userId;
+  const { accountId, goalId, amount } = req.body;
+
+  try {
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid transfer amount' });
+    }
+
+    // Use a transaction to ensure atomicity
+    const result = await prisma.$transaction(async (tx: any) => {
+      // 1. Check account and balance
+      const account = await tx.account.findUnique({
+        where: { id: accountId }
+      });
+
+      if (!account || account.userId !== userId) {
+        throw new Error('Account not found');
+      }
+
+      if (account.balance < parsedAmount) {
+        throw new Error('Insufficient funds in the selected account');
+      }
+
+      // 2. Check goal
+      const goal = await tx.goal.findUnique({
+        where: { id: goalId }
+      });
+
+      if (!goal || goal.userId !== userId) {
+        throw new Error('Goal not found');
+      }
+
+      // 3. Update account balance
+      const updatedAccount = await tx.account.update({
+        where: { id: accountId },
+        data: { balance: { decrement: parsedAmount } }
+      });
+
+      // 4. Update goal currentAmount
+      const updatedGoal = await tx.goal.update({
+        where: { id: goalId },
+        data: { currentAmount: { increment: parsedAmount } }
+      });
+
+      return { account: updatedAccount, goal: updatedGoal };
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    console.error('TRANSFER ERROR:', error.message);
+    res.status(400).json({ error: error.message });
+  }
+};

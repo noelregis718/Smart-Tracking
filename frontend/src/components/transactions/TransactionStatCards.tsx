@@ -64,7 +64,7 @@ export const TransactionStatCards = () => {
     return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
             {stats.map((stat, index) => (
-                <Card key={index} style={{ padding: '1.25rem', background: stat.bg, borderRadius: '6px' }}>
+                <Card key={index} style={{ padding: '1.25rem', background: stat.bg, borderRadius: '4px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#64748b' }}>{stat.title}</span>

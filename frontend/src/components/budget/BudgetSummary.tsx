@@ -1,11 +1,115 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Info } from 'lucide-react';
+import { Info, ChevronDown } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import api, { setAuthToken } from '../../lib/api';
 
 interface Budget {
     category: string;
     limit: number;
+}
+
+interface RecurringPayment {
+    id: string;
+    name: string;
+    amount: number;
+    category: string;
+    status: string;
+}
+
+// --- Helper Components ---
+
+function Tab({ label, active, onClick }: { label: string, active?: boolean, onClick: () => void }) {
+    return (
+        <div 
+            onClick={onClick}
+            style={{
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                color: active ? '#1e293b' : '#64748b',
+                padding: '6px 14px',
+                borderRadius: '4px',
+                background: active ? '#f1f5f9' : 'transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+            }}
+        >
+            {label}
+        </div>
+    );
+}
+
+function BudgetCategoryRow({ label, budget, spent, remaining, color, overlayColor, overlayWidth, last }: {
+    label: string,
+    budget: number,
+    spent: number,
+    remaining: number,
+    color: string,
+    overlayColor?: string,
+    overlayWidth?: string,
+    last?: boolean
+}) {
+    const percentage = (spent / budget) * 100;
+
+    return (
+        <div style={{
+            marginBottom: last ? 0 : '1rem',
+            paddingBottom: last ? 0 : '1rem',
+            borderBottom: last ? 'none' : '1px solid #f1f5f9'
+        }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>{label}</span>
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>₹{budget.toLocaleString()} budget</span>
+            </div>
+
+            <div style={{
+                height: '6px',
+                background: '#f1f5f9',
+                borderRadius: '3px',
+                position: 'relative',
+                marginBottom: '6px',
+                overflow: 'hidden'
+            }}>
+                <div style={{
+                    width: `${percentage}%`,
+                    height: '100%',
+                    background: color,
+                    borderRadius: '3px'
+                }} />
+                {overlayColor && (
+                    <div style={{
+                        position: 'absolute',
+                        left: `${percentage}%`,
+                        top: 0,
+                        width: overlayWidth || '6px',
+                        height: '100%',
+                        background: overlayColor,
+                    }} />
+                )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>₹{spent.toLocaleString()} spent</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#15803d', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ color: overlayColor || '#15803d' }}>₹{remaining.toLocaleString()}</span> remaining
+                </span>
+            </div>
+        </div>
+    );
+}
+
+function RecurringRow({ label, count, amount, last }: { label: string, count: number, amount: number, last?: boolean }) {
+    return (
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '8px 0',
+            borderBottom: last ? 'none' : '1px solid #f1f5f9'
+        }}>
+            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>{label} ({count})</span>
+            <span style={{ fontSize: '0.8rem', color: '#1e293b', fontWeight: '700' }}>₹{amount.toLocaleString()}/mo</span>
+        </div>
+    );
 }
 
 export const LeftToBudget = () => {
@@ -69,7 +173,7 @@ export const LeftToBudget = () => {
     }, [expenses, budgets]);
 
     if (loading) return (
-        <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', textAlign: 'center', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
+        <div style={{ background: 'white', borderRadius: '4px', padding: '2rem', textAlign: 'center', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
             <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '600' }}>Loading summary...</div>
         </div>
     );
@@ -77,7 +181,7 @@ export const LeftToBudget = () => {
     return (
         <div style={{
             background: 'white',
-            borderRadius: '16px',
+            borderRadius: '4px',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
             overflow: 'hidden',
             height: '100%',
@@ -137,25 +241,132 @@ export const LeftToBudget = () => {
 };
 
 export const RecurringPayments = () => {
+    const { getToken } = useAuth();
+    const [recurring, setRecurring] = useState<RecurringPayment[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [isStatusOpen, setIsStatusOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<RecurringPayment | null>(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        amount: '',
+        category: 'SaaS Tools',
+        status: 'Active'
+    });
+
+    const categories = ['SaaS Tools', 'Cloud Services', 'Memberships', 'Entertainment', 'Utilities', 'Others'];
+
+    const fetchRecurring = async () => {
+        try {
+            const token = await getToken();
+            setAuthToken(token);
+            const response = await api.get('/recurring');
+            setRecurring(response.data);
+        } catch (error) {
+            console.error('Failed to fetch recurring payments:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRecurring();
+    }, [getToken]);
+
+    const handleSave = async () => {
+        try {
+            const token = await getToken();
+            setAuthToken(token);
+            if (editingItem) {
+                await api.put(`/recurring/${editingItem.id}`, formData);
+            } else {
+                await api.post('/recurring', formData);
+            }
+            fetchRecurring();
+            setIsModalOpen(false);
+            setEditingItem(null);
+            setFormData({ name: '', amount: '', category: 'SaaS Tools', status: 'Active' });
+        } catch (error) {
+            console.error('Failed to save recurring payment:', error);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this recurring payment?')) return;
+        try {
+            const token = await getToken();
+            setAuthToken(token);
+            await api.delete(`/recurring/${id}`);
+            fetchRecurring();
+        } catch (error) {
+            console.error('Failed to delete recurring payment:', error);
+        }
+    };
+
+    const totals = useMemo(() => {
+        const active = recurring.filter(r => r.status === 'Active');
+        const monthlyTotal = active.reduce((acc, curr) => acc + curr.amount, 0);
+        
+        // Group by category for the rows
+        const grouped = categories.map(cat => ({
+            label: cat,
+            count: recurring.filter(r => r.category === cat).length,
+            amount: recurring.filter(r => r.category === cat && r.status === 'Active').reduce((acc, curr) => acc + curr.amount, 0)
+        })).filter(g => g.count > 0);
+
+        // Calculate utilization based on total budget or a default limit (e.g., 2000)
+        const budgetLimit = 2000; // This could be made dynamic later
+        const utilization = Math.min(100, Math.round((monthlyTotal / budgetLimit) * 100));
+
+        return {
+            activeCount: active.length,
+            monthlyTotal,
+            utilization,
+            grouped
+        };
+    }, [recurring]);
+
+    if (loading) return null;
+
     return (
         <div style={{ 
             background: 'white', 
             padding: '1.25rem', 
-            borderRadius: '16px', 
+            borderRadius: '4px', 
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-            transform: 'translateX(-2mm)'
+            marginLeft: '-2mm'
         }}>
-            <div style={{ marginBottom: '1rem' }}>
+            <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Recurring Payments</h3>
+                <button 
+                    onClick={() => {
+                        setEditingItem(null);
+                        setFormData({ name: '', amount: '', category: 'SaaS Tools', status: 'Active' });
+                        setIsModalOpen(true);
+                    }}
+                    style={{
+                        padding: '4px 8px',
+                        background: '#f1f5f9',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        color: '#64748b',
+                        cursor: 'pointer'
+                    }}
+                >
+                    + Manage
+                </button>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', lineHeight: '1' }}>14</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', lineHeight: '1' }}>{totals.activeCount}</div>
                     <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>Active subscriptions</div>
                 </div>
                 <div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', lineHeight: '1' }}>₹1,240</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', lineHeight: '1' }}>₹{totals.monthlyTotal.toLocaleString()}</div>
                     <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>Monthly total</div>
                 </div>
             </div>
@@ -163,116 +374,277 @@ export const RecurringPayments = () => {
             <div style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.75rem', color: '#64748b', fontWeight: '500' }}>
                     <span>Subscription Budget Utilization</span>
-                    <span style={{ fontWeight: '700', color: '#1e293b' }}>68%</span>
+                    <span style={{ fontWeight: '700', color: '#1e293b' }}>{totals.utilization}%</span>
                 </div>
                 <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ width: '68%', height: '100%', background: '#8b5cf6', borderRadius: '3px' }} />
+                    <div style={{ width: `${totals.utilization}%`, height: '100%', background: '#8b5cf6', borderRadius: '3px' }} />
                 </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <RecurringRow label="SaaS Tools" count={6} amount={840} />
-                <RecurringRow label="Cloud Services" count={3} amount={320} />
-                <RecurringRow label="Memberships" count={5} amount={80} last />
+                {totals.grouped.map((group, idx) => (
+                    <RecurringRow 
+                        key={group.label} 
+                        label={group.label} 
+                        count={group.count} 
+                        amount={group.amount} 
+                        last={idx === totals.grouped.length - 1} 
+                    />
+                ))}
+                {totals.grouped.length === 0 && (
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center', padding: '1rem 0', fontStyle: 'italic' }}>
+                        No recurring payments added yet.
+                    </div>
+                )}
             </div>
+
+            {/* Modal */}
+            {isModalOpen && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.4)',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000,
+                    padding: '20px'
+                }}>
+                    <div style={{
+                        background: 'white',
+                        width: '100%',
+                        maxWidth: '500px',
+                        borderRadius: '4px',
+                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
+                                {editingItem ? 'Edit' : 'Add'} Recurring Payment
+                            </h3>
+                            <button 
+                                onClick={() => { setIsModalOpen(false); setEditingItem(null); }}
+                                style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '20px' }}
+                            >
+                                &times;
+                            </button>
+                        </div>
+                        
+                        <div style={{ 
+                            padding: '1.5rem', 
+                            maxHeight: '75vh', 
+                            overflowY: 'auto', 
+                            position: 'relative'
+                        }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                {/* Name Input */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Name</label>
+                                    <input 
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={e => setFormData({...formData, name: e.target.value})}
+                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                        placeholder="e.g. Netflix"
+                                    />
+                                </div>
+
+                                {/* Amount and Status Grid */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Monthly Amount (₹)</label>
+                                        <input 
+                                            type="number"
+                                            value={formData.amount}
+                                            onChange={e => setFormData({...formData, amount: e.target.value})}
+                                            style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Status</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <div 
+                                                onClick={() => { setIsStatusOpen(!isStatusOpen); setIsCategoryOpen(false); }}
+                                                style={{ 
+                                                    padding: '0.75rem', 
+                                                    borderRadius: '4px', 
+                                                    border: '1px solid #e2e8f0', 
+                                                    fontSize: '0.875rem', 
+                                                    background: 'white',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <span style={{ color: formData.status === 'Active' ? '#22c55e' : '#64748b', fontWeight: '700' }}>
+                                                    {formData.status}
+                                                </span>
+                                                <ChevronDown size={16} style={{ color: '#94a3b8', transform: isStatusOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                                            </div>
+                                            {isStatusOpen && (
+                                                <div style={{ 
+                                                    position: 'absolute', 
+                                                    top: '100%', 
+                                                    left: 0, 
+                                                    right: 0, 
+                                                    zIndex: 100, 
+                                                    background: 'white', 
+                                                    border: '1px solid #e2e8f0', 
+                                                    borderRadius: '4px', 
+                                                    marginTop: '4px',
+                                                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
+                                                }}>
+                                                    <div 
+                                                        onClick={() => { setFormData({...formData, status: 'Active'}); setIsStatusOpen(false); }}
+                                                        style={{ 
+                                                            padding: '10px 12px', 
+                                                            fontSize: '0.875rem', 
+                                                            cursor: 'pointer',
+                                                            color: '#22c55e',
+                                                            fontWeight: formData.status === 'Active' ? '700' : 'normal',
+                                                            background: formData.status === 'Active' ? '#f0fdf4' : 'transparent'
+                                                        }}
+                                                    >
+                                                        Active
+                                                    </div>
+                                                    <div 
+                                                        onClick={() => { setFormData({...formData, status: 'Paused'}); setIsStatusOpen(false); }}
+                                                        style={{ 
+                                                            padding: '10px 12px', 
+                                                            fontSize: '0.875rem', 
+                                                            cursor: 'pointer',
+                                                            color: '#ef4444',
+                                                            fontWeight: formData.status === 'Paused' ? '700' : 'normal',
+                                                            background: formData.status === 'Paused' ? '#fef2f2' : 'transparent'
+                                                        }}
+                                                    >
+                                                        Paused
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Category Row (Full Width for better dropdown room) */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Category</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <div 
+                                            onClick={() => { setIsCategoryOpen(!isCategoryOpen); setIsStatusOpen(false); }}
+                                            style={{ 
+                                                padding: '0.75rem', 
+                                                borderRadius: '4px', 
+                                                border: '1px solid #e2e8f0', 
+                                                fontSize: '0.875rem', 
+                                                background: 'white',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <span>{formData.category}</span>
+                                            <ChevronDown size={16} style={{ color: '#94a3b8', transform: isCategoryOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                                        </div>
+                                        {isCategoryOpen && (
+                                            <div style={{ 
+                                                position: 'absolute', 
+                                                top: '100%', 
+                                                left: 0, 
+                                                right: 0, 
+                                                zIndex: 100, 
+                                                background: 'white', 
+                                                border: '1px solid #e2e8f0', 
+                                                borderRadius: '4px', 
+                                                marginTop: '4px',
+                                                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                                maxHeight: '200px',
+                                                overflowY: 'auto'
+                                            }}>
+                                                {categories.map(c => (
+                                                    <div 
+                                                        key={c} 
+                                                        onClick={() => { setFormData({...formData, category: c}); setIsCategoryOpen(false); }}
+                                                        style={{ 
+                                                            padding: '10px 12px', 
+                                                            fontSize: '0.875rem', 
+                                                            cursor: 'pointer',
+                                                            background: formData.category === c ? '#f1f5f9' : 'transparent',
+                                                            color: formData.category === c ? '#2563eb' : '#1e293b',
+                                                            fontWeight: formData.category === c ? '700' : 'normal'
+                                                        }}
+                                                    >
+                                                        {c}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {recurring.length > 0 && !editingItem && (
+                                    <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Subscriptions</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {recurring.map(r => (
+                                                <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#f8fafc', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1e293b' }}>{r.name}</span>
+                                                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>₹{r.amount.toLocaleString()} • {r.status}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                                        <button 
+                                                            onClick={() => { setEditingItem(r); setFormData({ name: r.name, amount: r.amount.toString(), category: r.category, status: r.status }); }} 
+                                                            style={{ border: 'none', background: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600' }}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDelete(r.id)} 
+                                                            style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600' }}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <button 
+                                onClick={() => { setIsModalOpen(false); setEditingItem(null); }}
+                                style={{ padding: '0.625rem 1.25rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleSave}
+                                className="btn-premium-shine"
+                                style={{ padding: '0.625rem 1.5rem', borderRadius: '4px', fontSize: '0.875rem' }}
+                            >
+                                {editingItem ? 'Update' : 'Save'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
-// Keep backward-compat export
+// --- Default Export Wrapper ---
+
 export const BudgetSummary = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <LeftToBudget />
         <RecurringPayments />
-    </div>
-);
-
-const Tab = ({ label, active, onClick }: { label: string, active?: boolean, onClick: () => void }) => (
-    <div 
-        onClick={onClick}
-        style={{
-            fontSize: '0.8rem',
-            fontWeight: '600',
-            color: active ? '#1e293b' : '#64748b',
-            padding: '6px 14px',
-            borderRadius: '100px',
-            background: active ? '#f1f5f9' : 'transparent',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-        }}
-    >
-        {label}
-    </div>
-);
-
-const BudgetCategoryRow = ({ label, budget, spent, remaining, color, overlayColor, overlayWidth, last }: {
-    label: string,
-    budget: number,
-    spent: number,
-    remaining: number,
-    color: string,
-    overlayColor?: string,
-    overlayWidth?: string,
-    last?: boolean
-}) => {
-    const percentage = (spent / budget) * 100;
-
-    return (
-        <div style={{
-            marginBottom: last ? 0 : '1rem',
-            paddingBottom: last ? 0 : '1rem',
-            borderBottom: last ? 'none' : '1px solid #f1f5f9'
-        }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>{label}</span>
-                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>₹{budget.toLocaleString()} budget</span>
-            </div>
-
-            <div style={{
-                height: '6px',
-                background: '#f1f5f9',
-                borderRadius: '3px',
-                position: 'relative',
-                marginBottom: '6px',
-                overflow: 'hidden'
-            }}>
-                <div style={{
-                    width: `${percentage}%`,
-                    height: '100%',
-                    background: color,
-                    borderRadius: '3px'
-                }} />
-                {overlayColor && (
-                    <div style={{
-                        position: 'absolute',
-                        left: `${percentage}%`,
-                        top: 0,
-                        width: overlayWidth || '6px',
-                        height: '100%',
-                        background: overlayColor,
-                    }} />
-                )}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>₹{spent.toLocaleString()} spent</span>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#15803d', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ color: overlayColor || '#15803d' }}>₹{remaining.toLocaleString()}</span> remaining
-                </span>
-            </div>
-        </div>
-    );
-};
-
-const RecurringRow = ({ label, count, amount, last }: { label: string, count: number, amount: number, last?: boolean }) => (
-    <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '8px 0',
-        borderBottom: last ? 'none' : '1px solid #f1f5f9'
-    }}>
-        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>{label} ({count})</span>
-        <span style={{ fontSize: '0.8rem', color: '#1e293b', fontWeight: '700' }}>₹{amount}/mo</span>
     </div>
 );

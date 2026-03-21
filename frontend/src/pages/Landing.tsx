@@ -128,8 +128,8 @@ export const Landing = () => {
                             <div className="mockup-content">
                                 <div className="skeleton-title"></div>
                                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-                                    <div style={{ flex: 1, height: '80px', background: '#f9fafb', borderRadius: '8px', border: '1px solid #f3f4f6' }}></div>
-                                    <div style={{ flex: 1, height: '80px', background: '#f9fafb', borderRadius: '8px', border: '1px solid #f3f4f6' }}></div>
+                                    <div style={{ flex: 1, height: '80px', background: '#f9fafb', borderRadius: '4px', border: '1px solid #f3f4f6' }}></div>
+                                    <div style={{ flex: 1, height: '80px', background: '#f9fafb', borderRadius: '4px', border: '1px solid #f3f4f6' }}></div>
                                 </div>
                                 <div className="skeleton-chart"></div>
                             </div>

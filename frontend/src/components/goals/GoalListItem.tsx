@@ -1,7 +1,8 @@
-import React from 'react';
-import { MoreVertical } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { MoreVertical, Edit2, Trash2 } from 'lucide-react';
 
 interface GoalListItemProps {
+    id: string;
     title: string;
     status: 'Ahead' | 'On track' | 'At risk' | 'Behind';
     statusDetail?: string;
@@ -11,9 +12,12 @@ interface GoalListItemProps {
     currency?: string;
     color?: string;
     isLast?: boolean;
+    onEdit: (goal: any) => void;
+    onDelete: (id: string) => void;
 }
 
 const GoalListItem: React.FC<GoalListItemProps> = ({
+    id,
     title,
     status,
     statusDetail,
@@ -22,8 +26,12 @@ const GoalListItem: React.FC<GoalListItemProps> = ({
     targetAmount,
     currency = '₹',
     color = '#22c55e',
-    isLast = false
+    isLast = false,
+    onEdit,
+    onDelete
 }) => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
     const percentage = Math.min(Math.round((currentAmount / targetAmount) * 100), 100);
     
     const statusColors = {
@@ -38,6 +46,32 @@ const GoalListItem: React.FC<GoalListItemProps> = ({
         'On track': '#dbeafe',
         'At risk': '#fef3c7',
         'Behind': '#fee2e2'
+    };
+
+    // Handle click away
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        if (isMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isMenuOpen]);
+
+    const handleEdit = () => {
+        setIsMenuOpen(false);
+        onEdit({ id, title, targetAmount, currentAmount, targetDate, color });
+    };
+
+    const handleDelete = () => {
+        setIsMenuOpen(false);
+        onDelete(id);
     };
 
     return (
@@ -69,9 +103,77 @@ const GoalListItem: React.FC<GoalListItemProps> = ({
                             <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '500' }}>{targetDate} {statusDetail && `(${statusDetail})`}</span>
                         </div>
                     </div>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}>
-                        <MoreVertical size={20} />
-                    </button>
+                    <div style={{ position: 'relative' }} ref={menuRef}>
+                        <button 
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px', transition: 'background 0.2s' }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                        >
+                            <MoreVertical size={20} />
+                        </button>
+                        
+                        {isMenuOpen && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                right: 0,
+                                background: 'white',
+                                borderRadius: '8px',
+                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                                zIndex: 10,
+                                minWidth: '140px',
+                                border: '1px solid #f1f5f9',
+                                overflow: 'hidden',
+                                marginTop: '4px'
+                            }}>
+                                <button 
+                                    onClick={handleEdit}
+                                    style={{
+                                        width: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '10px 12px',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        color: '#1e293b',
+                                        textAlign: 'left',
+                                        transition: 'background 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                                >
+                                    <Edit2 size={14} />
+                                    Edit Goal
+                                </button>
+                                <button 
+                                    onClick={handleDelete}
+                                    style={{
+                                        width: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '10px 12px',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        color: '#ef4444',
+                                        textAlign: 'left',
+                                        transition: 'background 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#fef2f2'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                                >
+                                    <Trash2 size={14} />
+                                    Delete Goal
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

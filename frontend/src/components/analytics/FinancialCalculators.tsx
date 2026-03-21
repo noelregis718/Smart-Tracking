@@ -76,7 +76,7 @@ const FinancialCalculators: React.FC = () => {
                         padding: '10px 12px',
                         paddingRight: '40px',
                         border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
+                        borderRadius: '4px',
                         fontSize: '0.9rem',
                         fontWeight: '600',
                         color: '#1e293b',
@@ -162,7 +162,7 @@ const FinancialCalculators: React.FC = () => {
                     alignItems: 'center',
                     textAlign: 'center',
                     background: '#f8fafc',
-                    borderRadius: '12px'
+                    borderRadius: '4px'
                 }}>
                     <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
                         {activeCalc === 'loan' ? 'Monthly EMI' : 

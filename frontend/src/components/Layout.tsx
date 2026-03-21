@@ -69,7 +69,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                             color: 'var(--text-muted)',
                             cursor: 'pointer',
                             padding: '4px',
-                            borderRadius: '6px',
+                            borderRadius: '4px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -102,7 +102,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                             justifyContent: isCollapsed ? 'center' : 'flex-start',
                             gap: '0.75rem',
                             padding: '0.625rem 0.75rem',
-                            borderRadius: '8px',
+                            borderRadius: '4px',
                             color: 'var(--text-muted)',
                             fontWeight: '500',
                             background: 'transparent',
@@ -136,7 +136,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                             style={{
                                 width: '40px',
                                 height: '40px',
-                                borderRadius: '8px',
+                                borderRadius: '4px',
                                 border: '1px solid var(--border)',
                                 objectFit: 'cover'
                             }}
@@ -184,7 +184,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                                 width: '100%',
                                 padding: '8px 12px 8px 40px',
                                 border: '1px solid var(--border)',
-                                borderRadius: '8px',
+                                borderRadius: '4px',
                                 background: 'var(--surface)',
                                 fontSize: '0.875rem'
                             }}
@@ -202,7 +202,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                                 padding: '0.4rem 1rem',
                                 fontSize: '0.875rem',
                                 height: '36px',
-                                borderRadius: '8px',
+                                borderRadius: '4px',
                                 background: 'white'
                             }}
                         >
@@ -232,7 +232,7 @@ const SidebarLink = ({ to, icon, label, collapsed }: { to: string, icon: React.R
             justifyContent: collapsed ? 'center' : 'flex-start',
             gap: '0.75rem',
             padding: '0.625rem 0.75rem',
-            borderRadius: '8px',
+            borderRadius: '4px',
             color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
             fontWeight: isActive ? '600' : '500',
             background: isActive ? 'var(--surface)' : 'transparent',

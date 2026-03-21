@@ -16,7 +16,7 @@ export const TransactionItem = ({ title, subtitle, amount, date, icon, color }: 
                 width: '40px',
                 height: '40px',
                 background: '#f8fafc',
-                borderRadius: '10px',
+                borderRadius: '4px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

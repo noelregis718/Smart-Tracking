@@ -64,13 +64,12 @@ export const LoanBook = () => {
             console.error('Delete failed:', error);
         }
     };
-
-    if (loading) return <div style={{ background: 'white', borderRadius: '16px', padding: '1.25rem' }}>Loading loans...</div>;
+    if (loading) return <div style={{ background: 'white', borderRadius: '4px', padding: '1.25rem' }}>Loading loans...</div>;
 
     return (
         <div style={{
             background: 'white',
-            borderRadius: '16px',
+            borderRadius: '4px',
             padding: '1.25rem',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
             display: 'flex',
@@ -99,7 +98,7 @@ export const LoanBook = () => {
                         background: 'white',
                         width: '100%',
                         maxWidth: '450px',
-                        borderRadius: '12px',
+                        borderRadius: '4px',
                         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
                         overflow: 'hidden'
                     }}>
@@ -114,7 +113,7 @@ export const LoanBook = () => {
                                     value={formData.name}
                                     onChange={e => setFormData({...formData, name: e.target.value})}
                                     placeholder="e.g. Car Loan, Student Debt"
-                                    style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                    style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                 />
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -125,7 +124,7 @@ export const LoanBook = () => {
                                         value={formData.amount}
                                         onChange={e => setFormData({...formData, amount: e.target.value})}
                                         placeholder="0.00"
-                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -135,7 +134,7 @@ export const LoanBook = () => {
                                         value={formData.total}
                                         onChange={e => setFormData({...formData, total: e.target.value})}
                                         placeholder="0.00"
-                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                 </div>
                             </div>
@@ -144,7 +143,7 @@ export const LoanBook = () => {
                         <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                             <button 
                                 onClick={() => setIsIdOpen(false)}
-                                style={{ padding: '0.625rem 1.25rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
+                                style={{ padding: '0.625rem 1.25rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>
@@ -259,12 +258,12 @@ export const Investments = () => {
         }
     };
 
-    if (loading) return <div style={{ background: 'white', borderRadius: '16px', padding: '1.25rem' }}>Loading investments...</div>;
+    if (loading) return <div style={{ background: 'white', borderRadius: '4px', padding: '1.25rem' }}>Loading investments...</div>;
 
     return (
         <div style={{
             background: 'white',
-            borderRadius: '16px',
+            borderRadius: '4px',
             padding: '1.25rem',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
             display: 'flex',
@@ -293,7 +292,7 @@ export const Investments = () => {
                         background: 'white',
                         width: '100%',
                         maxWidth: '450px',
-                        borderRadius: '12px',
+                        borderRadius: '4px',
                         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
                         overflow: 'hidden'
                     }}>
@@ -308,7 +307,7 @@ export const Investments = () => {
                                     value={formData.title}
                                     onChange={e => setFormData({...formData, title: e.target.value})}
                                     placeholder="e.g. Stock Portfolio, Crypto"
-                                    style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                    style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                 />
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -319,7 +318,7 @@ export const Investments = () => {
                                         value={formData.amount}
                                         onChange={e => setFormData({...formData, amount: e.target.value})}
                                         placeholder="0.00"
-                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -329,7 +328,7 @@ export const Investments = () => {
                                         value={formData.change}
                                         onChange={e => setFormData({...formData, change: e.target.value})}
                                         placeholder="+ / - 0.00"
-                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                 </div>
                             </div>
@@ -338,7 +337,7 @@ export const Investments = () => {
                         <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                             <button 
                                 onClick={() => setIsIdOpen(false)}
-                                style={{ padding: '0.625rem 1.25rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
+                                style={{ padding: '0.625rem 1.25rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>
@@ -444,7 +443,7 @@ const InvestmentCard = ({ id, title, amount, change, onDelete }: { id: string, t
     return (
         <div style={{
             padding: '1rem',
-            borderRadius: '12px',
+            borderRadius: '4px',
             border: '1px solid #e2e8f0',
             background: '#fafafa',
             display: 'flex',

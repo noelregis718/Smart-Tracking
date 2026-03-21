@@ -99,7 +99,7 @@ export const BudgetList = () => {
     return (
         <div style={{
             background: 'white',
-            borderRadius: '12px',
+            borderRadius: '4px',
             overflow: 'hidden',
             boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
             marginTop: '1.5rem'

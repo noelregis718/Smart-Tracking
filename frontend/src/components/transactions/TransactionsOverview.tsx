@@ -33,7 +33,7 @@ const CustomTooltip = ({ active, payload }: any) => {
                 background: '#1a1a1a',
                 color: 'white',
                 padding: '8px 16px',
-                borderRadius: '8px',
+                borderRadius: '4px',
                 fontSize: '0.875rem',
                 fontWeight: '600',
                 display: 'flex',
@@ -58,7 +58,7 @@ export const TransactionsOverview = () => {
     };
 
     return (
-        <Card style={{ padding: '1.25rem', background: 'white', borderRadius: '6px' }}>
+        <Card style={{ padding: '1.25rem', background: 'white', borderRadius: '4px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', margin: 0 }}>Overview</h2>
             </div>
@@ -94,7 +94,7 @@ export const TransactionsOverview = () => {
                         />
                         <Bar
                             dataKey="spent"
-                            radius={[6, 6, 0, 0]}
+                            radius={[4, 4, 0, 0]}
                             barSize={48}
                             onMouseEnter={onMouseEnter}
                         >

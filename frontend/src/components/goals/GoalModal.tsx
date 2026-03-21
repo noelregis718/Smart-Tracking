@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Target } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import api, { setAuthToken } from '../../lib/api';
 
@@ -7,6 +7,7 @@ interface GoalModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: () => void;
+    goal?: any; // Optional goal for editing
 }
 
 const COLORS = [
@@ -16,7 +17,8 @@ const COLORS = [
 const GoalModal: React.FC<GoalModalProps> = ({
     isOpen,
     onClose,
-    onSave
+    onSave,
+    goal
 }) => {
     const { getToken } = useAuth();
     const [title, setTitle] = useState('');
@@ -25,6 +27,22 @@ const GoalModal: React.FC<GoalModalProps> = ({
     const [targetDate, setTargetDate] = useState('');
     const [selectedColor, setSelectedColor] = useState(COLORS[0]);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (goal && isOpen) {
+            setTitle(goal.title || '');
+            setTargetAmount(goal.targetAmount?.toString() || '');
+            setCurrentAmount(goal.currentAmount?.toString() || '0');
+            setTargetDate(goal.targetDate || '');
+            setSelectedColor(goal.color || COLORS[0]);
+        } else if (isOpen) {
+            setTitle('');
+            setTargetAmount('');
+            setCurrentAmount('0');
+            setTargetDate('');
+            setSelectedColor(COLORS[0]);
+        }
+    }, [goal, isOpen]);
 
     if (!isOpen) return null;
 
@@ -40,23 +58,26 @@ const GoalModal: React.FC<GoalModalProps> = ({
         try {
             const token = await getToken();
             setAuthToken(token);
-            await api.post('/goals', {
+            
+            const payload = {
                 title,
                 targetAmount: parsedTarget,
                 currentAmount: parseFloat(currentAmount) || 0,
                 targetDate,
                 color: selectedColor
-            });
+            };
+
+            if (goal?.id) {
+                await api.put(`/goals/${goal.id}`, payload);
+            } else {
+                await api.post('/goals', payload);
+            }
+            
             onSave();
             onClose();
-            // Reset form
-            setTitle('');
-            setTargetAmount('');
-            setCurrentAmount('0');
-            setTargetDate('');
         } catch (error: any) {
-            console.error('Failed to create goal:', error);
-            alert('Failed to create goal. Please try again.');
+            console.error('Failed to save goal:', error);
+            alert(`Failed to ${goal ? 'update' : 'create'} goal. Please try again.`);
         } finally {
             setLoading(false);
         }
@@ -78,7 +99,7 @@ const GoalModal: React.FC<GoalModalProps> = ({
         }}>
             <div style={{
                 background: 'white',
-                borderRadius: '16px',
+                borderRadius: '4px',
                 width: '100%',
                 maxWidth: '450px',
                 padding: '2rem',
@@ -87,10 +108,9 @@ const GoalModal: React.FC<GoalModalProps> = ({
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '40px', height: '40px', background: '#f1f5f9', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
-                            <Target size={24} />
-                        </div>
-                        <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#1e293b' }}>Add new goal</h2>
+                        <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#1e293b' }}>
+                            {goal ? 'Edit goal' : 'Add new goal'}
+                        </h2>
                     </div>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}>
                         <X size={24} />
@@ -106,7 +126,7 @@ const GoalModal: React.FC<GoalModalProps> = ({
                             placeholder="e.g. New Car, Emergency Fund"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', background: '#f8fafc' }}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', background: '#f8fafc' }}
                         />
                     </div>
 
@@ -119,7 +139,7 @@ const GoalModal: React.FC<GoalModalProps> = ({
                                 placeholder="₹ 0.00"
                                 value={targetAmount}
                                 onChange={(e) => setTargetAmount(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', background: '#f8fafc' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', background: '#f8fafc' }}
                             />
                         </div>
                         <div>
@@ -129,7 +149,7 @@ const GoalModal: React.FC<GoalModalProps> = ({
                                 placeholder="₹ 0.00"
                                 value={currentAmount}
                                 onChange={(e) => setCurrentAmount(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', background: '#f8fafc' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', background: '#f8fafc' }}
                             />
                         </div>
                     </div>
@@ -141,7 +161,7 @@ const GoalModal: React.FC<GoalModalProps> = ({
                             placeholder="e.g. Dec 2026"
                             value={targetDate}
                             onChange={(e) => setTargetDate(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', background: '#f8fafc' }}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', background: '#f8fafc' }}
                         />
                     </div>
 
@@ -177,7 +197,7 @@ const GoalModal: React.FC<GoalModalProps> = ({
                                 fontSize: '1rem'
                             }}
                         >
-                            {loading ? 'Creating...' : 'Create Goal'}
+                            {loading ? (goal ? 'Saving...' : 'Creating...') : (goal ? 'Save Changes' : 'Create Goal')}
                         </button>
                     </div>
                 </form>

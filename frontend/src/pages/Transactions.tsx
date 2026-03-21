@@ -1,7 +1,7 @@
 import { TransactionStatCards } from '../components/transactions/TransactionStatCards';
 import { TransactionsOverview } from '../components/transactions/TransactionsOverview';
 import { AccountOverview } from '../components/transactions/AccountOverview';
-import { TasksTable } from '../components/transactions/TasksTable';
+import { RecentTransactionsTable } from '../components/dashboard/RecentTransactionsTable';
 
 export const Transactions = () => {
     return (
@@ -20,8 +20,8 @@ export const Transactions = () => {
                 <AccountOverview />
             </div>
 
-            {/* Bottom row: Tasks Table */}
-            <TasksTable />
+            {/* Bottom row: Recent Transactions Table */}
+            <RecentTransactionsTable />
         </div>
     );
 };

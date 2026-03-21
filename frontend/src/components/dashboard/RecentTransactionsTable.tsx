@@ -134,12 +134,12 @@ export const RecentTransactionsTable = () => {
                         background: 'white',
                         width: '100%',
                         maxWidth: '450px',
-                        borderRadius: '12px',
+                        borderRadius: '4px',
                         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
                         overflow: 'hidden'
                     }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add Manual Transaction</h3>
+                            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add Manual Expense</h3>
                         </div>
                         
                         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -149,7 +149,7 @@ export const RecentTransactionsTable = () => {
                                     value={formData.title}
                                     onChange={e => setFormData({...formData, title: e.target.value})}
                                     placeholder="e.g. Starbucks Coffee"
-                                    style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                    style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                 />
                             </div>
 
@@ -161,7 +161,7 @@ export const RecentTransactionsTable = () => {
                                         value={formData.amount}
                                         onChange={e => setFormData({...formData, amount: e.target.value})}
                                         placeholder="0.00"
-                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -170,7 +170,7 @@ export const RecentTransactionsTable = () => {
                                         type="date"
                                         value={formData.date}
                                         onChange={e => setFormData({...formData, date: e.target.value})}
-                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                 </div>
                             </div>
@@ -181,7 +181,8 @@ export const RecentTransactionsTable = () => {
                                     <select 
                                         value={formData.category}
                                         onChange={e => setFormData({...formData, category: e.target.value})}
-                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem', background: 'white' }}
+                                        className="modern-select"
+                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem', background: 'white' }}
                                     >
                                         <option>Food & Dining</option>
                                         <option>Shopping</option>
@@ -199,7 +200,8 @@ export const RecentTransactionsTable = () => {
                                         <select 
                                             value={formData.accountId}
                                             onChange={e => setFormData({...formData, accountId: e.target.value})}
-                                            style={{ flex: 1, padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem', background: 'white' }}
+                                            className="modern-select"
+                                            style={{ flex: 1, padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem', background: 'white' }}
                                         >
                                             <option value="">No Account</option>
                                             {accounts.map(acc => (
@@ -208,7 +210,7 @@ export const RecentTransactionsTable = () => {
                                         </select>
                                         <button 
                                             onClick={() => setIsAccOpen(true)}
-                                            style={{ padding: '0 12px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', cursor: 'pointer', fontWeight: '700' }}
+                                            style={{ padding: '0 12px', borderRadius: '4px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', cursor: 'pointer', fontWeight: '700' }}
                                             title="Quick Add Account"
                                         >
                                             +
@@ -221,7 +223,7 @@ export const RecentTransactionsTable = () => {
                         <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                             <button 
                                 onClick={() => setIsIdOpen(false)}
-                                style={{ padding: '0.625rem 1.25rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
+                                style={{ padding: '0.625rem 1.25rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>
@@ -231,10 +233,11 @@ export const RecentTransactionsTable = () => {
                                  className="btn-premium-shine"
                                  style={{ 
                                      padding: '0.625rem 1.25rem', 
-                                     fontSize: '0.875rem'
+                                     fontSize: '0.875rem',
+                                     borderRadius: '4px'
                                  }}
                              >
-                                 {isSaving ? 'Saving...' : 'Add Transaction'}
+                                 {isSaving ? 'Saving...' : 'Add Expense'}
                              </button>
                         </div>
                     </div>
@@ -261,7 +264,7 @@ export const RecentTransactionsTable = () => {
                         background: 'white',
                         width: '100%',
                         maxWidth: '450px',
-                        borderRadius: '12px',
+                        borderRadius: '4px',
                         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
                         overflow: 'hidden'
                     }}>
@@ -272,14 +275,14 @@ export const RecentTransactionsTable = () => {
                         
                         <div style={{ padding: '1.5rem', maxHeight: '400px', overflowY: 'auto' }}>
                             {/* Create New Account form nested or as section */}
-                            <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #f1f5f9' }}>
+                            <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #f1f5f9' }}>
                                 <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.8125rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Create New</h4>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     <input 
                                         value={accFormData.name}
                                         onChange={e => setAccFormData({...accFormData, name: e.target.value})}
                                         placeholder="Account Name (e.g. HDFC Bank)"
-                                        style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                        style={{ padding: '0.65rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <input 
@@ -287,13 +290,13 @@ export const RecentTransactionsTable = () => {
                                             value={accFormData.balance}
                                             onChange={e => setAccFormData({...accFormData, balance: e.target.value})}
                                             placeholder="Initial Balance"
-                                            style={{ flex: 1, padding: '0.65rem', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                            style={{ flex: 1, padding: '0.65rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                         />
                                          <button 
                                              onClick={handleAccSave}
                                              disabled={isSaving}
                                              className="btn-premium-shine"
-                                             style={{ padding: '0.65rem 1.25rem', fontSize: '0.8125rem' }}
+                                             style={{ padding: '0.65rem 1.25rem', fontSize: '0.8125rem', borderRadius: '4px' }}
                                          >
                                              {isSaving ? '...' : 'Add'}
                                          </button>
@@ -308,7 +311,7 @@ export const RecentTransactionsTable = () => {
                                     <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.875rem', color: '#94a3b8', fontStyle: 'italic' }}>No accounts yet</div>
                                 ) : (
                                     accounts.map(acc => (
-                                        <div key={acc.id} style={{ padding: '0.75rem 1rem', borderRadius: '6px', border: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
+                                        <div key={acc.id} style={{ padding: '0.75rem 1rem', borderRadius: '4px', border: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
                                             <div>
                                                 <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#1e293b' }}>{acc.name}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>₹{acc.balance.toLocaleString()}</div>
@@ -344,7 +347,7 @@ export const RecentTransactionsTable = () => {
                 borderBottom: '1px solid #f1f5f9'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', margin: 0 }}>Recent Transactions</h2>
+                    <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', margin: 0 }}>Recent Expenses</h2>
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -372,7 +375,7 @@ export const RecentTransactionsTable = () => {
                             fontSize: '0.875rem'
                         }}
                     >
-                        Add Transaction
+                        Add Expense
                     </button>
                 </div>
             </div>
