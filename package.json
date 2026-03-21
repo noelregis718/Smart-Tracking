@@ -4,7 +4,8 @@
   "description": "The Smart Expense Tracker is a premium, modern fintech application built with React and Node.js, featuring a stunning dashboard UI inspired by top-tier financial apps.",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "start": "npm run dev",
+    "dev": "concurrently --kill-others \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

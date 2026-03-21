@@ -6,8 +6,9 @@ export const getExpenses = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
 
   try {
-    const expenses = await prisma.expense.findMany({
+    const expenses = await (prisma.expense as any).findMany({
       where: { userId },
+      include: { account: true },
       orderBy: { date: 'desc' },
     });
     res.json(expenses);
@@ -18,20 +19,35 @@ export const getExpenses = async (req: AuthRequest, res: Response) => {
 
 export const createExpense = async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
-  const { title, amount, category, date } = req.body;
+  const { title, amount, category, date, accountId } = req.body;
 
   try {
-    const expense = await prisma.expense.create({
+    // Ensure the user exists in our local database (Clerk Sync)
+    // We'll use a placeholder email derived from the userId if we don't have it
+    // since we made the email unique but the password and name optional.
+    await (prisma.user as any).upsert({
+      where: { id: userId },
+      update: {},
+      create: {
+        id: userId,
+        email: `${userId}@clerk.local`, // Fallback email for Clerk users
+        name: 'Clerk User',
+      },
+    });
+
+    const expense = await (prisma.expense as any).create({
       data: {
         title,
         amount: parseFloat(amount),
         category,
         date: date ? new Date(date) : new Date(),
         userId,
+        accountId: accountId || null,
       },
     });
     res.status(201).json(expense);
   } catch (error: any) {
+    console.error('CREATE EXPENSE ERROR:', error);
     res.status(500).json({ error: error.message });
   }
 };

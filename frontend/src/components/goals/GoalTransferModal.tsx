@@ -166,8 +166,8 @@ const GoalTransferModal: React.FC<GoalTransferModalProps> = ({
                                 content: '';
                                 position: absolute;
                                 top: -50%;
-                                left: -50%;
-                                width: 200%;
+                                left: -60%;
+                                width: 20%;
                                 height: 200%;
                                 background: linear-gradient(
                                     to right,
@@ -175,16 +175,11 @@ const GoalTransferModal: React.FC<GoalTransferModalProps> = ({
                                     rgba(255, 255, 255, 0.3) 50%,
                                     rgba(255, 255, 255, 0) 100%
                                 );
-                                transform: rotate(30deg);
-                                animation: shine 3s infinite;
+                                transform: rotate(25deg);
+                                transition: all 0.6s ease;
                             }
-                            @keyframes shine {
-                                0% {
-                                    transform: translateX(-100%) rotate(30deg);
-                                }
-                                20%, 100% {
-                                    transform: translateX(100%) rotate(30deg);
-                                }
+                            .shine-button:hover::after {
+                                left: 120%;
                             }
                         ` }} />
                     </button>

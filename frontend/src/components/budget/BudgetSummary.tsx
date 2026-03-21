@@ -1,6 +1,79 @@
+import { useState, useEffect, useMemo } from 'react';
 import { Info } from 'lucide-react';
+import { useAuth } from '@clerk/clerk-react';
+import api, { setAuthToken } from '../../lib/api';
+
+interface Budget {
+    category: string;
+    limit: number;
+}
 
 export const LeftToBudget = () => {
+    const { getToken } = useAuth();
+    const [expenses, setExpenses] = useState<any[]>([]);
+    const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'Summary' | 'Income' | 'Expenses'>('Expenses');
+
+    const fetchData = async () => {
+        try {
+            const token = await getToken();
+            setAuthToken(token);
+            const [expRes, budRes] = await Promise.all([
+                api.get('/expenses'),
+                api.get('/budgets')
+            ]);
+            setExpenses(expRes.data);
+            setBudgets(budRes.data);
+        } catch (error) {
+            console.error('Failed to fetch budget summary data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [getToken]);
+
+    const stats = useMemo(() => {
+        const groups = {
+            Fixed: { spent: 0, budget: 0, categories: ['Utilities', 'Health'] },
+            Flexible: { spent: 0, budget: 0, categories: ['Food & Dining', 'Shopping', 'Transportation', 'Entertainment'] },
+            'Non-Monthly': { spent: 0, budget: 0, categories: ['Others'] }
+        };
+
+        expenses.forEach(exp => {
+            if (groups.Fixed.categories.includes(exp.category)) groups.Fixed.spent += exp.amount;
+            else if (groups.Flexible.categories.includes(exp.category)) groups.Flexible.spent += exp.amount;
+            else groups['Non-Monthly'].spent += exp.amount;
+        });
+
+        budgets.forEach(b => {
+            if (groups.Fixed.categories.includes(b.category)) groups.Fixed.budget += b.limit;
+            else if (groups.Flexible.categories.includes(b.category)) groups.Flexible.budget += b.limit;
+            else groups['Non-Monthly'].budget += b.limit;
+        });
+
+        const totalSpent = Object.values(groups).reduce((acc, curr) => acc + curr.spent, 0);
+        const totalBudget = Object.values(groups).reduce((acc, curr) => acc + curr.budget, 0);
+
+        return {
+            groups: Object.entries(groups).map(([name, data]) => ({
+                name,
+                ...data,
+                remaining: data.budget - data.spent
+            })),
+            totalLeft: Math.max(0, totalBudget - totalSpent)
+        };
+    }, [expenses, budgets]);
+
+    if (loading) return (
+        <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', textAlign: 'center', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
+            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '600' }}>Loading summary...</div>
+        </div>
+    );
+
     return (
         <div style={{
             background: 'white',
@@ -20,7 +93,7 @@ export const LeftToBudget = () => {
                 borderBottom: '1px solid #dcfce7'
             }}>
                 <div style={{ fontSize: '2rem', fontWeight: '800', color: '#166534', marginBottom: '4px', letterSpacing: '-0.02em' }}>
-                    ₹3,210
+                    ₹{stats.totalLeft.toLocaleString()}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', color: '#15803d', fontSize: '0.9rem', fontWeight: '600' }}>
                     Left to budget <Info size={16} />
@@ -34,37 +107,30 @@ export const LeftToBudget = () => {
                 padding: '1rem 0.5rem 0',
                 gap: '1rem'
             }}>
-                <Tab label="Summary" />
-                <Tab label="Income" />
-                <Tab label="Expenses" active />
+                <Tab label="Summary" active={activeTab === 'Summary'} onClick={() => setActiveTab('Summary')} />
+                <Tab label="Income" active={activeTab === 'Income'} onClick={() => setActiveTab('Income')} />
+                <Tab label="Expenses" active={activeTab === 'Expenses'} onClick={() => setActiveTab('Expenses')} />
             </div>
 
             {/* Category Breakdown */}
             <div style={{ padding: '1rem', flex: 1 }}>
-                <BudgetCategoryRow
-                    label="Fixed"
-                    budget={3390}
-                    spent={2810}
-                    remaining={580}
-                    color="#22c55e"
-                />
-                <BudgetCategoryRow
-                    label="Flexible"
-                    budget={1420}
-                    spent={581}
-                    remaining={839}
-                    color="#22c55e"
-                    overlayColor="#eab308"
-                    overlayWidth="40px"
-                />
-                <BudgetCategoryRow
-                    label="Non-Monthly"
-                    budget={390}
-                    spent={308}
-                    remaining={82}
-                    color="#22c55e"
-                    last
-                />
+                {activeTab === 'Expenses' ? (
+                    stats.groups.map((group, index) => (
+                        <BudgetCategoryRow
+                            key={group.name}
+                            label={group.name}
+                            budget={group.budget}
+                            spent={group.spent}
+                            remaining={group.remaining}
+                            color="#22c55e"
+                            last={index === stats.groups.length - 1}
+                        />
+                    ))
+                ) : (
+                    <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.85rem', padding: '2rem 0' }}>
+                        No data available for {activeTab}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -121,16 +187,20 @@ export const BudgetSummary = () => (
     </div>
 );
 
-const Tab = ({ label, active }: { label: string, active?: boolean }) => (
-    <div style={{
-        fontSize: '0.8rem',
-        fontWeight: '600',
-        color: active ? '#1e293b' : '#64748b',
-        padding: '6px 14px',
-        borderRadius: '100px',
-        background: active ? '#f1f5f9' : 'transparent',
-        cursor: 'pointer'
-    }}>
+const Tab = ({ label, active, onClick }: { label: string, active?: boolean, onClick: () => void }) => (
+    <div 
+        onClick={onClick}
+        style={{
+            fontSize: '0.8rem',
+            fontWeight: '600',
+            color: active ? '#1e293b' : '#64748b',
+            padding: '6px 14px',
+            borderRadius: '100px',
+            background: active ? '#f1f5f9' : 'transparent',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+        }}
+    >
         {label}
     </div>
 );

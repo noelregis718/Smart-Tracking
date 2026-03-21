@@ -24,7 +24,7 @@ export const Reports = () => {
             {/* KPI Cards */}
             <KPISection />
 
-            {/* Top Row: Calculators & Transactions */}
+            {/* Top Row: Calculators & Combined Card */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <AnalyticsCard title="Financial Planning Tools">
                     <FinancialCalculators />

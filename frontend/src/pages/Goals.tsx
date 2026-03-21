@@ -1,44 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GoalListItem from '../components/goals/GoalListItem';
 import GoalSidebar from '../components/goals/GoalSidebar';
 import GoalTransferModal from '../components/goals/GoalTransferModal';
+import GoalModal from '../components/goals/GoalModal';
+import { useAuth } from '@clerk/clerk-react';
+import api, { setAuthToken } from '../lib/api';
+import { Plus } from 'lucide-react';
 
-const GOALS_DATA = [
-    {
-        title: 'Retirement',
-        status: 'Ahead' as const,
-        targetDate: 'Dec 2045',
-        currentAmount: 238246,
-        targetAmount: 1000000,
-        color: '#22c55e'
-    },
-    {
-        title: 'Emergency fund',
-        status: 'Ahead' as const,
-        statusDetail: '2 months ahead',
-        targetDate: 'Jun 2026',
-        currentAmount: 5631,
-        targetAmount: 10000,
-        color: '#22c55e'
-    },
-    {
-        title: 'Down payment',
-        status: 'At risk' as const,
-        targetDate: 'Dec 2026',
-        currentAmount: 80000,
-        targetAmount: 100000,
-        color: '#eab308'
-    },
-    {
-        title: 'Vacation',
-        status: 'Ahead' as const,
-        statusDetail: '7 months ahead',
-        targetDate: 'Apr 2027',
-        currentAmount: 5000,
-        targetAmount: 8000,
-        color: '#22c55e'
-    }
-];
+interface Goal {
+    id: string;
+    title: string;
+    targetAmount: number;
+    currentAmount: number;
+    targetDate: string;
+    color: string;
+    status: 'Ahead' | 'At risk' | 'Behind';
+}
+
+// Initial data removed to use backend data
 
 const ACCOUNTS_DATA = [
     { name: "Melanie's 401k", balance: 0, color: '#ef4444' },
@@ -51,7 +30,28 @@ const ACCOUNTS_DATA = [
 ];
 
 export const Goals = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { getToken } = useAuth();
+    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+    const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+    const [goals, setGoals] = useState<Goal[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchGoals = async () => {
+        try {
+            const token = await getToken();
+            setAuthToken(token);
+            const res = await api.get('/goals');
+            setGoals(res.data);
+        } catch (error: any) {
+            console.error('Failed to fetch goals:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchGoals();
+    }, [getToken]);
 
     const totalAvailable = ACCOUNTS_DATA.reduce((acc, curr) => acc + curr.balance, 0);
 
@@ -75,29 +75,71 @@ export const Goals = () => {
                     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
                     height: 'fit-content'
                 }}>
-                    {GOALS_DATA.map((goal, idx) => (
-                        <GoalListItem 
-                            key={idx}
-                            {...goal}
-                            isLast={idx === GOALS_DATA.length - 1}
-                        />
-                    ))}
+                    {loading ? (
+                        <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading goals...</div>
+                    ) : (
+                        <>
+                            {goals.length > 0 ? (
+                                goals.map((goal, idx) => (
+                                    <GoalListItem 
+                                        key={idx}
+                                        {...goal}
+                                        isLast={idx === goals.length - 1}
+                                    />
+                                ))
+                            ) : (
+                                <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No goals found. Create one to get started!</div>
+                            )}
+                            
+                            <button 
+                                onClick={() => setIsGoalModalOpen(true)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    padding: '1rem',
+                                    width: '100%',
+                                    background: 'none',
+                                    border: 'none',
+                                    borderTop: '1px solid #f1f5f9',
+                                    color: '#2563eb',
+                                    fontWeight: '700',
+                                    fontSize: '0.9rem',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s',
+                                    borderRadius: '0 0 12px 12px'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                            >
+                                <Plus size={18} />
+                                Add Goal
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 <div>
                     <GoalSidebar 
                         totalAvailable={totalAvailable}
                         accounts={ACCOUNTS_DATA}
-                        onCreateTransfer={() => setIsModalOpen(true)}
+                        onCreateTransfer={() => setIsTransferModalOpen(true)}
                     />
                 </div>
             </div>
 
             <GoalTransferModal 
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={isTransferModalOpen}
+                onClose={() => setIsTransferModalOpen(false)}
                 accounts={ACCOUNTS_DATA.map(a => a.name)}
-                goals={GOALS_DATA.map(g => g.title)}
+                goals={goals.map(g => g.title)}
+            />
+
+            <GoalModal 
+                isOpen={isGoalModalOpen}
+                onClose={() => setIsGoalModalOpen(false)}
+                onSave={fetchGoals}
             />
         </div>
     );

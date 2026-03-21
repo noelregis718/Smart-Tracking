@@ -27,23 +27,21 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, description }) => (
 );
 
 const KPISection: React.FC = () => {
-    const { expenses } = useExpenses();
+    const { expenses, loading } = useExpenses();
     const currency = '₹';
+
+    if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading analytics...</div>;
 
     const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
     const avgSpent = expenses.length > 0 ? totalSpent / expenses.length : 0;
     
-    // Find top category
-    const catCounts = expenses.reduce((acc, e) => {
-        acc[e.category] = (acc[e.category] || 0) + e.amount;
-        return acc;
-    }, {} as Record<string, number>);
-
-    const topCategory = Object.entries(catCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
-
     // Simplified Financial Health Score logic
     // Higher score if average transaction is lower and total spent is reasonable (mocked thresholds)
     const healthScore = Math.max(0, Math.min(100, 100 - (totalSpent / 5000) - (avgSpent / 200)));
+
+    const today = new Date();
+    const dayOfMonth = today.getDate();
+    const dailyBurn = totalSpent / dayOfMonth;
 
     return (
         <div style={{ display: 'flex', gap: '1.5rem', width: '100%', marginBottom: '2rem' }}>
@@ -53,14 +51,14 @@ const KPISection: React.FC = () => {
                 description="Total expenses tracked"
             />
             <KPICard 
-                title="Top Category" 
-                value={topCategory} 
-                description="Most money spent here"
-            />
-            <KPICard 
-                title="Avg per Transaction" 
+                title="Avg Transaction Size" 
                 value={`${currency}${avgSpent.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} 
                 description="Average cost per expense"
+            />
+            <KPICard 
+                title="Daily Burn Rate" 
+                value={`${currency}${dailyBurn.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} 
+                description="Average spending per day"
             />
             <KPICard 
                 title="Financial Health" 

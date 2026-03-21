@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-type CalcType = 'loan' | 'fd' | 'rd' | 'compound';
+type CalcType = 'loan' | 'fd' | 'rd' | 'inflation' | 'emergency';
 
 const FinancialCalculators: React.FC = () => {
     const [activeCalc, setActiveCalc] = useState<CalcType>('loan');
@@ -10,6 +10,8 @@ const FinancialCalculators: React.FC = () => {
     const [rate, setRate] = useState<number>(8.5);
     const [tenure, setTenure] = useState<number>(5);
     const [monthly, setMonthly] = useState<number>(5000);
+    const [inflationRate, setInflationRate] = useState<number>(6); // Standard 6% inflation
+    const [monthsOfBuffer, setMonthsOfBuffer] = useState<number>(6); // 6 months standard
     
     // Result States
     const [result, setResult] = useState<number>(0);
@@ -19,7 +21,7 @@ const FinancialCalculators: React.FC = () => {
 
     useEffect(() => {
         calculate();
-    }, [activeCalc, amount, rate, tenure, monthly]);
+    }, [activeCalc, amount, rate, tenure, monthly, inflationRate, monthsOfBuffer]);
 
     const calculate = () => {
         if (activeCalc === 'loan') {
@@ -41,17 +43,23 @@ const FinancialCalculators: React.FC = () => {
             const r = rate / 100;
             const n = tenure * 12;
             const i = r / 4;
-            // Simplified RD Maturity formula
             const m = p * ((Math.pow(1 + i, n) - 1) / (1 - Math.pow(1 + i, -1/3)));
             setResult(m);
             setTotalInterest(m - (p * n));
-        } else if (activeCalc === 'compound') {
+        } else if (activeCalc === 'inflation') {
+            // How much today's money will be worth in X years
             const p = amount;
-            const r = rate / 100;
+            const r = inflationRate / 100;
             const t = tenure;
-            const m = p * Math.pow(1 + r, t);
-            setResult(m);
-            setTotalInterest(m - p);
+            const purchasingPower = p / Math.pow(1 + r, t);
+            setResult(purchasingPower);
+            setTotalInterest(p - purchasingPower); // This is "Loss of Value"
+        } else if (activeCalc === 'emergency') {
+            const monthlyExp = monthly;
+            const months = monthsOfBuffer;
+            const totalRequired = monthlyExp * months;
+            setResult(totalRequired);
+            setTotalInterest(monthlyExp); // Just to show the monthly baseline
         }
     };
 
@@ -84,8 +92,8 @@ const FinancialCalculators: React.FC = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', paddingBottom: '8px', borderBottom: '1px solid #f1f5f9', gap: '1.5rem' }}>
-                {(['loan', 'fd', 'rd', 'compound'] as CalcType[]).map((type) => (
+            <div style={{ display: 'flex', paddingBottom: '8px', borderBottom: '1px solid #f1f5f9', gap: '1.5rem', overflowX: 'auto' }}>
+                {(['loan', 'fd', 'rd', 'inflation', 'emergency'] as CalcType[]).map((type) => (
                     <button 
                         key={type}
                         onClick={() => setActiveCalc(type)}
@@ -94,6 +102,7 @@ const FinancialCalculators: React.FC = () => {
                             border: 'none',
                             background: 'transparent',
                             fontSize: '0.75rem',
+                            whiteSpace: 'nowrap',
                             fontWeight: activeCalc === type ? '800' : '600',
                             color: activeCalc === type ? '#1e293b' : '#94a3b8',
                             borderBottom: activeCalc === type ? '2px solid #1e293b' : 'none',
@@ -102,7 +111,7 @@ const FinancialCalculators: React.FC = () => {
                             transition: 'all 0.2s'
                         }}
                     >
-                        {type}
+                        {type === 'inflation' ? 'Inflation' : type === 'emergency' ? 'Emergency' : type}
                     </button>
                 ))}
             </div>
@@ -130,11 +139,17 @@ const FinancialCalculators: React.FC = () => {
                             <InputField label="Duration" value={tenure} onChange={setTenure} unit="Yrs" />
                         </>
                     )}
-                    {activeCalc === 'compound' && (
+                    {activeCalc === 'inflation' && (
                         <>
-                            <InputField label="Initial Investment" value={amount} onChange={setAmount} unit={currency} />
-                            <InputField label="Interest Rate" value={rate} onChange={setRate} unit="%" />
-                            <InputField label="Duration" value={tenure} onChange={setTenure} unit="Yrs" />
+                            <InputField label="Current Value" value={amount} onChange={setAmount} unit={currency} />
+                            <InputField label="Inflation Rate" value={inflationRate} onChange={setInflationRate} unit="%" />
+                            <InputField label="Time Period" value={tenure} onChange={setTenure} unit="Yrs" />
+                        </>
+                    )}
+                    {activeCalc === 'emergency' && (
+                        <>
+                            <InputField label="Monthly Expenses" value={monthly} onChange={setMonthly} unit={currency} />
+                            <InputField label="Months to Cover" value={monthsOfBuffer} onChange={setMonthsOfBuffer} unit="Mo" />
                         </>
                     )}
                 </div>
@@ -145,10 +160,14 @@ const FinancialCalculators: React.FC = () => {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    background: '#f8fafc',
+                    borderRadius: '12px'
                 }}>
                     <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                        {activeCalc === 'loan' ? 'Monthly EMI' : 'Estimated Return'}
+                        {activeCalc === 'loan' ? 'Monthly EMI' : 
+                         activeCalc === 'inflation' ? 'Future Value' :
+                         activeCalc === 'emergency' ? 'Total Fund Needed' : 'Estimated Return'}
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#166534' }}>
                         {currency}{result.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -157,14 +176,16 @@ const FinancialCalculators: React.FC = () => {
                     <div style={{ width: '100%', height: '1px', background: '#e2e8f0', margin: '1rem 0' }} />
                     
                     <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                        Total Interest
+                        {activeCalc === 'inflation' ? 'Loss in Value' : 
+                         activeCalc === 'emergency' ? 'Monthly Expenses' : 'Total Interest'}
                     </div>
                     <div style={{ fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
                         {currency}{totalInterest.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </div>
 
                     <div style={{ marginTop: '1rem', fontSize: '0.65rem', color: '#94a3b8', textAlign: 'center' }}>
-                        Standard calculations apply.
+                        {activeCalc === 'inflation' ? 'Shows purchasing power decay.' : 
+                         activeCalc === 'emergency' ? 'Standard is 3-6 months.' : 'Standard calculations apply.'}
                     </div>
                 </div>
             </div>

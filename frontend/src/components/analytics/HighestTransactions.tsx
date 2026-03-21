@@ -2,8 +2,10 @@ import React from 'react';
 import { useExpenses } from '../../context/ExpensesContext';
 
 const HighestTransactions: React.FC = () => {
-    const { expenses } = useExpenses();
+    const { expenses, loading } = useExpenses();
     const currency = '₹';
+
+    if (loading) return <div style={{ padding: '1rem', textAlign: 'center', color: '#64748b', fontSize: '0.875rem' }}>Loading highest transactions...</div>;
 
     const topTransactions = [...expenses]
         .sort((a, b) => b.amount - a.amount)
@@ -22,7 +24,9 @@ const HighestTransactions: React.FC = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <div>
                             <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#1e293b' }}>{transaction.title}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{transaction.category} • {transaction.date}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                {transaction.category} • {new Date(transaction.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </div>
                         </div>
                     </div>
                     <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#1e293b' }}>

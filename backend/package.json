@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon --exec \"node --dns-result-order=ipv4first -r ts-node/register\" src/index.ts",
+    "dev": "nodemon",
     "build": "tsc"
   },
   "keywords": [],
@@ -21,14 +21,14 @@
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
-    "@prisma/client": "^7.5.0",
+    "@prisma/client": "^6.2.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.2.3",
     "nodemon": "^3.1.11",
-    "prisma": "^7.5.0",
+    "prisma": "^6.2.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

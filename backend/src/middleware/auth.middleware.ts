@@ -21,8 +21,9 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
       req.userId = decoded.userId;
       return next();
     } catch (error) {
-      // If custom JWT is present but invalid, we don't fall back, we fail.
-      return res.status(401).json({ error: 'Unauthorized: Invalid custom token' });
+      // If custom JWT verification fails, we don't return 401 immediately.
+      // We log the error and allow the fallback to Clerk auth below.
+      console.warn('Custom JWT verification failed, falling back to Clerk:', (error as Error).message);
     }
   }
 

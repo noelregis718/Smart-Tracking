@@ -1,3 +1,6 @@
+import { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '@clerk/clerk-react';
+import api, { setAuthToken } from '../../lib/api';
 import { Card } from '../Card';
 import { Info, ChevronDown } from 'lucide-react';
 import {
@@ -10,66 +13,74 @@ import {
     CartesianGrid
 } from 'recharts';
 
-const data = [
-    { date: 'Nov 11', value: 663000 },
-    { date: 'Nov 12', value: 665000 },
-    { date: 'Nov 13', value: 668000 },
-    { date: 'Nov 14', value: 673000 },
-    { date: 'Nov 15', value: 670000 },
-    { date: 'Nov 16', value: 672000 },
-    { date: 'Nov 17', value: 674000 },
-    { date: 'Nov 18', value: 675000 },
-    { date: 'Nov 19', value: 672000 },
-    { date: 'Nov 20', value: 679000 },
-    { date: 'Nov 21', value: 679500 },
-    { date: 'Nov 22', value: 680000 },
-    { date: 'Nov 23', value: 683000 },
-    { date: 'Nov 24', value: 684000 },
-    { date: 'Nov 25', value: 682000 },
-    { date: 'Nov 26', value: 685000 },
-    { date: 'Nov 27', value: 686500 },
-    { date: 'Nov 28', value: 687500 },
-    { date: 'Nov 29', value: 688500 },
-    { date: 'Nov 30', value: 688500 },
-    { date: 'Dec 1', value: 690000 },
-    { date: 'Dec 2', value: 692000 },
-    { date: 'Dec 3', value: 695000 },
-    { date: 'Dec 4', value: 698000 },
-    { date: 'Dec 5', value: 698500 },
-    { date: 'Dec 6', value: 698500 },
-    { date: 'Dec 7', value: 700000 },
-    { date: 'Dec 8', value: 702000 },
-    { date: 'Dec 9', value: 705000 },
-    { date: 'Dec 10', value: 705500 },
-    { date: 'Dec 11', value: 706500 },
-];
+interface Expense {
+    id: string;
+    amount: number;
+    date: string;
+}
 
 export const NetWorthCard = () => {
+    const { getToken } = useAuth();
+    const [expenses, setExpenses] = useState<Expense[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchExpenses = async () => {
+            try {
+                const token = await getToken();
+                setAuthToken(token);
+                const response = await api.get('/expenses');
+                setExpenses(response.data);
+            } catch (error) {
+                console.error('Failed to fetch expenses for chart:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchExpenses();
+    }, [getToken]);
+
+    const chartData = useMemo(() => {
+        const grouped: Record<string, number> = {};
+        expenses.forEach(exp => {
+            const dateStr = new Date(exp.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+            grouped[dateStr] = (grouped[dateStr] || 0) + exp.amount;
+        });
+
+        const sortedEntries = Object.entries(grouped).sort((a, b) => 
+            new Date(a[0]).getTime() - new Date(b[0]).getTime()
+        );
+
+        return sortedEntries.map(([date, value]) => ({ date, value }));
+    }, [expenses]);
+
+    const totalAmount = useMemo(() => {
+        return expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    }, [expenses]);
+
+    if (loading) return <Card style={{ padding: '2rem', textAlign: 'center' }}>Updating financial summary...</Card>;
+
     return (
         <Card style={{ padding: '1.5rem', background: 'white' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>NET WORTH</span>
-                        <Info size={14} style={{ color: 'var(--text-muted)', cursor: 'pointer' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b', letterSpacing: '0.05em' }}>TOTAL EXPENSES</span>
+                        <Info size={14} style={{ color: '#64748b', cursor: 'pointer' }} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                        <h2 style={{ fontSize: '2rem', fontWeight: '700', margin: 0, color: 'var(--text-main)' }}>$686,547.97</h2>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9375rem', color: '#10b981', fontWeight: '600' }}>
-                            <span>↑ $23,292.75 (3.5%)</span>
-                            <span style={{ color: 'var(--text-muted)', fontWeight: '500', marginLeft: '4px' }}>1 month change</span>
-                        </div>
+                        <h2 style={{ fontSize: '2rem', fontWeight: '700', margin: 0, color: '#1e293b' }}>₹{totalAmount.toLocaleString()}</h2>
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    <Dropdown label="Net worth performance" />
-                    <Dropdown label="1 month" />
+                    <Dropdown label="Overview" />
+                    <Dropdown label="Real-time" />
                 </div>
             </div>
 
             <div style={{ height: '280px', width: '100%', marginTop: '1.5rem' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                             <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2} />
@@ -83,14 +94,12 @@ export const NetWorthCard = () => {
                             tickLine={false}
                             tick={{ fontSize: 12, fill: '#64748b' }}
                             dy={10}
-                            interval={2}
                         />
                         <YAxis
                             axisLine={false}
                             tickLine={false}
                             tick={{ fontSize: 12, fill: '#64748b' }}
-                            tickFormatter={(value) => `$${(value / 1000).toFixed(1)}K`}
-                            domain={['dataMin - 5000', 'dataMax + 5000']}
+                            tickFormatter={(value) => `₹${value}`}
                         />
                         <Tooltip />
                         <Area

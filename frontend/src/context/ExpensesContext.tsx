@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { useAuth } from '@clerk/clerk-react';
+import api, { setAuthToken } from '../lib/api';
 
 export interface Expense {
     id: string;
@@ -10,34 +12,69 @@ export interface Expense {
 
 interface ExpensesContextType {
     expenses: Expense[];
-    addExpense: (expense: Omit<Expense, 'id'>) => void;
-    deleteExpense: (id: string) => void;
+    loading: boolean;
+    addExpense: (expense: Omit<Expense, 'id'>) => Promise<void>;
+    deleteExpense: (id: string) => Promise<void>;
+    refreshExpenses: () => Promise<void>;
 }
 
 const ExpensesContext = createContext<ExpensesContextType | undefined>(undefined);
 
 export const ExpensesProvider = ({ children }: { children: ReactNode }) => {
-    const [expenses, setExpenses] = useState<Expense[]>([
-        { id: '1', title: 'Groceries', amount: 150.50, date: '2023-10-26', category: 'Food' },
-        { id: '2', title: 'Uber Ride', amount: 25.00, date: '2023-10-25', category: 'Transport' },
-        { id: '3', title: 'Netflix Subscription', amount: 15.00, date: '2023-10-24', category: 'Entertainment' },
-        { id: '4', title: 'Utilities', amount: 80.00, date: '2023-10-20', category: 'Bills' },
-    ]);
+    const { getToken, isLoaded, isSignedIn } = useAuth();
+    const [expenses, setExpenses] = useState<Expense[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const addExpense = (expense: Omit<Expense, 'id'>) => {
-        const newExpense = {
-            ...expense,
-            id: Math.random().toString(36).substr(2, 9),
-        };
-        setExpenses([newExpense, ...expenses]);
+    const fetchExpenses = async () => {
+        if (!isLoaded || !isSignedIn) return;
+        
+        try {
+            setLoading(true);
+            const token = await getToken();
+            setAuthToken(token);
+            const response = await api.get('/expenses');
+            setExpenses(response.data);
+        } catch (error) {
+            console.error('Failed to fetch expenses:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const deleteExpense = (id: string) => {
-        setExpenses(expenses.filter((e) => e.id !== id));
+    useEffect(() => {
+        fetchExpenses();
+    }, [isLoaded, isSignedIn]);
+
+    const addExpense = async (expense: Omit<Expense, 'id'>) => {
+        try {
+            const token = await getToken();
+            setAuthToken(token);
+            await api.post('/expenses', expense);
+            await fetchExpenses();
+        } catch (error) {
+            console.error('Failed to add expense:', error);
+        }
+    };
+
+    const deleteExpense = async (id: string) => {
+        try {
+            const token = await getToken();
+            setAuthToken(token);
+            await api.delete(`/expenses/${id}`);
+            await fetchExpenses();
+        } catch (error) {
+            console.error('Failed to delete expense:', error);
+        }
     };
 
     return (
-        <ExpensesContext.Provider value={{ expenses, addExpense, deleteExpense }}>
+        <ExpensesContext.Provider value={{ 
+            expenses, 
+            loading, 
+            addExpense, 
+            deleteExpense, 
+            refreshExpenses: fetchExpenses 
+        }}>
             {children}
         </ExpensesContext.Provider>
     );
