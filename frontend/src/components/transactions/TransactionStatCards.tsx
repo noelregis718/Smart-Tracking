@@ -10,6 +10,10 @@ interface Transaction {
     title: string;
 }
 
+const DEFAULT_CATEGORIES = [
+    "Food & Dining", "Shopping", "Transportation", "Utilities", "Entertainment", "Health", "Others"
+];
+
 export const TransactionStatCards = () => {
     const { getToken } = useAuth();
     const [stats, setStats] = useState([
@@ -23,29 +27,77 @@ export const TransactionStatCards = () => {
         try {
             const token = await getToken();
             setAuthToken(token);
-            const response = await api.get('/expenses');
-            const txs: Transaction[] = response.data;
+            const [expRes, budRes, recRes] = await Promise.all([
+                api.get('/expenses'),
+                api.get('/budgets'),
+                api.get('/recurring')
+            ]);
 
-            if (txs.length === 0) {
+            const txs: Transaction[] = expRes.data;
+            const budgets = budRes.data;
+            const recurring = recRes.data;
+
+            const activeRecurring = recurring.filter((r: any) => r.status === 'Active');
+
+            if (txs.length === 0 && activeRecurring.length === 0) {
                 setLoading(false);
                 return;
             }
 
-            // Calculations
-            const totalCount = txs.length;
-            const totalSum = txs.reduce((acc, curr) => acc + curr.amount, 0);
-            const avgAmount = totalSum / totalCount;
+            const allProperCategories = new Set([
+                ...DEFAULT_CATEGORIES,
+                ...budgets.map((b: any) => b.category)
+            ]);
 
             const categoryMap: Record<string, number> = {};
+            const categoryHighestItem: Record<string, { name: string, amount: number }> = {};
+            let totalSum = 0;
+
+            // Manual Expenses
             txs.forEach(tx => {
-                categoryMap[tx.category] = (categoryMap[tx.category] || 0) + 1;
+                let cat = tx.category;
+                if (!cat || !allProperCategories.has(cat)) cat = 'Others';
+                if (cat === 'Income') return;
+                
+                categoryMap[cat] = (categoryMap[cat] || 0) + tx.amount;
+                totalSum += tx.amount;
+
+                if (!categoryHighestItem[cat] || tx.amount > categoryHighestItem[cat].amount) {
+                    categoryHighestItem[cat] = { name: tx.title, amount: tx.amount };
+                }
             });
 
-            const topCat = Object.entries(categoryMap).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+            // Active Recurring
+            activeRecurring.forEach((rec: any) => {
+                let cat = rec.category;
+                if (!cat || !allProperCategories.has(cat)) cat = 'Others';
+                if (cat === 'Income') return;
+
+                categoryMap[cat] = (categoryMap[cat] || 0) + rec.amount;
+                totalSum += rec.amount;
+
+                if (!categoryHighestItem[cat] || rec.amount > categoryHighestItem[cat].amount) {
+                    categoryHighestItem[cat] = { name: rec.name, amount: rec.amount };
+                }
+            });
+
+            // Stats
+            const totalEntries = txs.filter(t => t.category !== 'Income').length + activeRecurring.length;
+            const avgAmount = totalSum / (totalEntries || 1);
+
+            let topCat = 'None';
+            if (Object.keys(categoryMap).length > 0) {
+                topCat = Object.entries(categoryMap).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+                
+                // If Top Category is "Others", show the specific highest item for clarity
+                if (topCat === 'Others' && categoryHighestItem['Others']) {
+                    topCat = `Others - ${categoryHighestItem['Others'].name}`;
+                }
+            }
 
             setStats([
-                { title: 'Total Transactions', amount: totalCount.toString(), bg: 'white' },
-                { title: 'Average Amount', amount: `₹${avgAmount.toFixed(2)}`, bg: 'white' },
+                { title: 'Total Transactions', amount: totalEntries.toString(), bg: 'white' },
+                { title: 'Average Amount', amount: `₹${Math.round(avgAmount).toLocaleString()}`, bg: 'white' },
                 { title: 'Top Category', amount: topCat, bg: 'white' }
             ]);
         } catch (error) {

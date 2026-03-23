@@ -6,7 +6,7 @@ export const getInvestments = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
 
   try {
-    const investments = await (prisma.investment as any).findMany({
+    const investments = await prisma.investment.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
@@ -22,7 +22,7 @@ export const createInvestment = async (req: AuthRequest, res: Response) => {
 
   try {
     // Sync user
-    await (prisma.user as any).upsert({
+    await prisma.user.upsert({
       where: { id: userId },
       update: {},
       create: {
@@ -32,7 +32,7 @@ export const createInvestment = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    const investment = await (prisma.investment as any).create({
+    const investment = await prisma.investment.create({
       data: {
         title,
         amount: parseFloat(amount || 0),
@@ -51,13 +51,13 @@ export const deleteInvestment = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
 
   try {
-    const investment = await (prisma.investment as any).findUnique({ where: { id } });
+    const investment = await prisma.investment.findUnique({ where: { id } });
 
     if (!investment || investment.userId !== userId) {
       return res.status(404).json({ error: 'Investment not found' });
     }
 
-    await (prisma.investment as any).delete({ where: { id } });
+    await prisma.investment.delete({ where: { id } });
     res.status(204).send();
   } catch (error: any) {
     res.status(500).json({ error: error.message });

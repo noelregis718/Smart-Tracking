@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Info, ChevronDown } from 'lucide-react';
+import { Info, ChevronDown, Plus } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import api, { setAuthToken } from '../../lib/api';
 
@@ -14,6 +14,8 @@ interface RecurringPayment {
     amount: number;
     category: string;
     status: string;
+    billingDay: number;
+    lastPaidMonth?: string;
 }
 
 // --- Helper Components ---
@@ -112,9 +114,45 @@ function RecurringRow({ label, count, amount, last }: { label: string, count: nu
     );
 }
 
+function IncomeRow({ label, amount, date, last }: { label: string, amount: number, date: string, last?: boolean }) {
+    return (
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 0',
+            borderBottom: last ? 'none' : '1px solid #f1f5f9'
+        }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>{label}</span>
+                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{new Date(date).toLocaleDateString()}</span>
+            </div>
+            <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#10b981' }}>₹{amount.toLocaleString()}</span>
+        </div>
+    );
+}
+
+function SummaryRow({ label, amount, type }: { label: string, amount: number, type: 'income' | 'expense' | 'net' | 'budget' }) {
+    const color = type === 'income' ? '#10b981' : type === 'expense' ? '#ef4444' : type === 'budget' ? '#2563eb' : (amount >= 0 ? '#10b981' : '#ef4444');
+
+    return (
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '8px 0',
+            borderBottom: 'none'
+        }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b' }}>{label}</span>
+            <span style={{ fontSize: '1rem', fontWeight: '800', color }}>₹{Math.abs(amount).toLocaleString()}</span>
+        </div>
+    );
+}
+
 export const LeftToBudget = () => {
     const { getToken } = useAuth();
     const [expenses, setExpenses] = useState<any[]>([]);
+    const [income, setIncome] = useState<any[]>([]);
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'Summary' | 'Income' | 'Expenses'>('Expenses');
@@ -123,12 +161,14 @@ export const LeftToBudget = () => {
         try {
             const token = await getToken();
             setAuthToken(token);
-            const [expRes, budRes] = await Promise.all([
+            const [expRes, budRes, incRes] = await Promise.all([
                 api.get('/expenses'),
-                api.get('/budgets')
+                api.get('/budgets'),
+                api.get('/income')
             ]);
             setExpenses(expRes.data);
             setBudgets(budRes.data);
+            setIncome(incRes.data);
         } catch (error) {
             console.error('Failed to fetch budget summary data:', error);
         } finally {
@@ -161,6 +201,7 @@ export const LeftToBudget = () => {
 
         const totalSpent = Object.values(groups).reduce((acc, curr) => acc + curr.spent, 0);
         const totalBudget = Object.values(groups).reduce((acc, curr) => acc + curr.budget, 0);
+        const totalIncomeValue = income.reduce((acc, curr) => acc + curr.amount, 0);
 
         return {
             groups: Object.entries(groups).map(([name, data]) => ({
@@ -168,9 +209,12 @@ export const LeftToBudget = () => {
                 ...data,
                 remaining: data.budget - data.spent
             })),
-            totalLeft: Math.max(0, totalBudget - totalSpent)
+            totalLeft: Math.max(0, totalBudget - totalSpent),
+            totalIncome: totalIncomeValue,
+            totalSpent,
+            totalBudget
         };
-    }, [expenses, budgets]);
+    }, [expenses, budgets, income]);
 
     if (loading) return (
         <div style={{ background: 'white', borderRadius: '4px', padding: '2rem', textAlign: 'center', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
@@ -200,7 +244,7 @@ export const LeftToBudget = () => {
                     ₹{stats.totalLeft.toLocaleString()}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', color: '#15803d', fontSize: '0.9rem', fontWeight: '600' }}>
-                    Left to budget <Info size={16} />
+                    Left to budget
                 </div>
             </div>
 
@@ -230,6 +274,35 @@ export const LeftToBudget = () => {
                             last={index === stats.groups.length - 1}
                         />
                     ))
+                ) : activeTab === 'Income' ? (
+                    <div>
+                        {income.length === 0 ? (
+                            <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem', padding: '1rem 0' }}>No income records found.</div>
+                        ) : (
+                            income.map((inc, index) => (
+                                <IncomeRow 
+                                    key={inc.id}
+                                    label={inc.title || inc.category}
+                                    amount={inc.amount}
+                                    date={inc.date}
+                                    last={index === income.length - 1}
+                                />
+                            ))
+                        )}
+                    </div>
+                ) : activeTab === 'Summary' ? (
+                    <div>
+                        <SummaryRow label="Total Income" amount={stats.totalIncome} type="income" />
+                        <SummaryRow label="Total Budget" amount={stats.totalBudget} type="budget" />
+                        <SummaryRow label="Total Expenses" amount={stats.totalSpent} type="expense" />
+                        <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem' }}>
+                            <SummaryRow 
+                                label="Net Cash Flow" 
+                                amount={stats.totalIncome - stats.totalSpent} 
+                                type="net" 
+                            />
+                        </div>
+                    </div>
                 ) : (
                     <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.85rem', padding: '2rem 0' }}>
                         No data available for {activeTab}
@@ -252,7 +325,8 @@ export const RecurringPayments = () => {
         name: '',
         amount: '',
         category: 'SaaS Tools',
-        status: 'Active'
+        status: 'Active',
+        billingDay: '1'
     });
 
     const categories = ['SaaS Tools', 'Cloud Services', 'Memberships', 'Entertainment', 'Utilities', 'Others'];
@@ -286,7 +360,7 @@ export const RecurringPayments = () => {
             fetchRecurring();
             setIsModalOpen(false);
             setEditingItem(null);
-            setFormData({ name: '', amount: '', category: 'SaaS Tools', status: 'Active' });
+            setFormData({ name: '', amount: '', category: 'SaaS Tools', status: 'Active', billingDay: '1' });
         } catch (error) {
             console.error('Failed to save recurring payment:', error);
         }
@@ -342,21 +416,16 @@ export const RecurringPayments = () => {
                 <button 
                     onClick={() => {
                         setEditingItem(null);
-                        setFormData({ name: '', amount: '', category: 'SaaS Tools', status: 'Active' });
+                        setFormData({ name: '', amount: '', category: 'SaaS Tools', status: 'Active', billingDay: '1' });
                         setIsModalOpen(true);
                     }}
+                    className="btn-premium-shine"
                     style={{
-                        padding: '4px 8px',
-                        background: '#f1f5f9',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        color: '#64748b',
-                        cursor: 'pointer'
+                        padding: '6px 12px',
+                        fontSize: '0.75rem'
                     }}
                 >
-                    + Manage
+                    <Plus size={14} /> Manage
                 </button>
             </div>
 
@@ -462,6 +531,21 @@ export const RecurringPayments = () => {
                                             placeholder="0.00"
                                         />
                                     </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Billing Day (1-31)</label>
+                                        <input 
+                                            type="number"
+                                            min="1"
+                                            max="31"
+                                            value={formData.billingDay}
+                                            onChange={e => setFormData({...formData, billingDay: e.target.value})}
+                                            style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
+                                            placeholder="1"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                         <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Status</label>
                                         <div style={{ position: 'relative' }}>
@@ -598,7 +682,7 @@ export const RecurringPayments = () => {
                                                     </div>
                                                     <div style={{ display: 'flex', gap: '12px' }}>
                                                         <button 
-                                                            onClick={() => { setEditingItem(r); setFormData({ name: r.name, amount: r.amount.toString(), category: r.category, status: r.status }); }} 
+                                                            onClick={() => { setEditingItem(r); setFormData({ name: r.name, amount: r.amount.toString(), category: r.category, status: r.status, billingDay: r.billingDay.toString() }); }} 
                                                             style={{ border: 'none', background: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600' }}
                                                         >
                                                             Edit
@@ -636,15 +720,152 @@ export const RecurringPayments = () => {
                     </div>
                 </div>
             )}
+            {/* Due Reminder Modal is handled by the wrapper now */}
+        </div>
+    );
+};
+
+// --- Reminder Component ---
+
+const DuePaymentReminder = ({ recurring, onAcknowledge }: { recurring: RecurringPayment[], onAcknowledge: () => void }) => {
+    const [duePayments, setDuePayments] = useState<RecurringPayment[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        const today = new Date();
+        const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        const day = today.getDate();
+
+        const due = recurring.filter(r => 
+            r.status === 'Active' && 
+            day >= r.billingDay && 
+            r.lastPaidMonth !== currentMonth
+        );
+
+        if (due.length > 0) {
+            setDuePayments(due);
+            setIsOpen(true);
+        } else {
+            setIsOpen(false);
+        }
+    }, [recurring]);
+
+    const handleAcknowledge = async (id: string) => {
+        try {
+            const today = new Date();
+            const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            await api.post(`/recurring/${id}/acknowledge`, { month: currentMonth });
+            onAcknowledge();
+        } catch (error) {
+            console.error('Failed to acknowledge payment:', error);
+        }
+    };
+
+    if (!isOpen || duePayments.length === 0) return null;
+
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 3000,
+            padding: '20px'
+        }}>
+            <div style={{
+                background: 'white',
+                width: '100%',
+                maxWidth: '450px',
+                borderRadius: '12px',
+                padding: '2rem',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                textAlign: 'center'
+            }}>
+                <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '30px',
+                    background: '#fef2f2',
+                    color: '#ef4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 1.5rem'
+                }}>
+                    <Info size={32} />
+                </div>
+                <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Upcoming Payments Due</h3>
+                <p style={{ margin: '0 0 1.5rem', color: '#64748b', fontSize: '0.875rem' }}>The following subscriptions are due for payment. Please acknowledge them once paid.</p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '2rem', maxHeight: '300px', overflowY: 'auto', padding: '4px' }}>
+                    {duePayments.map(p => (
+                        <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#1e293b' }}>{p.name}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>₹{p.amount.toLocaleString()} • Due on {p.billingDay}{p.billingDay === 1 ? 'st' : p.billingDay === 2 ? 'nd' : p.billingDay === 3 ? 'rd' : 'th'}</div>
+                            </div>
+                            <button 
+                                onClick={() => handleAcknowledge(p.id)}
+                                style={{ 
+                                    padding: '6px 12px', 
+                                    borderRadius: '6px', 
+                                    border: 'none', 
+                                    background: '#1e293b', 
+                                    color: 'white', 
+                                    fontSize: '0.75rem', 
+                                    fontWeight: '600', 
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.background = '#334155'}
+                                onMouseOut={(e) => e.currentTarget.style.background = '#1e293b'}
+                            >
+                                Acknowledge
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                <button 
+                    onClick={() => setIsOpen(false)}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
+                >
+                    Dismiss for now
+                </button>
+            </div>
         </div>
     );
 };
 
 // --- Default Export Wrapper ---
 
-export const BudgetSummary = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <LeftToBudget />
-        <RecurringPayments />
-    </div>
-);
+export const BudgetSummary = () => {
+    const { getToken } = useAuth();
+    const [recurring, setRecurring] = useState<RecurringPayment[]>([]);
+
+    const fetchRecurring = async () => {
+        try {
+            const token = await getToken();
+            setAuthToken(token);
+            const response = await api.get('/recurring');
+            setRecurring(response.data);
+        } catch (error) {
+            console.error('Failed to fetch recurring payments:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchRecurring();
+    }, [getToken]);
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <LeftToBudget />
+            <RecurringPayments />
+            <DuePaymentReminder recurring={recurring} onAcknowledge={fetchRecurring} />
+        </div>
+    );
+};

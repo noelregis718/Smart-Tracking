@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -20,6 +21,7 @@ model User {
   goals     Goal[]
   recurringPayments RecurringPayment[]
   tasks     Task[]
+  incomes   Income[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -99,15 +101,17 @@ model Budget {
 }
 
 model RecurringPayment {
-  id        String   @id @default(uuid())
-  name      String
-  amount    Float
-  category  String
-  status    String   @default("Active")
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  name          String
+  amount        Float
+  category      String
+  status        String   @default("Active")
+  billingDay    Int      @default(1)
+  lastPaidMonth String?  // Store as "YYYY-MM"
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Task {
@@ -121,3 +125,17 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Income {
+  id        String   @id @default(uuid())
+  title     String
+  amount    Float
+  category  String   // Salary, Freelance, Dividend, Bonus, etc.
+  source    String?  // Company/Client name
+  date      DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

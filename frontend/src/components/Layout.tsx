@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
     Home,
     ArrowLeftRight,
@@ -11,29 +11,125 @@ import {
     PanelRight,
     Wallet,
     BarChart3,
-    Plus,
+    FileText,
     LogOut
 } from 'lucide-react';
 import { useUser, SignOutButton } from '@clerk/clerk-react';
 import { Button } from './Button';
+import { ReportModal } from './dashboard/ReportModal';
+
+const SEARCH_ITEMS = [
+    // Dashboard Spot Index
+    { label: 'Dashboard', path: '/dashboard', keywords: ['home', 'overview', 'main', 'welcome', 'summary'] },
+    { label: 'Generate Report', path: '/dashboard', keywords: ['download', 'financial', 'statement', 'csv', 'generate', 'report'] },
+    { label: 'Net Worth Tracker', path: '/dashboard#net-worth-tracker', keywords: ['wealth', 'equity', 'total', 'networth', 'growth', 'chart'] },
+    { label: 'Recent Expenses', path: '/dashboard#recent-expenses', keywords: ['history', 'spending', 'transactions', 'recent', 'activity'] },
+    { label: 'Savings Goals Preview', path: '/dashboard#savings-goals-preview', keywords: ['save', 'target', 'progress', 'goals', 'savings'] },
+
+    // Transactions Spot Index
+    { label: 'Transactions', path: '/dashboard/transactions', keywords: ['history', 'recent', 'expenses', 'income', 'all transactions'] },
+    { label: 'Transaction Statistics', path: '/dashboard/transactions#transaction-stats', keywords: ['key stats', 'summary', 'metrics', 'numbers', 'total'] },
+    { label: 'Activity Chart', path: '/dashboard/transactions#activity-chart', keywords: ['graph', 'trends', 'timeline', 'spending over time'] },
+    { label: 'Account Overview', path: '/dashboard/transactions#account-overview-sidebar', keywords: ['accounts list', 'balances', 'wallets', 'banks'] },
+    { label: 'Transaction History', path: '/dashboard/transactions#full-history', keywords: ['detailed list', 'table', 'raw data', 'edit delete'] },
+
+    // Budget Spot Index
+    { label: 'Budget', path: '/dashboard/budget', keywords: ['spending', 'limit', 'plan', 'budgeting', 'finance'] },
+    { label: 'Spending Analysis', path: '/dashboard/budget#spending-analysis', keywords: ['categories', 'pie', 'charts', 'where is my money', 'breakdown'] },
+    { label: 'Loan Details', path: '/dashboard/budget#loan-details', keywords: ['debt', 'mortgage', 'liabilities', 'how much i owe', 'loans'] },
+    { label: 'Investment Portfolio', path: '/dashboard/budget#investment-portfolio', keywords: ['stocks', 'assets', 'market', 'portfolio', 'investments'] },
+    { label: 'Budget Summary', path: '/dashboard/budget#budget-summary', keywords: ['left to spend', 'remaining', 'allowance', 'limit'] },
+    { label: 'Monthly Subscriptions', path: '/dashboard/budget#monthly-subscriptions', keywords: ['recurring bills', 'subscriptions', 'monthly', 'payments', 'netflix'] },
+
+    // Goals Spot Index
+    { label: 'Goals', path: '/dashboard/goals', keywords: ['savings', 'target', 'save', 'my goals'] },
+    { label: 'All Savings Goals', path: '/dashboard/goals#all-savings-goals', keywords: ['list of goals', 'targets', 'progress', 'setups'] },
+    { label: 'Savings Transfer', path: '/dashboard/goals#savings-transfer', keywords: ['move money', 'transfer', 'allocate', 'deposit'] },
+    { label: 'My Tasks', path: '/dashboard/goals#my-tasks', keywords: ['checklist', 'to-do', 'todos', 'manage', 'tasks', 'my tasks'] },
+
+    // Analytics (Reports) Spot Index
+    { label: 'Analytics', path: '/dashboard/analytics', keywords: ['charts', 'reports', 'stats', 'financial analytics'] },
+    { label: 'KPI Analytics', path: '/dashboard/analytics#kpi-metrics', keywords: ['key', 'performance', 'summary', 'important stats'] },
+    { label: 'Planning Tools', path: '/dashboard/analytics#planning-tools', keywords: ['calculators', 'finance', 'math', 'tools'] },
+    { label: 'Currency Conversion', path: '/dashboard/analytics#forex-tool', keywords: ['forex', 'calculator', 'rates', 'change', 'exchange'] },
+    { label: 'Highest Transactions', path: '/dashboard/analytics#top-transactions', keywords: ['highest', 'biggest', 'large', 'extremes', 'top expenses'] },
+    { label: 'Market Sentiment', path: '/dashboard/analytics#market-news', keywords: ['stocks', 'news', 'trends', 'updates', 'stock market'] },
+    { label: 'AI Assistant', path: '/dashboard/analytics#ai-assistant', keywords: ['bot', 'help', 'ask', 'assistant', 'financial advisor'] },
+
+    // Settings & Help
+    { label: 'Settings', path: '/dashboard/settings', keywords: ['profile', 'account', 'config', 'security', 'notifications'] },
+    { label: 'Help', path: '/dashboard/help', keywords: ['support', 'faq', 'docs', 'tickets', 'contact'] },
+];
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
     const { user } = useUser();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     const sidebarWidth = isCollapsed ? '80px' : '240px';
+
+    // Handle scroll to hash specifically
+    useEffect(() => {
+        const hash = window.location.hash;
+        if (hash) {
+            const id = hash.replace('#', '');
+            const scroll = () => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            };
+            
+            // Try immediately AND after a short delay for dynamic content
+            scroll();
+            const timer = setTimeout(scroll, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [location.pathname, location.hash]); // Listen to both path and hash changes
+
+    const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            const query = searchQuery.toLowerCase().trim();
+            if (!query) return;
+
+            const match = SEARCH_ITEMS.find(item => 
+                item.label.toLowerCase().includes(query) || 
+                item.keywords.some(k => k.toLowerCase().includes(query))
+            );
+
+            if (match) {
+                // If we're already on that path but with a different hash, or even the same path, 
+                // we should force navigate or manually trigger the scroll.
+                if (window.location.pathname + window.location.hash === match.path) {
+                    // Force re-scroll if already there
+                    const id = match.path.split('#')[1];
+                    if (id) {
+                        const element = document.getElementById(id);
+                        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                } else {
+                    navigate(match.path);
+                }
+                setSearchQuery('');
+            }
+        }
+    };
 
     return (
         <div className="layout" style={{ minHeight: '100vh', display: 'flex', background: 'var(--background)' }}>
             {/* Sidebar */}
             <aside style={{
                 width: sidebarWidth,
-                background: 'var(--background)',
+                background: 'var(--surface)',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'fixed',
                 height: '100vh',
                 zIndex: 100,
+                borderRight: '1px solid var(--border)',
                 transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
                 <div style={{
@@ -83,10 +179,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     </button>
                 </div>
 
-                <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    {!isCollapsed && (
-                        <p style={{ fontSize: '0.975rem', fontWeight: '600', color: 'var(--text-muted)', padding: '1rem 0.5rem 0.5rem' }}>Menu</p>
-                    )}
+                <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '2rem' }}>
                     <SidebarLink to="/dashboard" icon={<Home size={18} />} label="Dashboard" collapsed={isCollapsed} />
                     <SidebarLink to="/dashboard/transactions" icon={<ArrowLeftRight size={18} />} label="Transactions" collapsed={isCollapsed} />
                     <SidebarLink to="/dashboard/budget" icon={<Wallet size={18} />} label="Budget" collapsed={isCollapsed} />
@@ -161,25 +254,31 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 marginLeft: sidebarWidth,
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                background: 'var(--background)',
+                transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                minHeight: '100vh'
             }}>
                 {/* Header */}
                 <header style={{
                     height: '64px',
-                    background: 'var(--background)',
+                    background: 'var(--surface)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '0 2rem',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 90
+                    zIndex: 90,
+                    borderBottom: '1px solid var(--border)'
                 }}>
-                    <div style={{ position: 'relative', width: '400px' }}>
+                    <div style={{ position: 'relative', width: '300px' }}>
                         <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                         <input
                             type="text"
                             placeholder="Search anything..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={handleSearch}
                             style={{
                                 width: '100%',
                                 padding: '8px 12px 8px 40px',
@@ -194,7 +293,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                         <Button
                             variant="secondary"
-                            onClick={() => { }}
+                            onClick={() => setIsReportModalOpen(true)}
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -206,8 +305,8 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                                 background: 'white'
                             }}
                         >
-                            <Plus size={16} />
-                            <span>Create invoice</span>
+                            <FileText size={16} />
+                            <span>Generate report</span>
                         </Button>
                     </div>
                 </header>
@@ -216,11 +315,16 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     {children}
                 </main>
             </div>
+
+            <ReportModal 
+                isOpen={isReportModalOpen} 
+                onClose={() => setIsReportModalOpen(false)} 
+            />
         </div>
     );
 };
 
-const SidebarLink = ({ to, icon, label, collapsed }: { to: string, icon: React.ReactNode, label: string, collapsed?: boolean }) => (
+const SidebarLink = ({ to, icon, label, collapsed, badge }: { to: string, icon: React.ReactNode, label: string, collapsed?: boolean, badge?: string }) => (
     <NavLink
         to={to}
         end={to === '/dashboard'}
@@ -233,15 +337,15 @@ const SidebarLink = ({ to, icon, label, collapsed }: { to: string, icon: React.R
             gap: '0.75rem',
             padding: '0.625rem 0.75rem',
             borderRadius: '4px',
-            color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
-            fontWeight: isActive ? '600' : '500',
-            background: isActive ? 'var(--surface)' : 'transparent',
-            border: isActive ? '1px solid var(--border)' : '1px solid transparent',
-            boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
+            color: isActive ? '#0f172a' : 'var(--text-muted)',
+            fontWeight: isActive ? '700' : '500',
+            background: isActive ? '#f8fafc' : 'transparent',
+            border: isActive ? '1px solid #e2e8f0' : '1px solid transparent',
+            boxShadow: isActive ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            margin: '0 4px'
+            margin: '0 8px'
         })}
     >
         <div style={{
@@ -253,5 +357,17 @@ const SidebarLink = ({ to, icon, label, collapsed }: { to: string, icon: React.R
             {icon}
         </div>
         {!collapsed && <span>{label}</span>}
+        {!collapsed && badge && (
+            <span style={{
+                marginLeft: 'auto',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: '#f1f5f9',
+                color: '#64748b',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                border: '1px solid #e2e8f0'
+            }}>{badge}</span>
+        )}
     </NavLink>
 );

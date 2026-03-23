@@ -23,6 +23,8 @@
     "cobe": "^0.6.5",
     "color-bits": "^1.1.1",
     "framer-motion": "^12.35.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.574.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

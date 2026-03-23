@@ -13,6 +13,8 @@ import budgetRoutes from './routes/budget.routes';
 import goalRoutes from './routes/goal.routes';
 import recurringRoutes from './routes/recurring.routes';
 import taskRoutes from './routes/task.routes';
+import incomeRoutes from './routes/income.routes';
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -42,6 +44,8 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/income', incomeRoutes);
+
 
 // Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

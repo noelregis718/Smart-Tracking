@@ -7,7 +7,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
     const { goalId } = req.query;
     const tasks = await prisma.task.findMany({
       where: {
-        userId: req.userId,
+        userId: req.userId as string,
         ...(goalId ? { goalId: goalId as string } : {})
       },
       orderBy: { createdAt: 'desc' }
@@ -41,8 +41,14 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const { title, completed } = req.body;
 
+    const taskCheck = await prisma.task.findFirst({
+      where: { id: id as string, userId: req.userId as string }
+    });
+
+    if (!taskCheck) return res.status(404).json({ error: 'Task not found or unauthorized' });
+
     const task = await prisma.task.update({
-      where: { id, userId: req.userId },
+      where: { id: id as string },
       data: {
         ...(title !== undefined && { title }),
         ...(completed !== undefined && { completed })
@@ -57,8 +63,8 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 export const deleteTask = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    await prisma.task.delete({
-      where: { id, userId: req.userId }
+    await prisma.task.deleteMany({
+      where: { id: id as string, userId: req.userId as string }
     });
     res.status(204).send();
   } catch (error: any) {

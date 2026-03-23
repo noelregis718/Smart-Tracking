@@ -6,7 +6,7 @@ export const getBudgets = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
 
   try {
-    const budgets = await (prisma.budget as any).findMany({
+    const budgets = await prisma.budget.findMany({
       where: { userId },
     });
     res.json(budgets);
@@ -21,7 +21,7 @@ export const upsertBudget = async (req: AuthRequest, res: Response) => {
 
   try {
     // Sync user
-    await (prisma.user as any).upsert({
+    await prisma.user.upsert({
       where: { id: userId },
       update: {},
       create: {
@@ -31,14 +31,15 @@ export const upsertBudget = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    const budget = await (prisma.budget as any).upsert({
+    const budget = await prisma.budget.upsert({
       where: {
-        userId_category: { userId, category },
+        userId_category: { userId: userId as string, category },
       },
       update: {
         limit: parseFloat(limit),
       },
       create: {
+        userId: userId as string,
         category,
         limit: parseFloat(limit),
       },
@@ -55,7 +56,7 @@ export const bulkUpsertBudgets = async (req: AuthRequest, res: Response) => {
 
   try {
     // Sync user
-    await (prisma.user as any).upsert({
+    await prisma.user.upsert({
       where: { id: userId },
       update: {},
       create: {
@@ -67,7 +68,7 @@ export const bulkUpsertBudgets = async (req: AuthRequest, res: Response) => {
 
     const results = await Promise.all(
       budgets.map((b: any) => 
-        (prisma.budget as any).upsert({
+        prisma.budget.upsert({
           where: {
             userId_category: { userId, category: b.category },
           },
@@ -75,9 +76,9 @@ export const bulkUpsertBudgets = async (req: AuthRequest, res: Response) => {
             limit: parseFloat(b.limit),
           },
           create: {
+            userId: userId as string,
             category: b.category,
             limit: parseFloat(b.limit),
-            userId,
           },
         })
       )
@@ -93,9 +94,9 @@ export const deleteBudget = async (req: AuthRequest, res: Response) => {
   const { category } = req.body;
 
   try {
-    await (prisma.budget as any).delete({
+    await prisma.budget.delete({
       where: {
-        userId_category: { userId, category },
+        userId_category: { userId: userId as string, category },
       },
     });
     res.status(204).send();

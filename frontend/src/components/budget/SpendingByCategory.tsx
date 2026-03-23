@@ -31,11 +31,13 @@ export const SpendingByCategory = () => {
     const { getToken } = useAuth();
     const [expenses, setExpenses] = useState<any[]>([]);
     const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [recurring, setRecurring] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
     const [bulkBudgets, setBulkBudgets] = useState<Record<string, string>>({});
 
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [hoveredData, setHoveredData] = useState<CategoryData | null>(null);
     const [showAll, setShowAll] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -43,12 +45,14 @@ export const SpendingByCategory = () => {
         try {
             const token = await getToken();
             setAuthToken(token);
-            const [expRes, budRes] = await Promise.all([
+            const [expRes, budRes, recRes] = await Promise.all([
                 api.get('/expenses'),
-                api.get('/budgets')
+                api.get('/budgets'),
+                api.get('/recurring')
             ]);
             setExpenses(expRes.data);
             setBudgets(budRes.data);
+            setRecurring(recRes.data);
         } catch (error) {
             console.error('Failed to fetch spending data:', error);
         } finally {
@@ -58,16 +62,35 @@ export const SpendingByCategory = () => {
 
     useEffect(() => {
         fetchData();
-    }, [getToken]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const spendingData = useMemo(() => {
         const categoryMap: Record<string, number> = {};
         let total = 0;
 
+        const allProperCategories = new Set([
+            ...DEFAULT_CATEGORIES,
+            ...budgets.map(b => b.category)
+        ]);
+
         expenses.forEach(exp => {
-            const cat = exp.category || 'Others';
+            let cat = exp.category;
+            if (!cat || !allProperCategories.has(cat)) {
+                cat = 'Others';
+            }
             categoryMap[cat] = (categoryMap[cat] || 0) + exp.amount;
             total += exp.amount;
+        });
+
+        // Add active recurring payments (monthly) to the respective categories
+        recurring.filter(r => r.status === 'Active').forEach(rec => {
+            let cat = rec.category;
+            if (!cat || !allProperCategories.has(cat)) {
+                cat = 'Others';
+            }
+            categoryMap[cat] = (categoryMap[cat] || 0) + rec.amount;
+            total += rec.amount;
         });
 
         // Ensure all categories that have a budget OR are in DEFAULT_CATEGORIES are shown
@@ -84,7 +107,7 @@ export const SpendingByCategory = () => {
             return {
                 name,
                 value,
-                percentage: total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%',
+                percentage: (budget && budget > 0) ? ((value / budget) * 100).toFixed(1) + '%' : '0%',
                 color: COLORS[index % COLORS.length],
                 budget
             };
@@ -100,10 +123,11 @@ export const SpendingByCategory = () => {
     }, [spendingData, selectedCategory]);
 
     const { totalSpent, totalBudget } = useMemo(() => {
-        const spent = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+        const expenseSpent = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+        const recurringSpent = recurring.filter(r => r.status === 'Active').reduce((acc, curr) => acc + curr.amount, 0);
         const budget = budgets.reduce((acc, curr) => acc + curr.limit, 0);
-        return { totalSpent: spent, totalBudget: budget };
-    }, [expenses, budgets]);
+        return { totalSpent: expenseSpent + recurringSpent, totalBudget: budget };
+    }, [expenses, budgets, recurring]);
 
     const visibleData = showAll ? spendingData : spendingData.slice(0, 12);
 
@@ -289,26 +313,32 @@ export const SpendingByCategory = () => {
                 <div style={{ height: '280px', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                            <Pie
-                                data={filteredChartData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={85}
-                                outerRadius={110}
-                                paddingAngle={selectedCategory ? 0 : 2}
-                                dataKey="value"
-                                stroke="none"
-                            >
-                                {filteredChartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{ borderRadius: '4px', border: 'none', background: '#1e293b', color: 'white' }}
-                                itemStyle={{ color: 'white' }}
-                                labelStyle={{ display: 'none' }}
-                                formatter={(value: any) => [`₹${Number(value || 0).toLocaleString()}`, '']}
-                            />
+                                <Pie
+                                    data={filteredChartData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={85}
+                                    outerRadius={110}
+                                    paddingAngle={selectedCategory ? 0 : 2}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    stroke="none"
+                                    onMouseEnter={(_, index) => setHoveredData(filteredChartData[index])}
+                                    onMouseLeave={() => setHoveredData(null)}
+                                >
+                                    {filteredChartData.map((entry, index) => (
+                                        <Cell 
+                                            key={`cell-${index}`} 
+                                            fill={entry.color} 
+                                            style={{ 
+                                                filter: (hoveredData && hoveredData.name === entry.name) ? 'brightness(1.1)' : 'none',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip content={() => null} />
                         </PieChart>
                     </ResponsiveContainer>
                     <div style={{
@@ -318,8 +348,12 @@ export const SpendingByCategory = () => {
                         transform: 'translate(-50%, -50%)',
                         textAlign: 'center'
                     }}>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Spent</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e293b' }}>₹{totalSpent.toLocaleString()}</div>
+                        <div style={{ fontSize: '0.8rem', color: hoveredData ? hoveredData.color : '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', transition: 'all 0.2s' }}>
+                            {hoveredData ? hoveredData.name : 'Total Spent'}
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e293b', transition: 'all 0.2s' }}>
+                            ₹{(hoveredData ? hoveredData.value : totalSpent).toLocaleString()}
+                        </div>
                     </div>
                 </div>
 

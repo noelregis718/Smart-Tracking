@@ -5,7 +5,8 @@ import HighestTransactions from '../components/analytics/HighestTransactions';
 import ConversionTool from '../components/analytics/ConversionTool';
 import FinancialCalculators from '../components/analytics/FinancialCalculators';
 import StockMarketNews from '../components/analytics/StockMarketNews';
-import FinancialAssistant from '../components/analytics/FinancialAssistant';
+import IncomeSources from '../components/analytics/IncomeSources';
+
 
 export const Reports = () => {
     const [activeTab, setActiveTab ] = useState<'highest' | 'conversion'>('highest');
@@ -22,12 +23,16 @@ export const Reports = () => {
             </div>
 
             {/* KPI Cards */}
-            <KPISection />
+            <div id="kpi-metrics">
+                <KPISection />
+            </div>
 
             {/* Top Row: Calculators & Combined Card */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <AnalyticsCard title="Financial Planning Tools">
-                    <FinancialCalculators />
+                    <div id="planning-tools">
+                        <FinancialCalculators />
+                    </div>
                 </AnalyticsCard>
 
                 <AnalyticsCard style={{ padding: '0', overflow: 'hidden' }}>
@@ -66,18 +71,29 @@ export const Reports = () => {
                         </button>
                     </div>
                     <div style={{ padding: '1.5rem' }}>
-                        {activeTab === 'highest' ? <HighestTransactions /> : <ConversionTool />}
+                        {activeTab === 'highest' ? (
+                            <div id="top-transactions">
+                                <HighestTransactions />
+                            </div>
+                        ) : (
+                            <div id="forex-tool">
+                                <ConversionTool />
+                            </div>
+                        )}
                     </div>
                 </AnalyticsCard>
             </div>
 
             {/* Bottom Row: Market & AI Assistant */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'stretch' }}>
-                <StockMarketNews />
-                <FinancialAssistant />
+                <div id="market-news">
+                    <StockMarketNews />
+                </div>
+                <div id="income-tracker">
+                    <IncomeSources />
+                </div>
+
             </div>
         </div>
     );
 };
-
-

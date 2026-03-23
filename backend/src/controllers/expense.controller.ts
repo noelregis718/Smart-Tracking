@@ -6,7 +6,7 @@ export const getExpenses = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
 
   try {
-    const expenses = await (prisma.expense as any).findMany({
+    const expenses = await prisma.expense.findMany({
       where: { userId },
       include: { account: true },
       orderBy: { date: 'desc' },
@@ -25,7 +25,7 @@ export const createExpense = async (req: AuthRequest, res: Response) => {
     // Ensure the user exists in our local database (Clerk Sync)
     // We'll use a placeholder email derived from the userId if we don't have it
     // since we made the email unique but the password and name optional.
-    await (prisma.user as any).upsert({
+    await prisma.user.upsert({
       where: { id: userId },
       update: {},
       create: {
@@ -35,7 +35,7 @@ export const createExpense = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    const expense = await (prisma.expense as any).create({
+    const expense = await prisma.expense.create({
       data: {
         title,
         amount: parseFloat(amount),
@@ -65,6 +65,34 @@ export const deleteExpense = async (req: AuthRequest, res: Response) => {
 
     await prisma.expense.delete({ where: { id } });
     res.status(204).send();
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateExpense = async (req: AuthRequest, res: Response) => {
+  const userId = req.userId;
+  const id = req.params.id as string;
+  const { title, amount, category, date, accountId } = req.body;
+
+  try {
+    const expense = await prisma.expense.findUnique({ where: { id } });
+
+    if (!expense || expense.userId !== userId) {
+      return res.status(404).json({ error: 'Expense not found' });
+    }
+
+    const updatedExpense = await prisma.expense.update({
+      where: { id },
+      data: {
+        title: title !== undefined ? title : expense.title,
+        amount: amount !== undefined ? parseFloat(amount) : expense.amount,
+        category: category !== undefined ? category : expense.category,
+        date: date ? new Date(date) : expense.date,
+        accountId: accountId !== undefined ? (accountId || null) : expense.accountId,
+      },
+    });
+    res.json(updatedExpense);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

@@ -5,25 +5,34 @@ import { LoanBook, Investments } from '../components/budget/WealthTracking';
 export const Budget = () => {
     return (
         <div style={{
-            padding: '2rem',
             maxWidth: '1600px',
-            margin: '0 auto',
             display: 'flex',
-            gap: '2rem'
+            gap: '2rem',
+            minHeight: '100vh'
         }}>
             {/* Main Content (4 / 5) */}
-            <div style={{ flex: '3', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: 'calc(-1.5rem - 2mm)' }}>
-                <SpendingByCategory />
+            <div style={{ flex: '3', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: 'calc(-0.5rem + 3mm)' }}>
+                <div id="spending-analysis">
+                    <SpendingByCategory />
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                    <LoanBook />
-                    <Investments />
+                    <div id="loan-details">
+                        <LoanBook />
+                    </div>
+                    <div id="investment-portfolio">
+                        <Investments />
+                    </div>
                 </div>
             </div>
 
             {/* Sidebar (1 / 5) */}
-            <div style={{ flex: '1.2', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: 'calc(-1.5rem - 2mm)' }}>
-                <LeftToBudget />
-                <RecurringPayments />
+            <div style={{ flex: '1.2', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: 'calc(-0.5rem + 3mm)' }}>
+                <div id="budget-summary">
+                    <LeftToBudget />
+                </div>
+                <div id="monthly-subscriptions">
+                    <RecurringPayments />
+                </div>
             </div>
         </div>
     );

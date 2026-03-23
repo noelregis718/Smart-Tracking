@@ -6,7 +6,7 @@ export const getAccounts = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
 
   try {
-    const accounts = await (prisma.account as any).findMany({
+    const accounts = await prisma.account.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
@@ -22,7 +22,7 @@ export const createAccount = async (req: AuthRequest, res: Response) => {
 
   try {
     // Ensure the user exists (Sync)
-    await (prisma.user as any).upsert({
+    await prisma.user.upsert({
       where: { id: userId },
       update: {},
       create: {
@@ -32,7 +32,7 @@ export const createAccount = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    const account = await (prisma.account as any).create({
+    const account = await prisma.account.create({
       data: {
         name,
         balance: parseFloat(balance || 0),
@@ -50,13 +50,13 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
 
   try {
-    const account = await (prisma.account as any).findUnique({ where: { id } });
+    const account = await prisma.account.findUnique({ where: { id } });
 
     if (!account || account.userId !== userId) {
       return res.status(404).json({ error: 'Account not found' });
     }
 
-    await (prisma.account as any).delete({ where: { id } });
+    await prisma.account.delete({ where: { id } });
     res.status(204).send();
   } catch (error: any) {
     res.status(500).json({ error: error.message });

@@ -43,16 +43,16 @@ const BudgetItem = ({ icon, label, budget, actual, remaining, isOver }: BudgetIt
                         color: '#1e293b',
                         fontWeight: '600'
                     }}>
-                        ${budget.toLocaleString()}
+                        ₹{budget.toLocaleString()}
                     </div>
                 </div>
 
                 <div style={{ width: '120px', textAlign: 'center', fontSize: '0.875rem', fontWeight: '600', color: '#1e293b' }}>
-                    ${actual.toLocaleString()}
+                    ₹{actual.toLocaleString()}
                 </div>
 
                 <div style={{ width: '120px', textAlign: 'right', fontSize: '0.875rem', fontWeight: '600', color: isOver ? '#ef4444' : '#22c55e' }}>
-                    {remaining < 0 ? `-$${Math.abs(remaining).toLocaleString()}` : `$${remaining.toLocaleString()}`}
+                    {remaining < 0 ? `-₹${Math.abs(remaining).toLocaleString()}` : `₹${remaining.toLocaleString()}`}
                 </div>
             </div>
 
@@ -84,13 +84,13 @@ const SectionHeader = ({ label, budget, actual, remaining, type = 'default' }: {
             <span style={{ fontSize: type === 'default' ? '0.9rem' : '1rem', fontWeight: type === 'default' ? '600' : '700', color: '#1e293b' }}>{label}</span>
         </div>
         <div style={{ width: '120px', textAlign: 'right', fontSize: '1rem', fontWeight: '800', color: '#1e293b', paddingRight: '1rem' }}>
-            ${budget.toLocaleString()}
+            ₹{budget.toLocaleString()}
         </div>
         <div style={{ width: '120px', textAlign: 'center', fontSize: '1rem', fontWeight: '800', color: '#1e293b' }}>
-            ${actual.toLocaleString()}
+            ₹{actual.toLocaleString()}
         </div>
         <div style={{ width: '120px', textAlign: 'right', fontSize: '1rem', fontWeight: '800', color: '#22c55e' }}>
-            ${remaining.toLocaleString()}
+            ₹{remaining.toLocaleString()}
         </div>
     </div>
 );

@@ -112,7 +112,6 @@ const ConversionTool: React.FC = () => {
     const [toCurr, setToCurr] = useState('USD');
     const [result, setResult] = useState<number>(0);
     const [rates, setRates] = useState<Record<string, number>>({});
-    const [lastUpdated, setLastUpdated] = useState<string>('');
 
     useEffect(() => {
         const fetchRates = async () => {
@@ -123,7 +122,6 @@ const ConversionTool: React.FC = () => {
                     const { data, timestamp } = JSON.parse(cached);
                     if (Date.now() - timestamp < CACHE_DURATION) {
                         setRates(data);
-                        setLastUpdated(new Date(timestamp).toLocaleTimeString());
                         return;
                     }
                 }
@@ -134,7 +132,6 @@ const ConversionTool: React.FC = () => {
 
                 if (json.success && json.rates) {
                     setRates(json.rates);
-                    setLastUpdated(new Date().toLocaleTimeString());
                     localStorage.setItem(CACHE_KEY, JSON.stringify({
                         data: json.rates,
                         timestamp: Date.now()
@@ -244,11 +241,6 @@ const ConversionTool: React.FC = () => {
                     </div>
                     <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase', display: 'flex', justifyContent: 'center', gap: '8px', alignItems: 'center' }}>
                         <span>{toCurr}</span>
-                        {lastUpdated && (
-                            <span style={{ fontSize: '0.55rem', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', color: '#64748b' }}>
-                                LIVE • {lastUpdated}
-                            </span>
-                        )}
                     </div>
                 </div>
             </div>

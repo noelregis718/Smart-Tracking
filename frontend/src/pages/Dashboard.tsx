@@ -29,14 +29,19 @@ export const Dashboard = () => {
                 </span>
             </div>
 
-            <div style={{ marginTop: '-0.5rem' }}>
+            <div id="net-worth-tracker" style={{ marginTop: '-0.5rem' }}>
                 <NetWorthCard />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '2rem' }}>
-                <RecentTransactionsTable />
-                <SavingsGoalsCard />
+                <div id="recent-expenses">
+                    <RecentTransactionsTable />
+                </div>
+                <div id="savings-goals-preview">
+                    <SavingsGoalsCard />
+                </div>
             </div>
+
         </div>
     );
 };

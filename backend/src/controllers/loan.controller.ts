@@ -6,7 +6,7 @@ export const getLoans = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
 
   try {
-    const loans = await (prisma.loan as any).findMany({
+    const loans = await prisma.loan.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
@@ -22,7 +22,7 @@ export const createLoan = async (req: AuthRequest, res: Response) => {
 
   try {
     // Ensure the user exists (Sync)
-    await (prisma.user as any).upsert({
+    await prisma.user.upsert({
       where: { id: userId },
       update: {},
       create: {
@@ -32,7 +32,7 @@ export const createLoan = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    const loan = await (prisma.loan as any).create({
+    const loan = await prisma.loan.create({
       data: {
         name,
         amount: parseFloat(amount || 0),
@@ -51,13 +51,13 @@ export const deleteLoan = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
 
   try {
-    const loan = await (prisma.loan as any).findUnique({ where: { id } });
+    const loan = await prisma.loan.findUnique({ where: { id } });
 
     if (!loan || loan.userId !== userId) {
       return res.status(404).json({ error: 'Loan not found' });
     }
 
-    await (prisma.loan as any).delete({ where: { id } });
+    await prisma.loan.delete({ where: { id } });
     res.status(204).send();
   } catch (error: any) {
     res.status(500).json({ error: error.message });

@@ -4,7 +4,7 @@
   --primary: #ff5f1f;
   --primary-hover: #e6561b;
   --secondary: #64748b;
-  --background: #f8f9fa;
+  --background: #f9fafb;
   --surface: #ffffff;
   --text-main: #1a1a1a;
   --text-muted: #71717a;
@@ -100,7 +100,7 @@ button {
 /* Premium Shine Button Utility */
 .btn-premium-shine {
   position: relative;
-  background: linear-gradient(135deg, #1d4ed8 0%, #1132cb 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #ffffff !important;
   border: none !important;
   border-radius: 4px;

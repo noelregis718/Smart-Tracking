@@ -7,7 +7,9 @@ export const Transactions = () => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {/* Top row: Stat Cards */}
-            <TransactionStatCards />
+            <div id="transaction-stats">
+                <TransactionStatCards />
+            </div>
 
             {/* Middle row: Overview Chart and Accounts */}
             <div style={{
@@ -16,12 +18,18 @@ export const Transactions = () => {
                 gap: '1.5rem',
                 alignItems: 'stretch'
             }}>
-                <TransactionsOverview />
-                <AccountOverview />
+                <div id="activity-chart">
+                    <TransactionsOverview />
+                </div>
+                <div id="account-overview-sidebar">
+                    <AccountOverview />
+                </div>
             </div>
 
             {/* Bottom row: Recent Transactions Table */}
-            <RecentTransactionsTable />
+            <div id="full-history">
+                <RecentTransactionsTable />
+            </div>
         </div>
     );
 };

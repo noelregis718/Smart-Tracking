@@ -6,11 +6,13 @@ The **Smart Expense Tracker** is a premium, modern fintech application built wit
 
 ## 🚀 Key Features
 
--   **Fintech Dashboard Overview**: Minimalist dashboard with vibrant accents, featuring live net worth performance charts and recent transaction highlights.
--   **Local Real-time Expenses**: Full CRUD (Create, Read, Delete) for expenses, powered by a local **PostgreSQL** database for maximum privacy and performance.
--   **Secure Hybrid Authentication**: Powered by **Clerk** with a custom hybrid middleware supporting local **JWT** for seamless backend data isolation.
--   **Financial Summary**: Dynamic calculation of total tracked expenses and time-series data visualization using **Recharts**.
--   **Premium UI/UX**: Beautifully designed `Landing`, `About`, `Features`, `Contact`, `Privacy Policy`, and `Terms of Use` pages with a consistent premium dark and gradient theme.
+-   **Rupee-First Dashboard**: All monetary values are standardized to the Indian Rupee symbol (₹) using `en-IN` numbering for a localized financial experience.
+-   **Premium Tile-Based UI**: A modern, airy design featuring white Sidebar and Header tiles against a light neutral grey background for maximum focus.
+-   **Local Real-time Expenses**: Full CRUD for expenses, powered by a local **PostgreSQL** database for privacy and performance.
+-   **Income & Recurring Tracking**: Built-in management for salary/revenue streams and automated subscription tracking with due reminders.
+-   **Financial Forecasting**: Live net worth projections and burn-rate analytics using **Recharts** to predict future savings.
+-   **Advanced Analytics Suite**: Multi-KPI metrics, currency conversion tools, and market intelligence at a glance.
+-   **Secure Hybrid Authentication**: Powered by **Clerk** with manual integration for custom backend data isolation.
 
 ---
 
@@ -20,9 +22,12 @@ The **Smart Expense Tracker** is a premium, modern fintech application built wit
 -   **React (Vite)**: Lightning-fast rendering and modern UX.
 -   **TypeScript**: Type-safe development.
 -   **Recharts**: Interactive performance and trend charts.
+-   **Framer Motion**: Smooth micro-animations and transitions.
+-   **Three.js & Cobe**: 3D visualization and vibrant UI elements.
 -   **Lucide React**: Premium iconography.
 -   **Clerk React**: Enterprise-grade user authentication.
--   **Axios**: Centralized API client for local backend communication.
+-   **EmailJS**: Automated contact form communication.
+-   **Axios**: Centralized API client for backend communication.
 
 ### Backend
 -   **Node.js (Express)**: Modular and scalable API architecture.

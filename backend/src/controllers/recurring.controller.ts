@@ -1,11 +1,10 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Response } from 'express';
+import { prisma } from '../lib/prisma';
+import { AuthRequest } from '../middleware/auth.middleware';
 
-const prisma = new PrismaClient();
-
-export const getRecurringPayments = async (req: Request, res: Response) => {
+export const getRecurringPayments = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = (req as any).auth?.userId;
+        const userId = req.userId;
         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
         const recurring = await prisma.recurringPayment.findMany({
@@ -18,10 +17,10 @@ export const getRecurringPayments = async (req: Request, res: Response) => {
     }
 };
 
-export const createRecurringPayment = async (req: Request, res: Response) => {
+export const createRecurringPayment = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = (req as any).auth?.userId;
-        const { name, amount, category, status } = req.body;
+        const userId = req.userId;
+        const { name, amount, category, status, billingDay } = req.body;
 
         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -31,7 +30,8 @@ export const createRecurringPayment = async (req: Request, res: Response) => {
                 amount: parseFloat(amount as string),
                 category: category as string,
                 status: (status as string) || 'Active',
-                userId
+                billingDay: parseInt(billingDay as string) || 1,
+                userId: userId as string
             }
         });
         res.status(201).json(newRecurring);
@@ -40,10 +40,10 @@ export const createRecurringPayment = async (req: Request, res: Response) => {
     }
 };
 
-export const updateRecurringPayment = async (req: Request, res: Response) => {
+export const updateRecurringPayment = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
-        const { name, amount, category, status } = req.body;
+        const { name, amount, category, status, billingDay } = req.body;
 
         const updated = await prisma.recurringPayment.update({
             where: { id: id as string },
@@ -51,7 +51,8 @@ export const updateRecurringPayment = async (req: Request, res: Response) => {
                 name: name as string,
                 amount: amount ? parseFloat(amount as string) : undefined,
                 category: category as string,
-                status: status as string
+                status: status as string,
+                billingDay: billingDay ? parseInt(billingDay as string) : undefined
             }
         });
         res.json(updated);
@@ -60,12 +61,27 @@ export const updateRecurringPayment = async (req: Request, res: Response) => {
     }
 };
 
-export const deleteRecurringPayment = async (req: Request, res: Response) => {
+export const deleteRecurringPayment = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
         await prisma.recurringPayment.delete({ where: { id: id as string } });
         res.json({ message: 'Deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete recurring payment' });
+    }
+};
+
+export const acknowledgePayment = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { month } = req.body; // e.g. "2026-03"
+
+        const updated = await prisma.recurringPayment.update({
+            where: { id: id as string },
+            data: { lastPaidMonth: month }
+        });
+        res.json(updated);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to acknowledge payment' });
     }
 };

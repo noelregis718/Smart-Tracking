@@ -93,21 +93,19 @@ export const Goals = () => {
             gap: '2.5rem'
         }}>
             <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', textTransform: 'capitalize' }}>Save up</h1>
-                </div>
-
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem', alignItems: 'start' }}>
                     {/* Left Column */}
-                    <div style={{ 
+                    <div id="all-savings-goals" style={{ 
                         display: 'flex', 
                         flexDirection: 'column',
                         background: 'white',
                         borderRadius: '4px',
-                        padding: '0.5rem 1.5rem',
+                        padding: '1.5rem',
+                        marginTop: '3mm',
                         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
                         height: 'fit-content'
                     }}>
+                        <h1 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', textTransform: 'capitalize' }}>Save up</h1>
                         {loading ? (
                             <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading goals...</div>
                         ) : (
@@ -156,7 +154,7 @@ export const Goals = () => {
                     </div>
 
                     {/* Right Column */}
-                    <div style={{ position: 'sticky', top: '2rem' }}>
+                    <div id="savings-transfer" style={{ position: 'sticky', top: '2rem', marginTop: '3mm' }}>
                         <GoalSidebar 
                             totalAvailable={totalAvailable}
                             accounts={accounts.map(a => ({ name: a.name, balance: a.balance, color: '#2563eb' }))}
@@ -166,7 +164,7 @@ export const Goals = () => {
                 </div>
 
                 {/* Integrated Tasks Section - Full Width at Bottom */}
-                <div style={{ marginTop: '3rem' }}>
+                <div id="my-tasks" style={{ marginTop: '3rem' }}>
                     <GoalTasks title="My Tasks" />
                 </div>
             </div>

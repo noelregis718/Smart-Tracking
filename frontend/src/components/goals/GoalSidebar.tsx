@@ -38,7 +38,7 @@ const GoalSidebar: React.FC<GoalSidebarProps> = ({
                     {currency}{totalAvailable.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: '600' }}>
-                    Available for goals ⓘ
+                    Available for goals
                 </div>
             </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import api, { setAuthToken } from '../../lib/api';
 
@@ -372,9 +372,9 @@ export const Investments = () => {
             </div>
 
             <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1rem'
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
             }}>
                 {investments.length === 0 ? (
                     <div style={{ gridColumn: 'span 2', padding: '1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.875rem', fontStyle: 'italic' }}>No investments added yet</div>
@@ -438,44 +438,65 @@ const LoanEntry = ({ id, name, amount, total, color, last, onDelete }: { id: str
 };
 
 const InvestmentCard = ({ id, title, amount, change, onDelete }: { id: string, title: string, amount: number, change: number, onDelete: (id: string) => void }) => {
-    const isPositive = change > 0;
+    const isPositive = change >= 0;
 
     return (
         <div style={{
             padding: '1rem',
-            borderRadius: '4px',
-            border: '1px solid #e2e8f0',
-            background: '#fafafa',
+            borderRadius: '8px',
+            border: '1px solid #f1f5f9',
+            background: 'white',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem',
-            position: 'relative'
+            alignItems: 'center',
+            gap: '1rem',
+            transition: 'all 0.2s ease',
+            cursor: 'pointer',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b' }}>{title}</span>
-                <button 
-                    onClick={() => onDelete(id)}
-                    style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', padding: '0', fontSize: '0.75rem', opacity: 0.6 }}
-                    title="Delete Investment"
-                >
-                    <Trash2 size={12} />
-                </button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                    <div style={{ 
+                        fontSize: '0.7rem', 
+                        fontWeight: '700', 
+                        color: isPositive ? '#16a34a' : '#ef4444',
+                        background: isPositive ? '#f0fdf4' : '#fef2f2',
+                        padding: '1px 6px',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '2px'
+                    }}>
+                        {isPositive ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                        {Math.abs(change)}%
+                    </div>
+                    <span style={{ fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.025em' }}>All time</span>
+                </div>
             </div>
 
-            <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>
+            <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ fontSize: '1rem', fontWeight: '800', color: '#1e293b' }}>
                     ₹{amount.toLocaleString()}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                    <span style={{
-                        fontSize: '0.75rem',
-                        fontWeight: '700',
-                        color: isPositive ? '#16a34a' : '#dc2626'
-                    }}>
-                        {isPositive ? '+' : ''}{change}%
-                    </span>
-                    <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>All time</span>
-                </div>
+                <button 
+                    onClick={() => onDelete(id)}
+                    style={{ 
+                        border: 'none', 
+                        background: 'none', 
+                        color: '#cbd5e1', 
+                        cursor: 'pointer', 
+                        padding: '4px',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                    onMouseOut={(e) => e.currentTarget.style.color = '#cbd5e1'}
+                >
+                    <Trash2 size={14} />
+                </button>
             </div>
         </div>
     );
