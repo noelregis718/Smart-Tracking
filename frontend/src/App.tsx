@@ -13,9 +13,29 @@ import { Budget } from './pages/Budget';
 import { Goals } from './pages/Goals';
 import { Settings } from './pages/Settings';
 import { Help } from './pages/Help';
+import { DemoTravelConnect } from './components/TravelConnectDemo';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { useAuth } from './context/AuthContext';
 import { ExpensesProvider } from './context/ExpensesContext';
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '40px', height: '40px', border: '4px solid #f3f4f6', borderTop: '4px solid #3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const DashboardRoutes = () => {
   return (
@@ -48,16 +68,12 @@ const App = () => {
           <Route
             path="/dashboard/*"
             element={
-              <>
-                <SignedIn>
-                  <DashboardRoutes />
-                </SignedIn>
-                <SignedOut>
-                  <RedirectToSignIn />
-                </SignedOut>
-              </>
+              <ProtectedRoute>
+                <DashboardRoutes />
+              </ProtectedRoute>
             }
           />
+          <Route path="/demo/travel-connect" element={<DemoTravelConnect />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ExpensesProvider>

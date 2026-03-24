@@ -7,8 +7,8 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 import type { ProjectionPoint } from '../../lib/projections';
 import { calculateProjections } from '../../lib/projections';
 import {
@@ -24,7 +24,7 @@ import {
 import { Info, ChevronDown } from 'lucide-react';
 
 export const NetWorthProjections = () => {
-    const { getToken } = useAuth();
+    const { user } = useAuth();
     const [expenses, setExpenses] = useState([]);
     const [income, setIncome] = useState([]);
     const [recurring, setRecurring] = useState([]);
@@ -36,8 +36,6 @@ export const NetWorthProjections = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = await getToken();
-                setAuthToken(token);
                 const [expRes, incRes, recRes] = await Promise.all([
                     api.get('/expenses'),
                     api.get('/income'),
@@ -53,8 +51,7 @@ export const NetWorthProjections = () => {
             }
         };
         fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [user]);
 
     const data: ProjectionPoint[] = useMemo(() => {
         return calculateProjections(expenses, income, recurring, showProjections ? projectionDays : 0);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '../Card';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 
 interface Transaction {
     id: string;
@@ -15,7 +15,7 @@ const DEFAULT_CATEGORIES = [
 ];
 
 export const TransactionStatCards = () => {
-    const { getToken } = useAuth();
+    useAuth();
     const [stats, setStats] = useState([
         { title: 'Total Transactions', amount: '0', bg: 'white' },
         { title: 'Average Amount', amount: '₹0.00', bg: 'white' },
@@ -25,8 +25,6 @@ export const TransactionStatCards = () => {
 
     const fetchStats = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const [expRes, budRes, recRes] = await Promise.all([
                 api.get('/expenses'),
                 api.get('/budgets'),
@@ -109,7 +107,7 @@ export const TransactionStatCards = () => {
 
     useEffect(() => {
         fetchStats();
-    }, [getToken]);
+    }, []);
 
     if (loading) return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>Loading stats...</div>;
 

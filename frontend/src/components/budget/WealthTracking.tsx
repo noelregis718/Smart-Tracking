@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 
 interface Loan {
     id: string;
@@ -11,7 +11,7 @@ interface Loan {
 }
 
 export const LoanBook = () => {
-    const { getToken } = useAuth();
+    useAuth();
     const [loans, setLoans] = useState<Loan[]>([]);
     const [loading, setLoading] = useState(true);
     const [isIdOpen, setIsIdOpen] = useState(false);
@@ -20,8 +20,6 @@ export const LoanBook = () => {
 
     const fetchLoans = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const response = await api.get('/loans');
             setLoans(response.data);
         } catch (error) {
@@ -33,14 +31,12 @@ export const LoanBook = () => {
 
     useEffect(() => {
         fetchLoans();
-    }, [getToken]);
+    }, []);
 
     const handleSave = async () => {
         if (!formData.name || !formData.total) return;
         setIsSaving(true);
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.post('/loans', formData);
             await fetchLoans();
             setIsIdOpen(false);
@@ -56,8 +52,6 @@ export const LoanBook = () => {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this loan?')) return;
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.delete(`/loans/${id}`);
             await fetchLoans();
         } catch (error) {
@@ -80,27 +74,31 @@ export const LoanBook = () => {
         }}>
             {/* Modal */}
             {isIdOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0,0,0,0.4)',
-                    backdropFilter: 'blur(4px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 2000,
-                    padding: '20px'
-                }}>
-                    <div style={{
+                <div 
+                    onClick={() => setIsIdOpen(false)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0,0,0,0.4)',
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 2000,
+                        padding: '20px'
+                    }}
+                >
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
                         background: 'white',
                         width: '100%',
                         maxWidth: '450px',
                         borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
-                        overflow: 'hidden'
+                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
                     }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
                             <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add New Loan</h3>
@@ -204,7 +202,7 @@ export const LoanBook = () => {
 };
 
 export const Investments = () => {
-    const { getToken } = useAuth();
+    useAuth();
     const [investments, setInvestments] = useState<Investment[]>([]);
     const [loading, setLoading] = useState(true);
     const [isIdOpen, setIsIdOpen] = useState(false);
@@ -213,8 +211,6 @@ export const Investments = () => {
 
     const fetchInvestments = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const response = await api.get('/investments');
             setInvestments(response.data);
         } catch (error) {
@@ -226,14 +222,12 @@ export const Investments = () => {
 
     useEffect(() => {
         fetchInvestments();
-    }, [getToken]);
+    }, []);
 
     const handleSave = async () => {
         if (!formData.title || !formData.amount) return;
         setIsSaving(true);
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.post('/investments', formData);
             await fetchInvestments();
             setIsIdOpen(false);
@@ -249,8 +243,6 @@ export const Investments = () => {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this investment?')) return;
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.delete(`/investments/${id}`);
             await fetchInvestments();
         } catch (error) {
@@ -274,27 +266,31 @@ export const Investments = () => {
         }}>
             {/* Modal */}
             {isIdOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0,0,0,0.4)',
-                    backdropFilter: 'blur(4px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 2000,
-                    padding: '20px'
-                }}>
-                    <div style={{
+                <div 
+                    onClick={() => setIsIdOpen(false)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0,0,0,0.4)',
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 2000,
+                        padding: '20px'
+                    }}
+                >
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
                         background: 'white',
                         width: '100%',
                         maxWidth: '450px',
                         borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
-                        overflow: 'hidden'
+                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
                     }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
                             <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add New Investment</h3>

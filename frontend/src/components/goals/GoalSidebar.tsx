@@ -26,7 +26,8 @@ const GoalSidebar: React.FC<GoalSidebarProps> = ({
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '1.5rem'
+            gap: '1.5rem',
+            height: '100%'
         }}>
             <div style={{ 
                 background: '#e6f4ea', 

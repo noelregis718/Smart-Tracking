@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, AlertCircle, ChevronDown } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 
 interface GoalTransferModalProps {
     isOpen: boolean;
@@ -114,7 +114,7 @@ const GoalTransferModal: React.FC<GoalTransferModalProps> = ({
     onSuccess,
     currency = '₹'
 }) => {
-    const { getToken } = useAuth();
+    useAuth();
     const [fromAccountId, setFromAccountId] = useState('');
     const [toGoalId, setToGoalId] = useState('');
     const [amount, setAmount] = useState('');
@@ -156,9 +156,6 @@ const GoalTransferModal: React.FC<GoalTransferModalProps> = ({
         setError(null);
 
         try {
-            const token = await getToken();
-            setAuthToken(token);
-            
             await api.post('/goals/transfer', {
                 accountId: fromAccountId,
                 goalId: toGoalId,
@@ -174,20 +171,25 @@ const GoalTransferModal: React.FC<GoalTransferModalProps> = ({
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            backdropFilter: 'blur(4px)'
-        }}>
-            <div style={{
+        <div 
+            onClick={onClose}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0, 0, 0, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+                backdropFilter: 'blur(4px)'
+            }}
+        >
+            <div 
+                onClick={(e) => e.stopPropagation()}
+                style={{
                 background: 'white',
                 borderRadius: '8px',
                 width: '100%',

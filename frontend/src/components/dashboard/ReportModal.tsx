@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, FileText, Download, ChevronLeft, ChevronRight, ChevronDown, AlertCircle } from 'lucide-react';
-import { useAuth, useUser } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -226,8 +226,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, label, isActiv
 };
 
 export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose }) => {
-    const { getToken } = useAuth();
-    const { user } = useUser();
+    const { user } = useAuth();
     
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -266,8 +265,6 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose }) => 
         console.log('Initiating Precise PDF Report Generation...');
         
         try {
-            const token = await getToken();
-            setAuthToken(token);
 
             // Detailed Data Aggregation
             const [goalsRes, budgetsRes, accountsRes, investmentsRes, loansRes, recurringRes, tasksRes, expensesRes, incomeRes] = await Promise.all([
@@ -343,7 +340,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose }) => 
             
             doc.setFontSize(10);
             doc.setTextColor(100, 116, 139);
-            doc.text(`Generated for: ${user?.fullName || 'User'}`, 14, 30);
+            doc.text(`Generated for: ${user?.name || 'User'}`, 14, 30);
             doc.text(`Period: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`, 14, 35);
 
             doc.setFontSize(14);
@@ -513,17 +510,22 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose }) => 
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 3000,
-            backdropFilter: 'blur(4px)',
-        }}>
-            <div style={{
+        <div 
+            onClick={onClose}
+            style={{
+                position: 'fixed',
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 3000,
+                backdropFilter: 'blur(4px)',
+            }}
+        >
+            <div 
+                onClick={(e) => e.stopPropagation()}
+                style={{
                 background: 'white',
                 borderRadius: '12px',
                 width: '100%',

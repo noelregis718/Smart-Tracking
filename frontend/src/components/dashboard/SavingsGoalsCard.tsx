@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '../Card';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 import {
     RadialBarChart,
     RadialBar,
@@ -18,14 +18,12 @@ interface Goal {
 }
 
 export const SavingsGoalsCard = () => {
-    const { getToken } = useAuth();
+    useAuth();
     const [goals, setGoals] = useState<Goal[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchGoals = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const res = await api.get('/goals');
             setGoals(res.data);
         } catch (error) {
@@ -37,7 +35,7 @@ export const SavingsGoalsCard = () => {
 
     useEffect(() => {
         fetchGoals();
-    }, [getToken]);
+    }, []);
 
     const chartData = goals.map(goal => ({
         name: goal.title,
@@ -49,7 +47,7 @@ export const SavingsGoalsCard = () => {
     if (loading) return <Card style={{ padding: '1.5rem', background: 'white', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading goals...</Card>;
 
     return (
-        <Card style={{ padding: '1.5rem', background: 'white' }}>
+        <Card style={{ padding: '1.5rem', background: 'white', height: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', margin: 0 }}>Goals</h2>
             </div>

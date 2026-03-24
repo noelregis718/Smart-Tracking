@@ -1,216 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 import { Card } from '../Card';
 import {
-    MoreVertical,
-    Calendar,
-    ChevronLeft,
-    ChevronRight
+    MoreVertical
 } from 'lucide-react';
+import { ModernSelect } from '../ModernSelect';
+import { DatePicker } from '../DatePicker';
 
-const DatePicker = ({ value, onChange }: { value: string, onChange: (date: string) => void }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [viewMode, setViewMode] = useState<'days' | 'months' | 'years'>('days');
-    const [viewDate, setViewDate] = useState(new Date(value || new Date()));
 
-    const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-    const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
 
-    const currentYear = viewDate.getFullYear();
-    const currentMonth = viewDate.getMonth();
 
-    const handlePrevMonth = () => setViewDate(new Date(currentYear, currentMonth - 1, 1));
-    const handleNextMonth = () => setViewDate(new Date(currentYear, currentMonth + 1, 1));
-
-    const handleDateSelect = (day: number) => {
-        const selected = new Date(currentYear, currentMonth, day);
-        const yyyy = selected.getFullYear();
-        const mm = String(selected.getMonth() + 1).padStart(2, '0');
-        const dd = String(selected.getDate()).padStart(2, '0');
-        onChange(`${yyyy}-${mm}-${dd}`);
-        setIsOpen(false);
-        setViewMode('days');
-    };
-
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-
-    const firstDay = firstDayOfMonth(currentYear, currentMonth);
-    const totalDays = daysInMonth(currentYear, currentMonth);
-
-    const yearRange = Array.from({ length: 15 }, (_, i) => currentYear - 7 + i);
-
-    return (
-        <div style={{ position: 'relative' }}>
-            <div
-                onClick={() => {
-                    setIsOpen(!isOpen);
-                    setViewMode('days');
-                }}
-                style={{
-                    padding: '0.75rem',
-                    borderRadius: '4px',
-                    border: '1px solid #e2e8f0',
-                    background: 'white',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    color: '#1e293b'
-                }}
-            >
-                <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>
-                    {new Date(value).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
-                </span>
-                <Calendar size={16} color="#64748b" />
-            </div>
-
-            {isOpen && (
-                <>
-                    <div 
-                        onClick={() => setIsOpen(false)}
-                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1999 }}
-                    />
-                    <div style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        marginTop: '8px',
-                        background: 'white',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                        padding: '1rem',
-                        zIndex: 2000,
-                        minWidth: '260px'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <button onClick={handlePrevMonth} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}><ChevronLeft size={18} /></button>
-                            <div style={{ display: 'flex', gap: '4px', fontSize: '0.9rem', fontWeight: '700' }}>
-                                <span 
-                                    onClick={() => setViewMode(viewMode === 'months' ? 'days' : 'months')}
-                                    style={{ cursor: 'pointer', color: viewMode === 'months' ? '#2563eb' : '#1e293b', padding: '2px 4px', borderRadius: '4px', background: viewMode === 'months' ? '#eff6ff' : 'transparent' }}
-                                >
-                                    {monthNames[currentMonth]}
-                                </span>
-                                <span 
-                                    onClick={() => setViewMode(viewMode === 'years' ? 'days' : 'years')}
-                                    style={{ cursor: 'pointer', color: viewMode === 'years' ? '#2563eb' : '#1e293b', padding: '2px 4px', borderRadius: '4px', background: viewMode === 'years' ? '#eff6ff' : 'transparent' }}
-                                >
-                                    {currentYear}
-                                </span>
-                            </div>
-                            <button onClick={handleNextMonth} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}><ChevronRight size={18} /></button>
-                        </div>
-                        
-                        {viewMode === 'days' && (
-                            <>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
-                                    {dayNames.map(d => (
-                                        <div key={d} style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', fontWeight: '600' }}>{d}</div>
-                                    ))}
-                                </div>
-                                
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
-                                    {Array.from({ length: firstDay }).map((_, i) => (
-                                        <div key={`empty-${i}`} />
-                                    ))}
-                                    {Array.from({ length: totalDays }).map((_, i) => {
-                                        const day = i + 1;
-                                        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                        const isSelected = value === dateStr;
-                                        return (
-                                            <div
-                                                key={day}
-                                                onClick={() => handleDateSelect(day)}
-                                                style={{
-                                                    width: '32px',
-                                                    height: '32px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    fontSize: '0.8rem',
-                                                    cursor: 'pointer',
-                                                    borderRadius: '4px',
-                                                    background: isSelected ? '#2563eb' : 'transparent',
-                                                    color: isSelected ? 'white' : '#1e293b',
-                                                    fontWeight: isSelected ? '700' : '500',
-                                                    transition: 'all 0.2s'
-                                                }}
-                                                onMouseEnter={(e) => !isSelected && (e.currentTarget.style.background = '#f1f5f9')}
-                                                onMouseLeave={(e) => !isSelected && (e.currentTarget.style.background = 'transparent')}
-                                            >
-                                                {day}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </>
-                        )}
-
-                        {viewMode === 'months' && (
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                                {monthNames.map((name, i) => (
-                                    <div
-                                        key={name}
-                                        onClick={() => {
-                                            setViewDate(new Date(currentYear, i, 1));
-                                            setViewMode('days');
-                                        }}
-                                        style={{
-                                            padding: '8px',
-                                            textAlign: 'center',
-                                            fontSize: '0.85rem',
-                                            cursor: 'pointer',
-                                            borderRadius: '4px',
-                                            background: currentMonth === i ? '#2563eb' : 'transparent',
-                                            color: currentMonth === i ? 'white' : '#1e293b',
-                                            fontWeight: currentMonth === i ? '700' : '500'
-                                        }}
-                                        onMouseEnter={(e) => currentMonth !== i && (e.currentTarget.style.background = '#f1f5f9')}
-                                        onMouseLeave={(e) => currentMonth !== i && (e.currentTarget.style.background = 'transparent')}
-                                    >
-                                        {name.substring(0, 3)}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {viewMode === 'years' && (
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                                {yearRange.map(year => (
-                                    <div
-                                        key={year}
-                                        onClick={() => {
-                                            setViewDate(new Date(year, currentMonth, 1));
-                                            setViewMode('months');
-                                        }}
-                                        style={{
-                                            padding: '8px',
-                                            textAlign: 'center',
-                                            fontSize: '0.85rem',
-                                            cursor: 'pointer',
-                                            borderRadius: '4px',
-                                            background: currentYear === year ? '#2563eb' : 'transparent',
-                                            color: currentYear === year ? 'white' : '#1e293b',
-                                            fontWeight: currentYear === year ? '700' : '500'
-                                        }}
-                                        onMouseEnter={(e) => currentYear !== year && (e.currentTarget.style.background = '#f1f5f9')}
-                                        onMouseLeave={(e) => currentYear !== year && (e.currentTarget.style.background = 'transparent')}
-                                    >
-                                        {year}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </>
-            )}
-        </div>
-    );
-};
 
 interface Transaction {
     id: string;
@@ -226,8 +26,14 @@ interface Account {
     balance: number;
 }
 
-export const RecentTransactionsTable = () => {
-    const { getToken } = useAuth();
+export const RecentTransactionsTable = ({ 
+    title = "Recent Expenses",
+    addButtonLabel = "Add Expense"
+}: { 
+    title?: string,
+    addButtonLabel?: string
+}) => {
+    useAuth();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
@@ -258,12 +64,11 @@ export const RecentTransactionsTable = () => {
     });
 
     const [isEditOpen, setIsEditOpen] = useState(false);
-    const [activeMenu, setActiveMenu] = useState<string | null>(null);
+    const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+    const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
     const fetchData = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const [expRes, accRes] = await Promise.all([
                 api.get('/expenses'),
                 api.get('/accounts')
@@ -281,6 +86,24 @@ export const RecentTransactionsTable = () => {
         }
     };
 
+    const availableCategories = useMemo(() => {
+        const defaults = [
+            'Food & Dining', 'Shopping', 'Transportation', 
+            'Bills & Utilities', 'Entertainment', 'Health & Fitness', 'Others'
+        ];
+        
+        const normalize = (cat: string) => {
+            const c = cat.trim();
+            if (c === 'Bills' || c === 'Utilities' || c === 'Bills & Utilities') return 'Bills & Utilities';
+            if (c === 'Other' || c === 'Others') return 'Others';
+            if (c === 'Health' || c === 'Health & Fitness') return 'Health & Fitness';
+            return c;
+        };
+
+        const discovered = transactions.map(t => normalize(t.category));
+        return Array.from(new Set([...defaults, ...discovered])).sort();
+    }, [transactions]);
+
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -290,8 +113,6 @@ export const RecentTransactionsTable = () => {
         if (!formData.title || !formData.amount) return;
         setIsSaving(true);
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.post('/expenses', formData);
             await fetchData();
             setIsIdOpen(false);
@@ -314,8 +135,6 @@ export const RecentTransactionsTable = () => {
         if (!accFormData.name) return;
         setIsSaving(true);
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.post('/accounts', accFormData);
             await fetchData();
             setIsAccOpen(false);
@@ -331,8 +150,6 @@ export const RecentTransactionsTable = () => {
     const handleDelete = async (id: string) => {
         if (!window.confirm('Are you sure you want to delete this transaction?')) return;
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.delete(`/expenses/${id}`);
             await fetchData();
         } catch (error) {
@@ -345,8 +162,6 @@ export const RecentTransactionsTable = () => {
         if (!editFormData.title || !editFormData.amount) return;
         setIsSaving(true);
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.patch(`/expenses/${editFormData.id}`, editFormData);
             await fetchData();
             setIsEditOpen(false);
@@ -363,10 +178,12 @@ export const RecentTransactionsTable = () => {
         return <Card style={{ padding: '2rem', textAlign: 'center' }}>Loading transactions...</Card>;
     }
     return (
-        <Card style={{ padding: '0', background: 'white', overflow: 'visible' }}>
+        <Card style={{ padding: '0', background: 'white', overflow: 'visible', height: '100%' }}>
             {/* Modal Overlay: Edit Transaction */}
             {isEditOpen && (
-                <div style={{
+                <div 
+                    onClick={() => setIsEditOpen(false)}
+                    style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -380,16 +197,19 @@ export const RecentTransactionsTable = () => {
                     zIndex: 1000,
                     padding: '20px'
                 }}>
-                    <div style={{
-                        background: 'white',
-                        width: '100%',
-                        maxWidth: '450px',
-                        borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
-                        position: 'relative'
-                    }}>
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: 'white',
+                            width: '100%',
+                            maxWidth: '450px',
+                            borderRadius: '4px',
+                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+                            position: 'relative'
+                        }}
+                    >
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Edit Expense</h3>
+                            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Edit Transaction</h3>
                         </div>
                         
                         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -424,20 +244,20 @@ export const RecentTransactionsTable = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Category</label>
-                                    <select 
+                                    <ModernSelect
                                         value={editFormData.category}
-                                        onChange={e => setEditFormData({...editFormData, category: e.target.value})}
-                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white', outline: 'none', fontSize: '0.875rem' }}
-                                    >
-                                        <option>Food & Dining</option>
-                                        <option>Shopping</option>
-                                        <option>Transportation</option>
-                                        <option>Utilities</option>
-                                        <option>Entertainment</option>
-                                        <option>Health</option>
-                                        <option>Income</option>                                        
-                                        <option>Others</option>
-                                    </select>
+                                        options={availableCategories.map(cat => ({ id: cat, label: cat }))}
+                                        onChange={(val) => setEditFormData({ ...editFormData, category: val })}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Account</label>
+                                    <ModernSelect
+                                        value={editFormData.accountId}
+                                        options={accounts.map(acc => ({ id: acc.id, label: acc.name }))}
+                                        onChange={(val) => setEditFormData({ ...editFormData, accountId: val })}
+                                        placeholder="Select account"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -455,7 +275,7 @@ export const RecentTransactionsTable = () => {
                                  className="btn-premium-shine"
                                  style={{ padding: '0.625rem 1.25rem', fontSize: '0.875rem', borderRadius: '4px' }}
                              >
-                                 {isSaving ? 'Saving...' : 'Update Expense'}
+                                 {isSaving ? 'Saving...' : 'Update Transaction'}
                              </button>
                         </div>
                     </div>
@@ -464,7 +284,9 @@ export const RecentTransactionsTable = () => {
 
             {/* Modal Overlay: Add Transaction */}
             {isIdOpen && (
-                <div style={{
+                <div 
+                    onClick={() => setIsIdOpen(false)}
+                    style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -478,16 +300,19 @@ export const RecentTransactionsTable = () => {
                     zIndex: 1000,
                     padding: '20px'
                 }}>
-                    <div style={{
-                        background: 'white',
-                        width: '100%',
-                        maxWidth: '450px',
-                        borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
-                        position: 'relative'
-                    }}>
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: 'white',
+                            width: '100%',
+                            maxWidth: '450px',
+                            borderRadius: '4px',
+                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+                            position: 'relative'
+                        }}
+                    >
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add Manual Expense</h3>
+                            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add Manual Transaction</h3>
                         </div>
                         
                         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -524,36 +349,21 @@ export const RecentTransactionsTable = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Category</label>
-                                    <select 
+                                    <ModernSelect
                                         value={formData.category}
-                                        onChange={e => setFormData({...formData, category: e.target.value})}
-                                        className="modern-select"
-                                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem', background: 'white' }}
-                                    >
-                                        <option>Food & Dining</option>
-                                        <option>Shopping</option>
-                                        <option>Transportation</option>
-                                        <option>Utilities</option>
-                                        <option>Entertainment</option>
-                                        <option>Health</option>
-                                        <option>Income</option>
-                                        <option>Others</option>
-                                    </select>
+                                        options={availableCategories.map(cat => ({ id: cat, label: cat }))}
+                                        onChange={(val) => setFormData({ ...formData, category: val })}
+                                    />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Account</label>
                                     <div style={{ display: 'flex', gap: '8px' }}>
-                                        <select 
+                                        <ModernSelect
                                             value={formData.accountId}
-                                            onChange={e => setFormData({...formData, accountId: e.target.value})}
-                                            className="modern-select"
-                                            style={{ flex: 1, padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem', background: 'white' }}
-                                        >
-                                            <option value="">No Account</option>
-                                            {accounts.map(acc => (
-                                                <option key={acc.id} value={acc.id}>{acc.name}</option>
-                                            ))}
-                                        </select>
+                                            options={accounts.map(acc => ({ id: acc.id, label: acc.name }))}
+                                            onChange={(val) => setFormData({ ...formData, accountId: val })}
+                                            placeholder="Select account"
+                                        />
                                         <button 
                                             onClick={() => setIsAccOpen(true)}
                                             style={{ padding: '0 12px', borderRadius: '4px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', cursor: 'pointer', fontWeight: '700' }}
@@ -583,7 +393,7 @@ export const RecentTransactionsTable = () => {
                                      borderRadius: '4px'
                                  }}
                              >
-                                 {isSaving ? 'Saving...' : 'Add Expense'}
+                                 {isSaving ? 'Saving...' : 'Add Transaction'}
                              </button>
                         </div>
                     </div>
@@ -592,7 +402,9 @@ export const RecentTransactionsTable = () => {
 
             {/* Modal Overlay: Manage Accounts */}
             {isAccOpen && (
-                <div style={{
+                <div 
+                    onClick={() => setIsAccOpen(false)}
+                    style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -603,24 +415,26 @@ export const RecentTransactionsTable = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    zIndex: 1100, // Higher than transaction modal
+                    zIndex: 1100,
                     padding: '20px'
                 }}>
-                    <div style={{
-                        background: 'white',
-                        width: '100%',
-                        maxWidth: '450px',
-                        borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
-                        overflow: 'hidden'
-                    }}>
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: 'white',
+                            width: '100%',
+                            maxWidth: '450px',
+                            borderRadius: '4px',
+                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+                            overflow: 'hidden'
+                        }}
+                    >
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Manage Accounts</h3>
-                            <button onClick={() => setIsAccOpen(false)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '20px' }}>&times;</button>
+                            <button onClick={() => setIsAccOpen(false)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '24px' }}>&times;</button>
                         </div>
                         
                         <div style={{ padding: '1.5rem', maxHeight: '400px', overflowY: 'auto' }}>
-                            {/* Create New Account form nested or as section */}
                             <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #f1f5f9' }}>
                                 <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.8125rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Create New</h4>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -650,7 +464,6 @@ export const RecentTransactionsTable = () => {
                                 </div>
                             </div>
 
-                            {/* List of accounts */}
                             <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.8125rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Your Accounts</h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {accounts.length === 0 ? (
@@ -665,8 +478,6 @@ export const RecentTransactionsTable = () => {
                                             <button 
                                                 onClick={async () => {
                                                     if(confirm(`Delete account "${acc.name}"?`)) {
-                                                        const token = await getToken();
-                                                        setAuthToken(token);
                                                         await api.delete(`/accounts/${acc.id}`);
                                                         await fetchData();
                                                     }
@@ -693,7 +504,7 @@ export const RecentTransactionsTable = () => {
                 borderBottom: '1px solid #f1f5f9'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', margin: 0 }}>Recent Expenses</h2>
+                    <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', margin: 0 }}>{title}</h2>
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -721,7 +532,7 @@ export const RecentTransactionsTable = () => {
                             fontSize: '0.875rem'
                         }}
                     >
-                        Add Expense
+                        {addButtonLabel}
                     </button>
                 </div>
             </div>
@@ -743,7 +554,7 @@ export const RecentTransactionsTable = () => {
                     <tbody>
                         {transactions.length === 0 ? (
                             <tr>
-                                <td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
                                     No transactions found. Start adding your expenses!
                                 </td>
                             </tr>
@@ -789,30 +600,46 @@ export const RecentTransactionsTable = () => {
                                             <MoreVertical 
                                                 size={16} 
                                                 style={{ color: '#94a3b8', cursor: 'pointer' }} 
-                                                onClick={() => setActiveMenu(activeMenu === tx.id ? null : tx.id)}
+                                                onClick={() => {
+                                                    setSelectedTx(tx);
+                                                    setIsOptionsOpen(true);
+                                                }}
                                             />
 
-                                            {activeMenu === tx.id && (
-                                                <>
+                                            {isOptionsOpen && selectedTx?.id === tx.id && (
+                                                <div 
+                                                    onClick={() => setIsOptionsOpen(false)}
+                                                    style={{
+                                                    position: 'fixed',
+                                                    top: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    bottom: 0,
+                                                    background: 'rgba(0,0,0,0.4)',
+                                                    backdropFilter: 'blur(4px)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    zIndex: 1000,
+                                                    padding: '20px'
+                                                }}>
                                                     <div 
-                                                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50 }}
-                                                        onClick={() => setActiveMenu(null)}
-                                                    />
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        top: '100%',
-                                                        right: 0,
-                                                        marginTop: '8px',
-                                                        background: 'white',
-                                                        border: '1px solid #e2e8f0',
-                                                        borderRadius: '8px',
-                                                        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                                                        padding: '4px',
-                                                        zIndex: 100,
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        minWidth: '120px'
-                                                    }}>
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        style={{
+                                                            background: 'white',
+                                                            width: '100%',
+                                                            maxWidth: '350px',
+                                                            borderRadius: '8px',
+                                                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+                                                            padding: '1.5rem',
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            gap: '1rem'
+                                                        }}
+                                                    >
+                                                        <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.25rem', fontWeight: '800', textAlign: 'center', color: '#1e293b' }}>Actions</h3>
+                                                        <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#64748b', textAlign: 'center' }}>{tx.title}</p>
+                                                        
                                                         <button
                                                             onClick={() => {
                                                                 setEditFormData({
@@ -824,47 +651,66 @@ export const RecentTransactionsTable = () => {
                                                                     accountId: (tx as any).accountId || ''
                                                                 });
                                                                 setIsEditOpen(true);
-                                                                setActiveMenu(null);
+                                                                setIsOptionsOpen(false);
                                                             }}
+                                                            className="btn-premium-shine"
                                                             style={{
-                                                                padding: '8px 12px',
-                                                                textAlign: 'left',
-                                                                fontSize: '0.8125rem',
-                                                                fontWeight: '600',
-                                                                color: '#475569',
-                                                                background: 'none',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer'
+                                                                padding: '14px',
+                                                                borderRadius: '10px',
+                                                                fontSize: '0.9rem',
+                                                                fontWeight: '700',
+                                                                letterSpacing: '0.01em'
                                                             }}
-                                                            onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                                                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
                                                         >
-                                                            ✏️ Edit
+                                                            Edit Transaction
                                                         </button>
+                                                        
                                                         <button
                                                             onClick={() => {
                                                                 handleDelete(tx.id);
-                                                                setActiveMenu(null);
+                                                                setIsOptionsOpen(false);
                                                             }}
                                                             style={{
-                                                                padding: '8px 12px',
-                                                                textAlign: 'left',
+                                                                padding: '14px',
+                                                                borderRadius: '10px',
+                                                                fontSize: '0.9rem',
+                                                                fontWeight: '700',
+                                                                background: '#fff',
+                                                                color: '#ef4444',
+                                                                border: '2px solid #fef2f2',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.2s',
+                                                                letterSpacing: '0.01em'
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.background = '#fef2f2';
+                                                                e.currentTarget.style.borderColor = '#fee2e2';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.background = '#fff';
+                                                                e.currentTarget.style.borderColor = '#fef2f2';
+                                                            }}
+                                                        >
+                                                            Delete Transaction
+                                                        </button>
+                                                        
+                                                        <button
+                                                            onClick={() => setIsOptionsOpen(false)}
+                                                            style={{
+                                                                marginTop: '0.5rem',
+                                                                padding: '8px',
                                                                 fontSize: '0.8125rem',
                                                                 fontWeight: '600',
-                                                                color: '#ef4444',
+                                                                color: '#94a3b8',
                                                                 background: 'none',
                                                                 border: 'none',
-                                                                borderRadius: '4px',
                                                                 cursor: 'pointer'
                                                             }}
-                                                            onMouseEnter={(e) => e.currentTarget.style.background = '#fef2f2'}
-                                                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
                                                         >
-                                                            🗑️ Delete
+                                                            Close
                                                         </button>
                                                     </div>
-                                                </>
+                                                </div>
                                             )}
                                         </div>
                                     </td>

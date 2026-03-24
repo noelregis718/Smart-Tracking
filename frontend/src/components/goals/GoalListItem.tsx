@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MoreVertical, Edit2, Trash2 } from 'lucide-react';
 
 interface GoalListItemProps {
@@ -31,7 +31,7 @@ const GoalListItem: React.FC<GoalListItemProps> = ({
     onDelete
 }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
     const percentage = Math.min(Math.round((currentAmount / targetAmount) * 100), 100);
     
     const statusColors = {
@@ -51,8 +51,12 @@ const GoalListItem: React.FC<GoalListItemProps> = ({
     // Handle click away
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setIsMenuOpen(false);
+            if (isMenuOpen) {
+                // If clicked outside the icon and menu triggers
+                const target = event.target as HTMLElement;
+                if (!target.closest('.fixed-dropdown-menu') && !target.closest('.menu-trigger')) {
+                    setIsMenuOpen(false);
+                }
             }
         };
 
@@ -103,9 +107,17 @@ const GoalListItem: React.FC<GoalListItemProps> = ({
                             <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '500' }}>{targetDate} {statusDetail && `(${statusDetail})`}</span>
                         </div>
                     </div>
-                    <div style={{ position: 'relative' }} ref={menuRef}>
+                    <div style={{ position: 'relative' }}>
                         <button 
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="menu-trigger"
+                            onClick={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setMenuPosition({ 
+                                    top: rect.bottom + window.scrollY, 
+                                    left: rect.left + window.scrollX - 110 
+                                });
+                                setIsMenuOpen(!isMenuOpen);
+                            }}
                             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px', transition: 'background 0.2s' }}
                             onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
                             onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
@@ -114,18 +126,19 @@ const GoalListItem: React.FC<GoalListItemProps> = ({
                         </button>
                         
                         {isMenuOpen && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '100%',
-                                right: 0,
+                            <div 
+                                className="fixed-dropdown-menu"
+                                style={{
+                                position: 'fixed',
+                                top: menuPosition.top + 4,
+                                left: menuPosition.left,
                                 background: 'white',
                                 borderRadius: '8px',
                                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                                zIndex: 10,
+                                zIndex: 9999,
                                 minWidth: '140px',
                                 border: '1px solid #f1f5f9',
-                                overflow: 'hidden',
-                                marginTop: '4px'
+                                overflow: 'hidden'
                             }}>
                                 <button 
                                     onClick={handleEdit}

@@ -16,10 +16,10 @@ export const Budget = () => {
                     <SpendingByCategory />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                    <div id="loan-details">
+                    <div id="loan-details" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                         <LoanBook />
                     </div>
-                    <div id="investment-portfolio">
+                    <div id="investment-portfolio" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                         <Investments />
                     </div>
                 </div>
@@ -30,7 +30,7 @@ export const Budget = () => {
                 <div id="budget-summary">
                     <LeftToBudget />
                 </div>
-                <div id="monthly-subscriptions">
+                <div id="monthly-subscriptions" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <RecurringPayments />
                 </div>
             </div>

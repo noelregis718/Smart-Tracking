@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, X } from 'lucide-react';
 import AnalyticsCard from './AnalyticsCard';
 import api from '../../lib/api';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
+import { ModernSelect } from '../ModernSelect';
+import { DatePicker } from '../DatePicker';
 
 interface Income {
     id: string;
@@ -22,10 +24,11 @@ const INCOME_CATEGORIES = [
 ];
 
 const IncomeSources: React.FC = () => {
-    const { getToken } = useAuth();
+    const { user } = useAuth();
     const [incomes, setIncomes] = useState<Income[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
+    const modalRef = useRef<HTMLDivElement>(null);
     
     // Form State
     const [title, setTitle] = useState('');
@@ -37,10 +40,7 @@ const IncomeSources: React.FC = () => {
     const fetchIncomes = async () => {
         try {
             setLoading(true);
-            const token = await getToken();
-            const response = await api.get('/income', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/income');
             setIncomes(response.data);
         } catch (error) {
             console.error('Failed to fetch incomes:', error);
@@ -51,22 +51,38 @@ const IncomeSources: React.FC = () => {
 
     useEffect(() => {
         fetchIncomes();
-    }, []);
+    }, [user]);
+
+    // Click outside handler for modal
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isAdding && modalRef.current && !modalRef.current.contains(event.target as Node)) {
+                // If the click is on the overlay itself, close it
+                const target = event.target as HTMLElement;
+                if (target.classList.contains('modal-overlay')) {
+                    setIsAdding(false);
+                }
+            }
+        };
+        if (isAdding) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isAdding]);
 
     const handleAddIncome = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!title || !amount) return;
 
         try {
-            const token = await getToken();
             await api.post('/income', {
                 title,
                 amount: parseFloat(amount),
                 category,
                 source: source || null,
                 date: date
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
             
             setTitle('');
@@ -83,10 +99,7 @@ const IncomeSources: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         try {
-            const token = await getToken();
-            await api.delete(`/income/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/income/${id}`);
             fetchIncomes();
         } catch (error) {
             console.error('Failed to delete income:', error);
@@ -96,148 +109,196 @@ const IncomeSources: React.FC = () => {
     const totalIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
 
     return (
-        <AnalyticsCard style={{ height: '440px', padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <AnalyticsCard style={{ height: '440px', padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
             <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f8fafc', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                 <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: '#1e293b' }}>
                     Income Sources
                 </h3>
                 <button 
-                    onClick={() => setIsAdding(!isAdding)}
+                    onClick={() => setIsAdding(true)}
                     className="btn-premium-shine"
                     style={{
                         padding: '6px 14px',
                         fontSize: '11px',
                         fontWeight: '800',
                         textTransform: 'uppercase',
-                        borderRadius: '6px',
-                        ...(isAdding ? { background: '#f1f5f9', color: '#64748b', boxShadow: 'none' } : {})
+                        borderRadius: '6px'
                     }}
                 >
-                    {isAdding ? <X size={14} /> : <Plus size={14} />}
-                    {isAdding ? 'Cancel' : 'Add Income'}
+                    <Plus size={14} /> Add Income
                 </button>
             </div>
             
             <div style={{ flex: 1, overflowY: 'auto', background: '#fff' }}>
-                {isAdding ? (
-                    <form onSubmit={handleAddIncome} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Label</label>
-                                <input 
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="e.g. Monthly Salary"
-                                    required
-                                    style={{ padding: '0.75rem', borderRadius: '6px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
-                                />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Amount (INR)</label>
-                                <input 
-                                    type="number"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    placeholder="0.00"
-                                    required
-                                    style={{ padding: '0.75rem', borderRadius: '6px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
-                                />
-                            </div>
+                <div style={{ padding: '1.25rem' }}>
+                    {loading && incomes.length === 0 ? (
+                        <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>Loading sources...</div>
+                    ) : incomes.length === 0 ? (
+                        <div style={{ padding: '3rem 2rem', textAlign: 'center', border: '2px dashed #f1f5f9', borderRadius: '12px' }}>
+                            <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', fontWeight: '700' }}>No income sources yet</h4>
+                            <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#94a3b8' }}>Add your first income stream to start tracking.</p>
                         </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Category</label>
-                                <select 
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    style={{ padding: '0.75rem', borderRadius: '6px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none', background: 'white' }}
-                                >
-                                    {INCOME_CATEGORIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                                </select>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Date</label>
-                                <input 
-                                    type="date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                    required
-                                    style={{ padding: '0.75rem', borderRadius: '6px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none', background: 'white' }}
-                                />
-                            </div>
-                        </div>
-
-                        <button 
-                            type="submit"
-                            className="btn-premium-shine"
-                            style={{
-                                marginTop: '0.5rem',
-                                padding: '0.85rem',
-                                width: '100%',
-                                fontSize: '13px',
-                                borderRadius: '6px',
-                            }}
-                        >
-                            Save Income Source
-                        </button>
-                    </form>
-                ) : (
-                    <div style={{ padding: '1.25rem' }}>
-                        {loading && incomes.length === 0 ? (
-                            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>Loading sources...</div>
-                        ) : incomes.length === 0 ? (
-                            <div style={{ padding: '3rem 2rem', textAlign: 'center', border: '2px dashed #f1f5f9', borderRadius: '12px' }}>
-                                <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', fontWeight: '700' }}>No income sources yet</h4>
-                                <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#94a3b8' }}>Add your first revenue stream to start tracking.</p>
-                            </div>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                {incomes.map(inc => {
-                                    return (
-                                        <div key={inc.id} style={{
-                                            padding: '1rem',
-                                            borderRadius: '10px',
-                                            background: '#f8fafc',
-                                            border: '1px solid #f1f5f9',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            transition: 'transform 0.2s ease',
-                                        }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <div>
-                                                    <div style={{ fontSize: '13px', fontWeight: '800', color: '#1e293b' }}>{inc.title}</div>
-                                                    <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>{inc.source || 'Direct Deposit'}</div>
-                                                </div>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ textAlign: 'right' }}>
-                                                    <div style={{ fontSize: '14px', fontWeight: '900', color: '#10b981' }}>+₹{inc.amount.toLocaleString()}</div>
-                                                    <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '700' }}>{inc.category}</div>
-                                                </div>
-                                                <button 
-                                                    onClick={() => handleDelete(inc.id)}
-                                                    style={{ border: 'none', background: 'none', color: '#ef4444', opacity: 0.5, cursor: 'pointer', padding: '4px' }}
-                                                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                                                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            {incomes.map(inc => {
+                                return (
+                                    <div key={inc.id} style={{
+                                        padding: '1rem',
+                                        borderRadius: '10px',
+                                        background: '#f8fafc',
+                                        border: '1px solid #f1f5f9',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        transition: 'transform 0.2s ease',
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <div>
+                                                <div style={{ fontSize: '13px', fontWeight: '800', color: '#1e293b' }}>{inc.title}</div>
+                                                <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>{inc.source || 'Direct Deposit'}</div>
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                )}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '14px', fontWeight: '900', color: '#10b981' }}>+₹{inc.amount.toLocaleString()}</div>
+                                                <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '700' }}>{inc.category}</div>
+                                            </div>
+                                            <button 
+                                                onClick={() => handleDelete(inc.id)}
+                                                style={{ border: 'none', background: 'none', color: '#ef4444', opacity: 0.5, cursor: 'pointer', padding: '4px' }}
+                                                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Total Monthly Revenue</span>
+                <span style={{ fontSize: '12px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Total Monthly Income</span>
                 <span style={{ fontSize: '1.25rem', fontWeight: '900', color: '#1e293b' }}>₹{totalIncome.toLocaleString()}</span>
             </div>
+
+            {/* Modal Overlay: Add Income */}
+            {isAdding && (
+                <div 
+                    className="modal-overlay"
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0,0,0,0.4)',
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                        padding: '20px'
+                    }}
+                >
+                    <div 
+                        ref={modalRef}
+                        style={{
+                            background: 'white',
+                            width: '100%',
+                            maxWidth: '450px',
+                            borderRadius: '8px',
+                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+                            position: 'relative'
+                        }}
+                    >
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '800', color: '#1e293b' }}>Add Income Source</h3>
+                            <button onClick={() => setIsAdding(false)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '24px' }}><X size={20} /></button>
+                        </div>
+                        
+                        <form onSubmit={handleAddIncome} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Label</label>
+                                    <input 
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        placeholder="e.g. Monthly Salary"
+                                        required
+                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Amount (INR)</label>
+                                    <input 
+                                        type="number"
+                                        value={amount}
+                                        onChange={(e) => setAmount(e.target.value)}
+                                        placeholder="0.00"
+                                        required
+                                        style={{ padding: '0.75rem', borderRadius: '6px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Category</label>
+                                    <ModernSelect
+                                        value={category}
+                                        options={INCOME_CATEGORIES.map(c => ({ id: c.name, label: c.name }))}
+                                        onChange={(val) => setCategory(val)}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Date</label>
+                                    <DatePicker 
+                                        value={date}
+                                        onChange={(newDate) => setDate(newDate)}
+                                        style={{ height: 'auto' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '0.5rem' }}>
+                                <button 
+                                    type="button"
+                                    onClick={() => setIsAdding(false)}
+                                    style={{
+                                        flex: 1,
+                                        padding: '0.85rem',
+                                        borderRadius: '6px',
+                                        border: '1.5px solid #e2e8f0',
+                                        background: 'white',
+                                        color: '#64748b',
+                                        fontSize: '13px',
+                                        fontWeight: '800',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="btn-premium-shine"
+                                    style={{
+                                        flex: 2,
+                                        padding: '0.85rem',
+                                        fontSize: '13px',
+                                        borderRadius: '6px',
+                                    }}
+                                >
+                                    Save Income Source
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </AnalyticsCard>
     );
 };

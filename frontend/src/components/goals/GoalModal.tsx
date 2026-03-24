@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import api from '../../lib/api';
 
 interface GoalModalProps {
     isOpen: boolean;
@@ -20,7 +19,6 @@ const GoalModal: React.FC<GoalModalProps> = ({
     onSave,
     goal
 }) => {
-    const { getToken } = useAuth();
     const [title, setTitle] = useState('');
     const [targetAmount, setTargetAmount] = useState('');
     const [currentAmount, setCurrentAmount] = useState('0');
@@ -56,8 +54,6 @@ const GoalModal: React.FC<GoalModalProps> = ({
 
         setLoading(true);
         try {
-            const token = await getToken();
-            setAuthToken(token);
             
             const payload = {
                 title,
@@ -84,20 +80,25 @@ const GoalModal: React.FC<GoalModalProps> = ({
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000,
-            backdropFilter: 'blur(4px)'
-        }}>
-            <div style={{
+        <div 
+            onClick={onClose}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0, 0, 0, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 2000,
+                backdropFilter: 'blur(4px)'
+            }}
+        >
+            <div 
+                onClick={(e) => e.stopPropagation()}
+                style={{
                 background: 'white',
                 borderRadius: '4px',
                 width: '100%',

@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
 import { ChevronDown } from 'lucide-react';
-import api, { setAuthToken } from '../../lib/api';
+import api from '../../lib/api';
+import { ModernSelect } from '../ModernSelect';
 
 interface CategoryData {
     name: string;
     value: number;
     percentage: string;
+    totalPercentage: string;
     color: string;
     budget?: number;
 }
@@ -23,12 +25,10 @@ const COLORS = [
     '#52a353', '#facc15'
 ];
 
-const DEFAULT_CATEGORIES = [
-    "Food & Dining", "Shopping", "Transportation", "Utilities", "Entertainment", "Health", "Others"
-];
+
 
 export const SpendingByCategory = () => {
-    const { getToken } = useAuth();
+    useAuth();
     const [expenses, setExpenses] = useState<any[]>([]);
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [recurring, setRecurring] = useState<any[]>([]);
@@ -41,18 +41,25 @@ export const SpendingByCategory = () => {
     const [showAll, setShowAll] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    const [timeRange, setTimeRange] = useState<'this_month' | 'all_time'>('all_time');
+
+    const [loans, setLoans] = useState<any[]>([]);
+    const [investments, setInvestments] = useState<any[]>([]);
+
     const fetchData = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
-            const [expRes, budRes, recRes] = await Promise.all([
+            const [expRes, budRes, recRes, loanRes, invRes] = await Promise.all([
                 api.get('/expenses'),
                 api.get('/budgets'),
-                api.get('/recurring')
+                api.get('/recurring'),
+                api.get('/loans'),
+                api.get('/investments')
             ]);
             setExpenses(expRes.data);
             setBudgets(budRes.data);
             setRecurring(recRes.data);
+            setLoans(loanRes.data);
+            setInvestments(invRes.data);
         } catch (error) {
             console.error('Failed to fetch spending data:', error);
         } finally {
@@ -65,56 +72,79 @@ export const SpendingByCategory = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const filteredExpenses = useMemo(() => {
+        if (timeRange === 'all_time') return expenses;
+        
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        return expenses.filter(exp => {
+            const expDate = new Date(exp.date);
+            return expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear;
+        });
+    }, [expenses, timeRange]);
+
+    const normalizeCategory = (cat: string) => {
+        const c = cat.trim();
+        if (c === 'Bills' || c === 'Utilities' || c === 'Bills & Utilities') return 'Bills & Utilities';
+        if (c === 'Other' || c === 'Others') return 'Others';
+        if (c === 'Health & Fitness' || c === 'Health') return 'Health & Fitness';
+        return c;
+    };
+
     const spendingData = useMemo(() => {
         const categoryMap: Record<string, number> = {};
-        let total = 0;
 
-        const allProperCategories = new Set([
-            ...DEFAULT_CATEGORIES,
-            ...budgets.map(b => b.category)
-        ]);
-
-        expenses.forEach(exp => {
-            let cat = exp.category;
-            if (!cat || !allProperCategories.has(cat)) {
-                cat = 'Others';
-            }
+        // 1. Process Expenses (Exclude Income and Investments)
+        filteredExpenses.forEach(exp => {
+            if (exp.category === 'Income' || exp.category === 'Investments') return;
+            const cat = normalizeCategory(exp.category || 'Others');
             categoryMap[cat] = (categoryMap[cat] || 0) + exp.amount;
-            total += exp.amount;
         });
 
-        // Add active recurring payments (monthly) to the respective categories
+        // 2. Add active recurring payments (monthly)
         recurring.filter(r => r.status === 'Active').forEach(rec => {
-            let cat = rec.category;
-            if (!cat || !allProperCategories.has(cat)) {
-                cat = 'Others';
-            }
+            if (rec.category === 'Income' || rec.category === 'Investments') return;
+            const cat = normalizeCategory(rec.category || 'Others');
             categoryMap[cat] = (categoryMap[cat] || 0) + rec.amount;
-            total += rec.amount;
         });
 
-        // Ensure all categories that have a budget OR are in DEFAULT_CATEGORIES are shown
+        // 3. Add Loans (All Time)
+        if (timeRange === 'all_time') {
+            const totalLoans = loans.reduce((acc, curr) => acc + curr.amount, 0);
+            if (totalLoans > 0) {
+                categoryMap['Debt Repayment'] = (categoryMap['Debt Repayment'] || 0) + totalLoans;
+            }
+        }
+
+        // Ensure all categories that have a budget OR are in categories found are shown
+        const budgetedCategories = budgets.map(b => normalizeCategory(b.category));
+        
         const allCategoryNames = Array.from(new Set([
-            ...DEFAULT_CATEGORIES,
-            ...budgets.map(b => b.category),
+            ...budgetedCategories,
             ...Object.keys(categoryMap)
-        ])).filter(cat => cat !== 'Income');
+        ])).filter(cat => cat !== 'Income' && cat !== 'Investments');
 
         const data: CategoryData[] = allCategoryNames.map((name, index) => {
             const value = categoryMap[name] || 0;
-            const budget = budgets.find(b => b.category === name)?.limit;
+            const budgetItem = budgets.find(b => normalizeCategory(b.category) === name);
+            const budget = budgetItem?.limit;
+            const totalSpent = Object.values(categoryMap).reduce((a, b) => a + b, 0);
+            const totalPercentage = totalSpent > 0 ? ((value / totalSpent) * 100).toFixed(1) + '%' : '0%';
 
             return {
                 name,
                 value,
                 percentage: (budget && budget > 0) ? ((value / budget) * 100).toFixed(1) + '%' : '0%',
+                totalPercentage,
                 color: COLORS[index % COLORS.length],
                 budget
             };
         });
 
         return data.sort((a, b) => b.value - a.value);
-    }, [expenses, budgets]);
+    }, [filteredExpenses, budgets, recurring, loans, investments, timeRange]);
 
     const filteredChartData = useMemo(() => {
         if (!selectedCategory) return spendingData.filter(d => d.value > 0);
@@ -123,18 +153,15 @@ export const SpendingByCategory = () => {
     }, [spendingData, selectedCategory]);
 
     const { totalSpent, totalBudget } = useMemo(() => {
-        const expenseSpent = expenses.reduce((acc, curr) => acc + curr.amount, 0);
-        const recurringSpent = recurring.filter(r => r.status === 'Active').reduce((acc, curr) => acc + curr.amount, 0);
+        const spent = spendingData.reduce((acc, curr) => acc + curr.value, 0);
         const budget = budgets.reduce((acc, curr) => acc + curr.limit, 0);
-        return { totalSpent: expenseSpent + recurringSpent, totalBudget: budget };
-    }, [expenses, budgets, recurring]);
+        return { totalSpent: spent, totalBudget: budget };
+    }, [spendingData, budgets]);
 
     const visibleData = showAll ? spendingData : spendingData.slice(0, 12);
 
     const handleBulkSaveBudgets = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
 
             const budgetsToSave = Object.entries(bulkBudgets)
                 .filter(([_, limit]) => limit !== '')
@@ -176,12 +203,23 @@ export const SpendingByCategory = () => {
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
+                paddingRight: '1rem',
                 alignItems: 'center',
                 marginBottom: '1.5rem'
             }}>
                 <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#1e293b' }}>Spending by category</h2>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <ModernSelect
+                        value={timeRange}
+                        options={[
+                            { id: 'this_month', label: 'This Month' },
+                            { id: 'all_time', label: 'All Time' }
+                        ]}
+                        onChange={(val) => setTimeRange(val as any)}
+                        style={{ width: '135px' }}
+                    />
+
                     <div style={{ position: 'relative' }}>
                         <div
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -191,12 +229,14 @@ export const SpendingByCategory = () => {
                                 gap: '4px',
                                 cursor: 'pointer',
                                 border: '1px solid #e2e8f0',
-                                padding: '4px 12px',
-                                borderRadius: '4px',
-                                fontSize: '0.85rem',
+                                padding: '10px 14px',
+                                borderRadius: '8px',
+                                fontSize: '0.875rem',
                                 color: '#64748b',
                                 background: selectedCategory ? '#eff6ff' : 'white',
-                                borderColor: selectedCategory ? '#3b82f6' : '#e2e8f0'
+                                borderColor: selectedCategory ? '#3b82f6' : '#e2e8f0',
+                                height: '44px',
+                                boxSizing: 'border-box'
                             }}
                         >
                             <span style={{ color: selectedCategory ? '#2563eb' : 'inherit', fontWeight: selectedCategory ? '700' : 'normal' }}>
@@ -389,17 +429,23 @@ export const SpendingByCategory = () => {
                                     <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#1e293b' }}>
                                         ₹{item.value.toLocaleString()}
                                     </div>
-                                    {item.budget !== undefined && (
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <span>of ₹{item.budget.toLocaleString()}</span>
-                                            <span style={{
-                                                color: item.value > item.budget ? '#ef4444' : '#22c55e',
-                                                fontWeight: 'bold'
-                                            }}>
-                                                ({item.percentage})
-                                            </span>
-                                        </div>
-                                    )}
+                                        {item.budget ? (
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                                                of ₹{item.budget.toLocaleString()} <span style={{ 
+                                                    color: parseFloat(item.percentage) > 100 ? '#ef4444' : '#16a34a',
+                                                    fontWeight: '700'
+                                                }}>({item.percentage})</span>
+                                            </div>
+                                        ) : (
+                                            (item.name === 'Memberships' || item.name === 'Debt Repayment') && item.value > 0 && (
+                                                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                                                     <span style={{ 
+                                                        color: '#16a34a',
+                                                        fontWeight: '700'
+                                                    }}>({item.totalPercentage} of total)</span>
+                                                </div>
+                                            )
+                                        )}
                                 </div>
                             </div>
                         ))}
@@ -427,14 +473,19 @@ export const SpendingByCategory = () => {
 
             {/* Bulk Budget Modal (Keep the existing modal logic) */}
             {isBudgetModalOpen && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px'
-                }}>
-                    <div style={{
+                <div 
+                    onClick={() => setIsBudgetModalOpen(false)}
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px'
+                    }}
+                >
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
                         background: 'white', width: '100%', maxWidth: '500px',
-                        borderRadius: '4px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+                        borderRadius: '4px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
                         display: 'flex', flexDirection: 'column', maxHeight: '85vh'
                     }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -442,12 +493,12 @@ export const SpendingByCategory = () => {
                             <button onClick={() => setIsBudgetModalOpen(false)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '24px' }}>&times;</button>
                         </div>
                         <div style={{ padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {DEFAULT_CATEGORIES.map(category => (
-                                <div key={category} style={{ display: 'grid', gridTemplateColumns: '1fr 150px', alignItems: 'center', gap: '1rem', padding: '0.5rem', borderBottom: '1px solid #f8fafc' }}>
-                                    <span style={{ fontSize: '0.875rem', fontWeight: '600' }}>{category}</span>
+                            {spendingData.map(item => (
+                                <div key={item.name} style={{ display: 'grid', gridTemplateColumns: '1fr 150px', alignItems: 'center', gap: '1rem', padding: '0.5rem', borderBottom: '1px solid #f8fafc' }}>
+                                    <span style={{ fontSize: '0.875rem', fontWeight: '600' }}>{item.name}</span>
                                     <input
-                                        type="number" value={bulkBudgets[category] || ''}
-                                        onChange={e => setBulkBudgets(prev => ({ ...prev, [category]: e.target.value }))}
+                                        type="number" value={bulkBudgets[item.name] || ''}
+                                        onChange={e => setBulkBudgets(prev => ({ ...prev, [item.name]: e.target.value }))}
                                         placeholder="0.00"
                                         style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #e2e8f0', textAlign: 'right' }}
                                     />

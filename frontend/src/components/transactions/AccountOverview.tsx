@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '../Card';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 import { Plus } from 'lucide-react';
 
 interface Account {
@@ -11,7 +11,7 @@ interface Account {
 }
 
 export const AccountOverview = () => {
-    const { getToken } = useAuth();
+    useAuth();
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAccOpen, setIsAccOpen] = useState(false);
@@ -22,8 +22,6 @@ export const AccountOverview = () => {
 
     const fetchAccounts = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const response = await api.get('/accounts');
             setAccounts(response.data);
         } catch (error) {
@@ -35,14 +33,12 @@ export const AccountOverview = () => {
 
     useEffect(() => {
         fetchAccounts();
-    }, [getToken]);
+    }, []);
 
     const handleAccSave = async () => {
         if (!accFormData.name) return;
         setIsSaving(true);
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.post('/accounts', accFormData);
             await fetchAccounts();
             setIsAccOpen(false);
@@ -61,7 +57,9 @@ export const AccountOverview = () => {
         <Card style={{ padding: '1.25rem', background: 'white', borderRadius: '4px', height: '100%' }}>
             {/* Modal Overlay: Add Account */}
             {isAccOpen && (
-                <div style={{
+                <div 
+                    onClick={() => setIsAccOpen(false)}
+                    style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -75,14 +73,17 @@ export const AccountOverview = () => {
                     zIndex: 2000,
                     padding: '20px'
                 }}>
-                    <div style={{
-                        background: 'white',
-                        width: '100%',
-                        maxWidth: '500px',
-                        borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
-                        overflow: 'hidden'
-                    }}>
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: 'white',
+                            width: '100%',
+                            maxWidth: '500px',
+                            borderRadius: '4px',
+                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+                            position: 'relative'
+                        }}
+                    >
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add New Account</h3>
                             <button onClick={() => setIsAccOpen(false)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '20px' }}>&times;</button>
@@ -138,7 +139,9 @@ export const AccountOverview = () => {
             
             {/* Modal Overlay: View Account Details */}
             {isViewModalOpen && selectedAccount && (
-                <div style={{
+                <div 
+                    onClick={() => setIsViewModalOpen(false)}
+                    style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -152,21 +155,24 @@ export const AccountOverview = () => {
                     zIndex: 2000,
                     padding: '20px'
                 }}>
-                    <div style={{
-                        background: 'white',
-                        width: '100%',
-                        maxWidth: '500px',
-                        borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
-                        overflow: 'hidden'
-                    }}>
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: 'white',
+                            width: '100%',
+                            maxWidth: '500px',
+                            borderRadius: '4px',
+                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+                            position: 'relative'
+                        }}
+                    >
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Account Details</h3>
                             <button onClick={() => setIsViewModalOpen(false)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '20px' }}>&times;</button>
                         </div>
                         
                         <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-                            <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                            <div style={{ textAlign: 'center', color: '#10b981' }}>
                                 <div style={{ fontSize: '2.5rem', fontWeight: '800' }}>₹{selectedAccount.balance.toLocaleString()}</div>
                             </div>
                             

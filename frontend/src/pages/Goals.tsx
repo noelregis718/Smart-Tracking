@@ -4,8 +4,7 @@ import GoalSidebar from '../components/goals/GoalSidebar';
 import GoalTransferModal from '../components/goals/GoalTransferModal';
 import GoalModal from '../components/goals/GoalModal';
 import { GoalTasks } from '../components/goals/GoalTasks';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../lib/api';
+import api from '../lib/api';
 import { Plus } from 'lucide-react';
 
 interface Goal {
@@ -26,7 +25,6 @@ interface Account {
 }
 
 export const Goals = () => {
-    const { getToken } = useAuth();
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
     const [editingGoal, setEditingGoal] = useState<any>(null);
@@ -36,8 +34,6 @@ export const Goals = () => {
 
     const fetchGoals = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const res = await api.get('/goals');
             setGoals(res.data);
             
@@ -57,8 +53,6 @@ export const Goals = () => {
         }
 
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.delete(`/goals/${id}`);
             fetchGoals();
         } catch (error: any) {
@@ -79,7 +73,8 @@ export const Goals = () => {
 
     useEffect(() => {
         fetchGoals();
-    }, [getToken]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const totalAvailable = accounts.reduce((acc, curr) => acc + curr.balance, 0);
 
@@ -93,7 +88,7 @@ export const Goals = () => {
             gap: '2.5rem'
         }}>
             <div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem', alignItems: 'start' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem' }}>
                     {/* Left Column */}
                     <div id="all-savings-goals" style={{ 
                         display: 'flex', 
@@ -103,7 +98,7 @@ export const Goals = () => {
                         padding: '1.5rem',
                         marginTop: '3mm',
                         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-                        height: 'fit-content'
+                        height: '100%'
                     }}>
                         <h1 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', textTransform: 'capitalize' }}>Save up</h1>
                         {loading ? (
@@ -154,7 +149,7 @@ export const Goals = () => {
                     </div>
 
                     {/* Right Column */}
-                    <div id="savings-transfer" style={{ position: 'sticky', top: '2rem', marginTop: '3mm' }}>
+                    <div id="savings-transfer" style={{ position: 'sticky', top: '2rem', marginTop: '3mm', height: '100%', display: 'flex', flexDirection: 'column' }}>
                         <GoalSidebar 
                             totalAvailable={totalAvailable}
                             accounts={accounts.map(a => ({ name: a.name, balance: a.balance, color: '#2563eb' }))}

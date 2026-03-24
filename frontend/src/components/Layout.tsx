@@ -5,8 +5,6 @@ import {
     ArrowLeftRight,
     Target,
     Search,
-    Settings,
-    HelpCircle,
     PanelLeft,
     PanelRight,
     Wallet,
@@ -14,7 +12,7 @@ import {
     FileText,
     LogOut
 } from 'lucide-react';
-import { useUser, SignOutButton } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { Button } from './Button';
 import { ReportModal } from './dashboard/ReportModal';
 
@@ -57,12 +55,10 @@ const SEARCH_ITEMS = [
     { label: 'AI Assistant', path: '/dashboard/analytics#ai-assistant', keywords: ['bot', 'help', 'ask', 'assistant', 'financial advisor'] },
 
     // Settings & Help
-    { label: 'Settings', path: '/dashboard/settings', keywords: ['profile', 'account', 'config', 'security', 'notifications'] },
-    { label: 'Help', path: '/dashboard/help', keywords: ['support', 'faq', 'docs', 'tickets', 'contact'] },
 ];
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
-    const { user } = useUser();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -188,8 +184,9 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 </nav>
 
                 <div style={{ padding: '1rem 0.75rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <SignOutButton>
-                        <button style={{
+                    <button 
+                        onClick={logout}
+                        style={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: isCollapsed ? 'center' : 'flex-start',
@@ -206,14 +203,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                             width: 'calc(100% - 8px)',
                             textAlign: 'left'
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '18px' }}>
-                                <LogOut size={18} />
-                            </div>
-                            {!isCollapsed && <span>Log out</span>}
-                        </button>
-                    </SignOutButton>
-                    <SidebarLink to="/dashboard/settings" icon={<Settings size={18} />} label="Settings" collapsed={isCollapsed} />
-                    <SidebarLink to="/dashboard/help" icon={<HelpCircle size={18} />} label="Help" collapsed={isCollapsed} />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '18px' }}>
+                            <LogOut size={18} />
+                        </div>
+                        {!isCollapsed && <span>Log out</span>}
+                    </button>
 
                     <div style={{
                         marginTop: '1.5rem',
@@ -224,7 +218,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                         gap: '0.75rem'
                     }}>
                         <img
-                            src={user?.imageUrl}
+                            src={user?.picture || `https://ui-avatars.com/api/?name=${user?.name}&background=random`}
                             alt="Profile"
                             style={{
                                 width: '40px',
@@ -237,10 +231,10 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                         {!isCollapsed && (
                             <div style={{ overflow: 'hidden' }}>
                                 <div style={{ fontSize: '0.875rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {user?.fullName}
+                                    {user?.name}
                                 </div>
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {user?.primaryEmailAddress?.emailAddress}
+                                    {user?.email}
                                 </div>
                             </div>
                         )}
@@ -338,7 +332,7 @@ const SidebarLink = ({ to, icon, label, collapsed, badge }: { to: string, icon: 
             padding: '0.625rem 0.75rem',
             borderRadius: '4px',
             color: isActive ? '#0f172a' : 'var(--text-muted)',
-            fontWeight: isActive ? '700' : '500',
+            fontWeight: '500',
             background: isActive ? '#f8fafc' : 'transparent',
             border: isActive ? '1px solid #e2e8f0' : '1px solid transparent',
             boxShadow: isActive ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',

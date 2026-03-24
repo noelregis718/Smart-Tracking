@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../lib/api';
+import { useAuth } from './AuthContext';
+import api from '../lib/api';
 
 export interface Expense {
     id: string;
@@ -21,17 +21,15 @@ interface ExpensesContextType {
 const ExpensesContext = createContext<ExpensesContextType | undefined>(undefined);
 
 export const ExpensesProvider = ({ children }: { children: ReactNode }) => {
-    const { getToken, isLoaded, isSignedIn } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchExpenses = async () => {
-        if (!isLoaded || !isSignedIn) return;
+        if (authLoading || !user) return;
         
         try {
             setLoading(true);
-            const token = await getToken();
-            setAuthToken(token);
             const response = await api.get('/expenses');
             setExpenses(response.data);
         } catch (error) {
@@ -42,13 +40,16 @@ export const ExpensesProvider = ({ children }: { children: ReactNode }) => {
     };
 
     useEffect(() => {
-        fetchExpenses();
-    }, [isLoaded, isSignedIn]);
+        if (user) {
+            fetchExpenses();
+        } else if (!authLoading) {
+            setExpenses([]);
+            setLoading(false);
+        }
+    }, [user, authLoading]);
 
     const addExpense = async (expense: Omit<Expense, 'id'>) => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.post('/expenses', expense);
             await fetchExpenses();
         } catch (error) {
@@ -58,8 +59,6 @@ export const ExpensesProvider = ({ children }: { children: ReactNode }) => {
 
     const deleteExpense = async (id: string) => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.delete(`/expenses/${id}`);
             await fetchExpenses();
         } catch (error) {

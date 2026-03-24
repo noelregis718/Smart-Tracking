@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, CheckCircle, Circle, Loader2 } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 
 interface Task {
     id: string;
@@ -16,7 +16,7 @@ interface GoalTasksProps {
 }
 
 export const GoalTasks: React.FC<GoalTasksProps> = ({ goalId, title = "Goal Tasks" }) => {
-    const { getToken } = useAuth();
+    const { user } = useAuth();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -24,8 +24,6 @@ export const GoalTasks: React.FC<GoalTasksProps> = ({ goalId, title = "Goal Task
 
     const fetchTasks = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const response = await api.get('/tasks', {
                 params: { goalId }
             });
@@ -39,7 +37,7 @@ export const GoalTasks: React.FC<GoalTasksProps> = ({ goalId, title = "Goal Task
 
     useEffect(() => {
         fetchTasks();
-    }, [getToken, goalId]);
+    }, [user, goalId]);
 
     const handleAddTask = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,8 +45,6 @@ export const GoalTasks: React.FC<GoalTasksProps> = ({ goalId, title = "Goal Task
 
         setIsAdding(true);
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const response = await api.post('/tasks', {
                 title: newTaskTitle,
                 goalId
@@ -64,8 +60,6 @@ export const GoalTasks: React.FC<GoalTasksProps> = ({ goalId, title = "Goal Task
 
     const toggleTaskStatus = async (task: Task) => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const updatedTask = await api.put(`/tasks/${task.id}`, {
                 completed: !task.completed
             });
@@ -77,8 +71,6 @@ export const GoalTasks: React.FC<GoalTasksProps> = ({ goalId, title = "Goal Task
 
     const handleDeleteTask = async (id: string) => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.delete(`/tasks/${id}`);
             setTasks(tasks.filter(t => t.id !== id));
         } catch (error) {

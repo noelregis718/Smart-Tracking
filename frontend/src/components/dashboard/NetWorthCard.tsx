@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 import { Card } from '../Card';
 import { Info } from 'lucide-react';
 import {
@@ -25,7 +25,7 @@ interface Investment { amount: number; }
 interface Loan { total: number; amount: number; }
 
 export const NetWorthCard = () => {
-    const { getToken } = useAuth();
+    const { user } = useAuth();
     const [expenses, setExpenses] = useState<Transaction[]>([]);
     const [income, setIncome] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -36,8 +36,6 @@ export const NetWorthCard = () => {
     useEffect(() => {
         const fetchAllData = async () => {
             try {
-                const token = await getToken();
-                setAuthToken(token);
                 const [expRes, incRes, accs, invs, loansRes] = await Promise.all([
                     api.get('/expenses'),
                     api.get('/income'),
@@ -57,8 +55,7 @@ export const NetWorthCard = () => {
             }
         };
         fetchAllData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [user]);
 
     const { chartData, currentNetWorth, oneMonthChange, changePercent } = useMemo(() => {
         // 1. Current Net Worth logic

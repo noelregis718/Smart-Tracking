@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Info, ChevronDown, Plus } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
-import api, { setAuthToken } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 
 interface Budget {
     category: string;
@@ -150,7 +150,7 @@ function SummaryRow({ label, amount, type }: { label: string, amount: number, ty
 }
 
 export const LeftToBudget = () => {
-    const { getToken } = useAuth();
+    const { user } = useAuth();
     const [expenses, setExpenses] = useState<any[]>([]);
     const [income, setIncome] = useState<any[]>([]);
     const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -159,8 +159,6 @@ export const LeftToBudget = () => {
 
     const fetchData = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const [expRes, budRes, incRes] = await Promise.all([
                 api.get('/expenses'),
                 api.get('/budgets'),
@@ -178,7 +176,7 @@ export const LeftToBudget = () => {
 
     useEffect(() => {
         fetchData();
-    }, [getToken]);
+    }, [user]);
 
     const stats = useMemo(() => {
         const groups = {
@@ -188,12 +186,14 @@ export const LeftToBudget = () => {
         };
 
         expenses.forEach(exp => {
+            if (exp.category === 'Income') return;
             if (groups.Fixed.categories.includes(exp.category)) groups.Fixed.spent += exp.amount;
             else if (groups.Flexible.categories.includes(exp.category)) groups.Flexible.spent += exp.amount;
             else groups['Non-Monthly'].spent += exp.amount;
         });
 
         budgets.forEach(b => {
+            if (b.category === 'Income') return;
             if (groups.Fixed.categories.includes(b.category)) groups.Fixed.budget += b.limit;
             else if (groups.Flexible.categories.includes(b.category)) groups.Flexible.budget += b.limit;
             else groups['Non-Monthly'].budget += b.limit;
@@ -314,7 +314,7 @@ export const LeftToBudget = () => {
 };
 
 export const RecurringPayments = () => {
-    const { getToken } = useAuth();
+    const { user } = useAuth();
     const [recurring, setRecurring] = useState<RecurringPayment[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -329,12 +329,13 @@ export const RecurringPayments = () => {
         billingDay: '1'
     });
 
-    const categories = ['SaaS Tools', 'Cloud Services', 'Memberships', 'Entertainment', 'Utilities', 'Others'];
+    const allCategories = useMemo(() => {
+        const defaults = ['SaaS Tools', 'Cloud Services', 'Memberships', 'Entertainment', 'Utilities', 'Others'];
+        return Array.from(new Set([...defaults, ...recurring.map(r => r.category)]));
+    }, [recurring]);
 
     const fetchRecurring = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const response = await api.get('/recurring');
             setRecurring(response.data);
         } catch (error) {
@@ -346,12 +347,10 @@ export const RecurringPayments = () => {
 
     useEffect(() => {
         fetchRecurring();
-    }, [getToken]);
+    }, [user]);
 
     const handleSave = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             if (editingItem) {
                 await api.put(`/recurring/${editingItem.id}`, formData);
             } else {
@@ -369,8 +368,6 @@ export const RecurringPayments = () => {
     const handleDelete = async (id: string) => {
         if (!window.confirm('Are you sure you want to delete this recurring payment?')) return;
         try {
-            const token = await getToken();
-            setAuthToken(token);
             await api.delete(`/recurring/${id}`);
             fetchRecurring();
         } catch (error) {
@@ -383,7 +380,7 @@ export const RecurringPayments = () => {
         const monthlyTotal = active.reduce((acc, curr) => acc + curr.amount, 0);
         
         // Group by category for the rows
-        const grouped = categories.map(cat => ({
+        const grouped = allCategories.map(cat => ({
             label: cat,
             count: recurring.filter(r => r.category === cat).length,
             amount: recurring.filter(r => r.category === cat && r.status === 'Active').reduce((acc, curr) => acc + curr.amount, 0)
@@ -409,7 +406,8 @@ export const RecurringPayments = () => {
             padding: '1.25rem', 
             borderRadius: '4px', 
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-            marginLeft: '-2mm'
+            marginLeft: '-2mm',
+            height: '100%'
         }}>
             <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Recurring Payments</h3>
@@ -469,18 +467,23 @@ export const RecurringPayments = () => {
 
             {/* Modal */}
             {isModalOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.4)',
-                    backdropFilter: 'blur(4px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 2000,
-                    padding: '20px'
-                }}>
-                    <div style={{
+                <div 
+                    onClick={() => { setIsModalOpen(false); setEditingItem(null); }}
+                    style={{
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.4)',
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 2000,
+                        padding: '20px'
+                    }}
+                >
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
                         background: 'white',
                         width: '100%',
                         maxWidth: '500px',
@@ -649,7 +652,7 @@ export const RecurringPayments = () => {
                                                 maxHeight: '200px',
                                                 overflowY: 'auto'
                                             }}>
-                                                {categories.map(c => (
+                                                {allCategories.map(c => (
                                                     <div 
                                                         key={c} 
                                                         onClick={() => { setFormData({...formData, category: c}); setIsCategoryOpen(false); }}
@@ -764,18 +767,23 @@ const DuePaymentReminder = ({ recurring, onAcknowledge }: { recurring: Recurring
     if (!isOpen || duePayments.length === 0) return null;
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 3000,
-            padding: '20px'
-        }}>
-            <div style={{
+        <div 
+            onClick={() => setIsOpen(false)}
+            style={{
+                position: 'fixed',
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(8px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 3000,
+                padding: '20px'
+            }}
+        >
+            <div 
+                onClick={(e) => e.stopPropagation()}
+                style={{
                 background: 'white',
                 width: '100%',
                 maxWidth: '450px',
@@ -843,13 +851,11 @@ const DuePaymentReminder = ({ recurring, onAcknowledge }: { recurring: Recurring
 // --- Default Export Wrapper ---
 
 export const BudgetSummary = () => {
-    const { getToken } = useAuth();
+    const { user } = useAuth();
     const [recurring, setRecurring] = useState<RecurringPayment[]>([]);
 
     const fetchRecurring = async () => {
         try {
-            const token = await getToken();
-            setAuthToken(token);
             const response = await api.get('/recurring');
             setRecurring(response.data);
         } catch (error) {
@@ -859,7 +865,7 @@ export const BudgetSummary = () => {
 
     useEffect(() => {
         fetchRecurring();
-    }, [getToken]);
+    }, [user]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
