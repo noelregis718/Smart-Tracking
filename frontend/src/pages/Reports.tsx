@@ -17,13 +17,7 @@ export const Reports = () => {
             minHeight: '100vh',
             marginTop: '-0.5rem'
         }}>
-            {/* Header Area */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Financial Analytics</h1>
-            </div>
-
-            {/* KPI Cards */}
-            <div id="kpi-metrics">
+            <div id="kpi-metrics" style={{ marginTop: '2mm' }}>
                 <KPISection />
             </div>
 

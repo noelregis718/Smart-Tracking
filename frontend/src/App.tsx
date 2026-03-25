@@ -13,7 +13,6 @@ import { Budget } from './pages/Budget';
 import { Goals } from './pages/Goals';
 import { Settings } from './pages/Settings';
 import { Help } from './pages/Help';
-import { DemoTravelConnect } from './components/TravelConnectDemo';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { ExpensesProvider } from './context/ExpensesContext';
@@ -73,7 +72,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/demo/travel-connect" element={<DemoTravelConnect />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ExpensesProvider>

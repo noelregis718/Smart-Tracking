@@ -66,6 +66,7 @@ export const RecentTransactionsTable = ({
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchData = async () => {
         try {
@@ -85,6 +86,15 @@ export const RecentTransactionsTable = ({
             setLoading(false);
         }
     };
+
+    const filteredTransactions = useMemo(() => {
+        if (!searchTerm.trim()) return transactions;
+        const lowerTerm = searchTerm.toLowerCase();
+        return transactions.filter(tx => 
+            tx.title.toLowerCase().includes(lowerTerm) || 
+            tx.category.toLowerCase().includes(lowerTerm)
+        );
+    }, [transactions, searchTerm]);
 
     const availableCategories = useMemo(() => {
         const defaults = [
@@ -512,6 +522,8 @@ export const RecentTransactionsTable = ({
                         <input
                             type="text"
                             placeholder="Search anything"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             style={{
                                 padding: '8px 12px',
                                 border: '1px solid #e2e8f0',
@@ -552,14 +564,14 @@ export const RecentTransactionsTable = ({
                         </tr>
                     </thead>
                     <tbody>
-                        {transactions.length === 0 ? (
+                        {filteredTransactions.length === 0 ? (
                             <tr>
                                 <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
-                                    No transactions found. Start adding your expenses!
+                                    {searchTerm ? 'No matching transactions found.' : 'No transactions found. Start adding your expenses!'}
                                 </td>
                             </tr>
                         ) : (
-                            transactions.map((tx) => (
+                            filteredTransactions.map((tx) => (
                                 <tr key={tx.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                     <td style={{ padding: '12px 24px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

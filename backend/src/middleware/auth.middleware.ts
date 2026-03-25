@@ -11,7 +11,6 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  // 1. Try Custom JWT first
   const authHeader = req.headers.authorization;
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -21,17 +20,9 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
       req.userId = decoded.userId;
       return next();
     } catch (error) {
-      // If custom JWT verification fails, we don't return 401 immediately.
-      // We log the error and allow the fallback to Clerk auth below.
-      console.warn('Custom JWT verification failed, falling back to Clerk:', (error as Error).message);
+      console.warn('JWT verification failed:', (error as Error).message);
     }
   }
 
-  // 2. Fallback to Clerk Auth (attached by ClerkExpressWithAuth middleware)
-  if (req.auth && req.auth.userId) {
-    req.userId = req.auth.userId;
-    return next();
-  }
-
-  return res.status(401).json({ error: 'Unauthorized: No valid session found' });
+  return res.status(401).json({ error: 'Unauthorized: Please login with Google' });
 };

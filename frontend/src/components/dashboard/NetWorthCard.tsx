@@ -101,10 +101,11 @@ export const NetWorthCard = () => {
             runningNW -= todayNetChange;
         }
 
+        // reversedPoints goes from 30 days ago at index 0 to today at index 29
         const reversedPoints = historicalPoints.reverse();
         const startNW = reversedPoints[0].value;
         const diffNW = currentNW - startNW;
-        const pctNW = startNW !== 0 ? (diffNW / startNW) * 100 : 0;
+        const pctNW = startNW !== 0 ? (diffNW / Math.abs(startNW)) * 100 : (currentNW > 0 ? 100 : 0);
 
         return { 
             chartData: reversedPoints, 
@@ -113,6 +114,12 @@ export const NetWorthCard = () => {
             changePercent: pctNW
         };
     }, [expenses, income, accounts, investments, loans]);
+
+    const [isReady, setIsReady] = useState(false);
+    useEffect(() => {
+        const timer = setTimeout(() => setIsReady(true), 150);
+        return () => clearTimeout(timer);
+    }, []);
 
     if (loading) return <Card style={{ padding: '2rem', textAlign: 'center' }}>Building your wealth profile...</Card>;
 
@@ -150,8 +157,9 @@ export const NetWorthCard = () => {
                 </div>
             </div>
 
-            <div style={{ height: '300px', width: '100%', marginLeft: '-10px' }}>
-                <ResponsiveContainer width="100%" height="100%">
+            <div style={{ height: '300px', minHeight: '300px', width: '100%', marginLeft: '-10px' }}>
+                {isReady && (
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                     <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                             <linearGradient id="wealthGradient" x1="0" y1="0" x2="0" y2="1">
@@ -169,8 +177,8 @@ export const NetWorthCard = () => {
                             dy={10}
                         />
                         <YAxis
-                            hide={true} // Cleaner "Premium" look like the image
-                            domain={['dataMin - 5000', 'dataMax + 5000']}
+                            hide={true}
+                            domain={['dataMin - 10000', 'dataMax + 10000']}
                         />
                         <Tooltip 
                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
@@ -183,10 +191,12 @@ export const NetWorthCard = () => {
                             strokeWidth={3}
                             fillOpacity={1}
                             fill="url(#wealthGradient)"
+                            baseValue="dataMin"
                             animationDuration={1500}
                         />
                     </AreaChart>
                 </ResponsiveContainer>
+                )}
             </div>
         </Card>
     );

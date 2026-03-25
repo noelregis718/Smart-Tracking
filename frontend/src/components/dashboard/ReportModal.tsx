@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, FileText, Download, ChevronLeft, ChevronRight, ChevronDown, AlertCircle } from 'lucide-react';
+import { X, Calendar, Download, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
 import { jsPDF } from 'jspdf';
@@ -228,6 +228,9 @@ const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, label, isActiv
 export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose }) => {
     const { user } = useAuth();
     
+    // These states are currently unused in the report generation logic
+    // const [stats, setStats] = useState<any[]>([]);
+    // const [loading, setLoading] = useState(false);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [selectedCategories, setSelectedCategories] = useState<string[]>(CATEGORIES);
@@ -547,17 +550,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose }) => 
                 </button>
 
                 {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-                    <div style={{ 
-                        padding: '10px', 
-                        borderRadius: '8px', 
-                        border: '1.5px solid #1e293b', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center' 
-                    }}>
-                        <FileText size={24} color="#1e293b" />
-                    </div>
+                <div style={{ marginBottom: '2rem' }}>
                     <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800', color: '#1e293b' }}>
                         Custom Report Builder
                     </h2>
@@ -598,7 +591,6 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose }) => 
                                         borderRadius: '8px',
                                         display: 'flex',
                                         justifyContent: 'space-between',
-                                        alignItems: 'center',
                                         cursor: 'pointer',
                                         minHeight: '52px'
                                     }}
@@ -608,7 +600,6 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose }) => 
                                             ? 'All Categories' 
                                             : `${selectedCategories.length} Categories Selected`}
                                     </span>
-                                    <ChevronDown size={20} style={{ color: '#94a3b8', transform: isCategoryOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                                 </div>
 
                                 {isCategoryOpen && (

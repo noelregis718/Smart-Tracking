@@ -102,9 +102,6 @@ const Dropdown = ({ label, value, onChange }: { label: string, value: string, on
     );
 };
 
-const API_KEY = import.meta.env.VITE_EXCHANGE_RATES_API_KEY;
-const CACHE_KEY = 'currency_rates_cache';
-const CACHE_DURATION = 3600000; // 1 hour
 
 const ConversionTool: React.FC = () => {
     const [amount, setAmount] = useState<number>(1000);
@@ -116,29 +113,15 @@ const ConversionTool: React.FC = () => {
     useEffect(() => {
         const fetchRates = async () => {
             try {
-                // Check cache first
-                const cached = localStorage.getItem(CACHE_KEY);
-                if (cached) {
-                    const { data, timestamp } = JSON.parse(cached);
-                    if (Date.now() - timestamp < CACHE_DURATION) {
-                        setRates(data);
-                        return;
-                    }
-                }
-
-                const symbols = currencies.map(c => c.code).join(',');
-                const response = await fetch(`http://api.exchangeratesapi.io/v1/latest?access_key=${API_KEY}&symbols=${symbols}`);
-                const json = await response.json();
-
-                if (json.success && json.rates) {
-                    setRates(json.rates);
-                    localStorage.setItem(CACHE_KEY, JSON.stringify({
-                        data: json.rates,
-                        timestamp: Date.now()
-                    }));
+                // Call our internal proxy to avoid 429s and keep API key secure
+                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/external/exchange-rates`);
+                const data = await response.json();
+                
+                if (data && typeof data === 'object') {
+                    setRates(data);
                 }
             } catch (error) {
-                console.error('Failed to fetch rates:', error);
+                console.error('Failed to fetch rates from internal proxy:', error);
             }
         };
 

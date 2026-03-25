@@ -3,7 +3,6 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import { ClerkExpressWithAuth } from '@clerk/clerk-sdk-node';
 import authRoutes from './routes/auth.routes';
 import expenseRoutes from './routes/expense.routes';
 import accountRoutes from './routes/account.routes';
@@ -14,6 +13,8 @@ import goalRoutes from './routes/goal.routes';
 import recurringRoutes from './routes/recurring.routes';
 import taskRoutes from './routes/task.routes';
 import incomeRoutes from './routes/income.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import externalRoutes from './routes/external.routes';
 
 
 const app = express();
@@ -22,7 +23,6 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(ClerkExpressWithAuth() as any);
 
 // Logger Middleware
 app.use((req, res, next) => {
@@ -45,6 +45,8 @@ app.use('/api/goals', goalRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/income', incomeRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/external', externalRoutes);
 
 
 // Error Handler

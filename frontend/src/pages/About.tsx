@@ -85,7 +85,7 @@ const About = () => {
             {/* Founding Team Section */}
             <section className="about-team">
                 <header className="team-header">
-                    <h2>Founding Team<br />Behind the Fintechy</h2>
+                    <h2>Founding Team<br />Behind the Expensify</h2>
                     <p className="team-subtitle">
                         Powered by smart technology and built by a strong founding<br />team, we are shaping the future of global finance together.
                     </p>
@@ -99,20 +99,20 @@ const About = () => {
                         <h3>Mantosh Kumar Yadav</h3>
                         <p className="founder-role">CEO & Founder</p>
                         <div className="founder-socials">
-                            <Link to="#" className="social-link"><XIcon size={18} /></Link>
-                            <Link to="#" className="social-link"><Linkedin size={18} /></Link>
+                            <a href="#" className="social-link"><XIcon size={18} /></a>
+                            <a href="https://www.linkedin.com/in/mantosh-kumar-yadav-b819b8291?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank" rel="noopener noreferrer" className="social-link"><Linkedin size={18} /></a>
                         </div>
                     </div>
 
                     <div className="founder-card">
                         <div className="founder-avatar-placeholder">
-                            {/* Image placeholder - to be updated by user later */}
+                            <img src="/2.jpeg" alt="Noel Regis" className="founder-avatar" />
                         </div>
                         <h3>Noel Regis</h3>
                         <p className="founder-role">CTO & Co-Founder</p>
                         <div className="founder-socials">
-                            <Link to="#" className="social-link"><XIcon size={18} /></Link>
-                            <Link to="#" className="social-link"><Linkedin size={18} /></Link>
+                            <a href="https://x.com/NoelRegis8" target="_blank" rel="noopener noreferrer" className="social-link"><XIcon size={18} /></a>
+                            <a href="https://www.linkedin.com/in/noel-regis-aa07081b1/" target="_blank" rel="noopener noreferrer" className="social-link"><Linkedin size={18} /></a>
                         </div>
                     </div>
 
@@ -123,8 +123,8 @@ const About = () => {
                         <h3>Md. Raqib Alam</h3>
                         <p className="founder-role">CTO & Co-Founder</p>
                         <div className="founder-socials">
-                            <Link to="#" className="social-link"><XIcon size={18} /></Link>
-                            <Link to="#" className="social-link"><Linkedin size={18} /></Link>
+                            <a href="https://x.com/Raqib_alam01" target="_blank" rel="noopener noreferrer" className="social-link"><XIcon size={18} /></a>
+                            <a href="https://www.linkedin.com/in/md-raqib-alam-722311357?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" className="social-link"><Linkedin size={18} /></a>
                         </div>
                     </div>
                 </div>

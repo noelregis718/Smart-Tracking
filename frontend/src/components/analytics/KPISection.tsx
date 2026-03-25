@@ -43,22 +43,17 @@ const KPISection: React.FC = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [incRes, budRes, accRes, loanRes, invRes, goalRes] = await Promise.all([
-                api.get('/income'),
-                api.get('/budgets'),
-                api.get('/accounts'),
-                api.get('/loans'),
-                api.get('/investments'),
-                api.get('/goals')
-            ]);
-            setIncome(incRes.data);
-            setBudgets(budRes.data);
-            setAccounts(accRes.data);
-            setLoans(loanRes.data);
-            setInvestments(invRes.data);
-            setGoals(goalRes.data);
+            const response = await api.get('/dashboard/summary');
+            const data = response.data;
+            
+            setIncome(data.income || []);
+            setBudgets(data.budgets || []);
+            setAccounts(data.accounts || []);
+            setLoans(data.loans || []);
+            setInvestments(data.investments || []);
+            setGoals(data.goals || []);
         } catch (error) {
-            console.error('Failed to fetch data for health score:', error);
+            console.error('Failed to fetch consolidated health data:', error);
         } finally {
             setLoading(false);
         }
@@ -75,6 +70,10 @@ const KPISection: React.FC = () => {
     // Robust Financial Health Calculation Logic
     const healthScore = useMemo(() => {
         if (loading || expensesLoading) return 0;
+
+        // 0. Check for No Data
+        const hasData = [expenses, income, budgets, loans, investments, goals, accounts].some(arr => arr.length > 0);
+        if (!hasData) return 0;
 
         // 1. Savings Rate (30%)
         let savingsScore = 0;

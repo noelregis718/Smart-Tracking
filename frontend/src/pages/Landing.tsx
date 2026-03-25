@@ -105,35 +105,8 @@ export const Landing = () => {
                 <div className="preview-wrapper">
                     <div className="preview-line-extension"></div>
                     <div className="preview-line-extension-left"></div>
-                    <div className="preview-container">
-                        <div className="mockup-header">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Expensify</span>
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <div style={{ width: '80px', height: '24px', background: '#f3f4f6', borderRadius: '4px' }}></div>
-                                <div style={{ width: '24px', height: '24px', background: '#f3f4f6', borderRadius: '4px' }}></div>
-                            </div>
-                        </div>
-                        <div className="mockup-main">
-                            <div className="mockup-sidebar">
-                                <div className="skeleton-text" style={{ width: '80%' }}></div>
-                                <div className="skeleton-text" style={{ width: '90%' }}></div>
-                                <div className="skeleton-text" style={{ width: '70%' }}></div>
-                                <div style={{ marginTop: '2rem' }}>
-                                    <div className="skeleton-text" style={{ width: '85%' }}></div>
-                                    <div className="skeleton-text" style={{ width: '95%' }}></div>
-                                </div>
-                            </div>
-                            <div className="mockup-content">
-                                <div className="skeleton-title"></div>
-                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-                                    <div style={{ flex: 1, height: '80px', background: '#f9fafb', borderRadius: '4px', border: '1px solid #f3f4f6' }}></div>
-                                    <div style={{ flex: 1, height: '80px', background: '#f9fafb', borderRadius: '4px', border: '1px solid #f3f4f6' }}></div>
-                                </div>
-                                <div className="skeleton-chart"></div>
-                            </div>
-                        </div>
+                    <div className="preview-container" style={{ border: 'none', background: '#fff' }}>
+                        <img src="/7.png" alt="Expensify Dashboard Preview" style={{ width: '100%', height: 'auto', display: 'block' }} />
                     </div>
                 </div>
                 <div className="dashboard-divider"></div>

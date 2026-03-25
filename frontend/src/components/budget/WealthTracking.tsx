@@ -70,6 +70,7 @@ export const LoanBook = () => {
             flexDirection: 'column',
             gap: '1rem',
             height: '100%',
+            minHeight: '260px',
             position: 'relative'
         }}>
             {/* Modal */}

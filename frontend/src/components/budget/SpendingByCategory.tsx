@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Trash2 } from 'lucide-react';
 import api from '../../lib/api';
 import { ModernSelect } from '../ModernSelect';
 
@@ -46,29 +46,45 @@ export const SpendingByCategory = () => {
     const [loans, setLoans] = useState<any[]>([]);
     const [investments, setInvestments] = useState<any[]>([]);
 
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Click outside to close the category dropdown
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        }
+        if (isDropdownOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isDropdownOpen]);
+
     const fetchData = async () => {
         try {
-            const [expRes, budRes, recRes, loanRes, invRes] = await Promise.all([
-                api.get('/expenses'),
-                api.get('/budgets'),
-                api.get('/recurring'),
-                api.get('/loans'),
-                api.get('/investments')
-            ]);
-            setExpenses(expRes.data);
-            setBudgets(budRes.data);
-            setRecurring(recRes.data);
-            setLoans(loanRes.data);
-            setInvestments(invRes.data);
+            const response = await api.get('/dashboard/summary');
+            const data = response.data;
+            
+            setExpenses(data.expenses || []);
+            setBudgets(data.budgets || []);
+            setRecurring(data.recurring || []);
+            setLoans(data.loans || []);
+            setInvestments(data.investments || []);
         } catch (error) {
-            console.error('Failed to fetch spending data:', error);
+            console.error('Failed to fetch spending summary:', error);
         } finally {
             setLoading(false);
         }
     };
 
+    const [isReady, setIsReady] = useState(false);
     useEffect(() => {
         fetchData();
+        const timer = setTimeout(() => setIsReady(true), 150);
+        return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -220,7 +236,7 @@ export const SpendingByCategory = () => {
                         style={{ width: '135px' }}
                     />
 
-                    <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative' }} ref={dropdownRef}>
                         <div
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             style={{
@@ -350,8 +366,9 @@ export const SpendingByCategory = () => {
                 alignItems: 'start'
             }}>
                 {/* Chart Section */}
-                <div style={{ height: '280px', position: 'relative' }}>
-                    <ResponsiveContainer width="100%" height="100%">
+                <div style={{ height: '280px', minHeight: '280px', position: 'relative' }}>
+                    {isReady && (
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                         <PieChart>
                                 <Pie
                                     data={filteredChartData}
@@ -381,6 +398,7 @@ export const SpendingByCategory = () => {
                                 <Tooltip content={() => null} />
                         </PieChart>
                     </ResponsiveContainer>
+                    )}
                     <div style={{
                         position: 'absolute',
                         top: '50%',
@@ -493,17 +511,84 @@ export const SpendingByCategory = () => {
                             <button onClick={() => setIsBudgetModalOpen(false)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '24px' }}>&times;</button>
                         </div>
                         <div style={{ padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {spendingData.map(item => (
-                                <div key={item.name} style={{ display: 'grid', gridTemplateColumns: '1fr 150px', alignItems: 'center', gap: '1rem', padding: '0.5rem', borderBottom: '1px solid #f8fafc' }}>
-                                    <span style={{ fontSize: '0.875rem', fontWeight: '600' }}>{item.name}</span>
-                                    <input
-                                        type="number" value={bulkBudgets[item.name] || ''}
-                                        onChange={e => setBulkBudgets(prev => ({ ...prev, [item.name]: e.target.value }))}
-                                        placeholder="0.00"
-                                        style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #e2e8f0', textAlign: 'right' }}
-                                    />
-                                </div>
-                            ))}
+                            {(() => {
+                                const MASTER_CATEGORIES = [
+                                    'Food & Dining', 'Shopping', 'Transportation', 'Entertainment',
+                                    'Bills & Utilities', 'Health & Fitness', 'Travel', 'Education',
+                                    'Personal Care', 'General Services', 'General Merchandise',
+                                    'Debt Repayment', 'Others'
+                                ];
+                                const allBudgetable = Array.from(new Set([
+                                    ...MASTER_CATEGORIES,
+                                    ...spendingData.map(d => d.name),
+                                    ...Object.keys(bulkBudgets)
+                                ])).filter(cat => cat !== 'Income' && cat !== 'Investments');
+
+                                return (
+                                    <>
+                                        {allBudgetable.sort().map(catName => (
+                                            <div key={catName} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 40px', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderBottom: '1px solid #f8fafc' }}>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{catName}</span>
+                                                <input
+                                                    type="number" 
+                                                    value={bulkBudgets[catName] || ''}
+                                                    onChange={e => setBulkBudgets(prev => ({ ...prev, [catName]: e.target.value }))}
+                                                    placeholder="0.00"
+                                                    style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #e2e8f0', textAlign: 'right', fontSize: '0.875rem' }}
+                                                />
+                                                <button 
+                                                    onClick={() => {
+                                                        const next = { ...bulkBudgets };
+                                                        delete next[catName];
+                                                        setBulkBudgets(next);
+                                                        const existing = budgets.find(b => normalizeCategory(b.category) === catName);
+                                                        if (existing) {
+                                                            api.delete('/budgets', { data: { category: catName } }).catch(console.error);
+                                                        }
+                                                    }}
+                                                    style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        ))}
+
+                                        {/* Create New Category */}
+                                        <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                                            <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Create Custom Category</div>
+                                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                                <input 
+                                                    id="new-category-name"
+                                                    placeholder="Category name..."
+                                                    style={{ flex: 1, padding: '0.625rem', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '0.875rem' }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            const val = (e.currentTarget as HTMLInputElement).value.trim();
+                                                            if (val) {
+                                                                setBulkBudgets(prev => ({ ...prev, [val]: '' }));
+                                                                (e.currentTarget as HTMLInputElement).value = '';
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                                <button 
+                                                    onClick={() => {
+                                                        const input = document.getElementById('new-category-name') as HTMLInputElement;
+                                                        const val = input.value.trim();
+                                                        if (val) {
+                                                            setBulkBudgets(prev => ({ ...prev, [val]: '' }));
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                    style={{ padding: '0.625rem 1rem', background: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '0.875rem', fontWeight: '600', color: '#0ea5e9', cursor: 'pointer' }}
+                                                >
+                                                    Add
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </>
+                                );
+                            })()}
                         </div>
                         <div style={{ padding: '1rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                             <button onClick={() => setIsBudgetModalOpen(false)} style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>

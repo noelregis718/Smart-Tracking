@@ -32,8 +32,9 @@ export const NetWorthProjections = () => {
     const [projectionDays, setProjectionDays] = useState(30);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showProjections] = useState(true);
-
+    const [isReady, setIsReady] = useState(false);
     useEffect(() => {
+        const timer = setTimeout(() => setIsReady(true), 150);
         const fetchData = async () => {
             try {
                 const [expRes, incRes, recRes] = await Promise.all([
@@ -51,6 +52,7 @@ export const NetWorthProjections = () => {
             }
         };
         fetchData();
+        return () => clearTimeout(timer);
     }, [user]);
 
     const data: ProjectionPoint[] = useMemo(() => {
@@ -176,8 +178,9 @@ export const NetWorthProjections = () => {
                     <p style={{ margin: 0, fontWeight: '500' }}>Insight: Create your first transaction to unlock projections.</p>
                 </div>
             ) : (
-                <div style={{ height: '280px', width: '100%' }}>
-                    <ResponsiveContainer width="100%" height="100%">
+                <div style={{ height: '280px', minHeight: '280px', width: '100%' }}>
+                    {isReady && (
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                         <BarChart data={data} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                             <CartesianGrid vertical={false} stroke="#f1f5f9" />
                             <XAxis
@@ -221,6 +224,7 @@ export const NetWorthProjections = () => {
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
+                    )}
                 </div>
             )}
         </div>

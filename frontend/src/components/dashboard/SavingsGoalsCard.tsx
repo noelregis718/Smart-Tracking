@@ -33,8 +33,11 @@ export const SavingsGoalsCard = () => {
         }
     };
 
+    const [isReady, setIsReady] = useState(false);
     useEffect(() => {
         fetchGoals();
+        const timer = setTimeout(() => setIsReady(true), 150);
+        return () => clearTimeout(timer);
     }, []);
 
     const chartData = goals.map(goal => ({
@@ -59,8 +62,9 @@ export const SavingsGoalsCard = () => {
             ) : (
                 <>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', minHeight: '180px' }}>
-                        <div style={{ width: '55%', height: '180px' }}>
-                            <ResponsiveContainer width="100%" height="100%">
+                        <div style={{ width: '55%', height: '180px', minHeight: '180px' }}>
+                            {isReady && (
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                                 <RadialBarChart
                                     cx="50%"
                                     cy="80%"
@@ -84,6 +88,7 @@ export const SavingsGoalsCard = () => {
                                     />
                                 </RadialBarChart>
                             </ResponsiveContainer>
+                            )}
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', width: '45%' }}>

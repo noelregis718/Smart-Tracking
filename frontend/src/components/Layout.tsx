@@ -47,12 +47,15 @@ const SEARCH_ITEMS = [
 
     // Analytics (Reports) Spot Index
     { label: 'Analytics', path: '/dashboard/analytics', keywords: ['charts', 'reports', 'stats', 'financial analytics'] },
-    { label: 'KPI Analytics', path: '/dashboard/analytics#kpi-metrics', keywords: ['key', 'performance', 'summary', 'important stats'] },
+    { label: 'Financial Health Score', path: '/dashboard/analytics#kpi-metrics', keywords: ['kpi', 'score', 'health', 'percent', 'metrics'] },
+    { label: 'Total Spending KPI', path: '/dashboard/analytics#kpi-metrics', keywords: ['kpi', 'total spent', 'summary'] },
+    { label: 'Daily Burn Rate KPI', path: '/dashboard/analytics#kpi-metrics', keywords: ['kpi', 'daily', 'burn', 'rate'] },
     { label: 'Planning Tools', path: '/dashboard/analytics#planning-tools', keywords: ['calculators', 'finance', 'math', 'tools'] },
     { label: 'Currency Conversion', path: '/dashboard/analytics#forex-tool', keywords: ['forex', 'calculator', 'rates', 'change', 'exchange'] },
     { label: 'Highest Transactions', path: '/dashboard/analytics#top-transactions', keywords: ['highest', 'biggest', 'large', 'extremes', 'top expenses'] },
     { label: 'Market Sentiment', path: '/dashboard/analytics#market-news', keywords: ['stocks', 'news', 'trends', 'updates', 'stock market'] },
     { label: 'AI Assistant', path: '/dashboard/analytics#ai-assistant', keywords: ['bot', 'help', 'ask', 'assistant', 'financial advisor'] },
+    { label: 'Income Sources', path: '/dashboard/analytics#income-tracker', keywords: ['money in', 'salary', 'earnings', 'revenue'] },
 
     // Settings & Help
 ];
@@ -64,8 +67,14 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [showResults, setShowResults] = useState(false);
 
     const sidebarWidth = isCollapsed ? '80px' : '240px';
+
+    const filteredResults = searchQuery.trim() === '' ? [] : SEARCH_ITEMS.filter(item =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.keywords.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()))
+    ).slice(0, 6);
 
     // Handle scroll to hash specifically
     useEffect(() => {
@@ -78,7 +87,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             };
-            
+
             // Try immediately AND after a short delay for dynamic content
             scroll();
             const timer = setTimeout(scroll, 200);
@@ -86,46 +95,38 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         }
     }, [location.pathname, location.hash]); // Listen to both path and hash changes
 
-    const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            const query = searchQuery.toLowerCase().trim();
-            if (!query) return;
-
-            const match = SEARCH_ITEMS.find(item => 
-                item.label.toLowerCase().includes(query) || 
-                item.keywords.some(k => k.toLowerCase().includes(query))
-            );
-
-            if (match) {
-                // If we're already on that path but with a different hash, or even the same path, 
-                // we should force navigate or manually trigger the scroll.
-                if (window.location.pathname + window.location.hash === match.path) {
-                    // Force re-scroll if already there
-                    const id = match.path.split('#')[1];
-                    if (id) {
-                        const element = document.getElementById(id);
-                        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                } else {
-                    navigate(match.path);
-                }
-                setSearchQuery('');
+    const selectResult = (item: typeof SEARCH_ITEMS[0]) => {
+        if (window.location.pathname + window.location.hash === item.path) {
+            const id = item.path.split('#')[1];
+            if (id) {
+                const element = document.getElementById(id);
+                if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+        } else {
+            navigate(item.path);
+        }
+        setSearchQuery('');
+        setShowResults(false);
+    };
+
+    const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && filteredResults.length > 0) {
+            selectResult(filteredResults[0]);
         }
     };
 
     return (
-        <div className="layout" style={{ minHeight: '100vh', display: 'flex', background: 'var(--background)' }}>
+        <div className="layout" style={{ minHeight: '100vh', display: 'flex', background: 'var(--color-background)' }}>
             {/* Sidebar */}
             <aside style={{
                 width: sidebarWidth,
-                background: 'var(--surface)',
+                background: 'var(--color-surface)',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'fixed',
                 height: '100vh',
                 zIndex: 100,
-                borderRight: '1px solid var(--border)',
+                borderRight: '1px solid #e2e8f0',
                 transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
                 <div style={{
@@ -147,8 +148,8 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                         <img src="/2-removebg-preview.png" alt="Expensify Logo" style={{ height: '34px', width: 'auto', objectFit: 'contain', marginLeft: isCollapsed ? '0' : '-4px' }} />
                         {!isCollapsed && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0', transform: 'translateY(3px)' }}>
-                                <span style={{ fontSize: '1.25rem', fontWeight: 'bold', lineHeight: '1.1', transform: 'translateX(-2px)' }}>Expensify</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '500', transform: 'translateX(-2px)' }}>Track Smart</span>
+                                <span style={{ fontSize: '1.25rem', fontWeight: 'bold', lineHeight: '1.1', transform: 'translateX(-2px)', color: '#0f172a' }}>Expensify</span>
+                                <span style={{ fontSize: '0.75rem', color: '#475569', fontWeight: '600', transform: 'translateX(-2px)' }}>Track Smart</span>
                             </div>
                         )}
                     </Link>
@@ -175,7 +176,23 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     </button>
                 </div>
 
-                <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '2rem' }}>
+                {!isCollapsed && (
+                    <div style={{
+                        padding: '1rem 0.75rem 0.5rem 1.80rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '700',
+                        color: '#64748b',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: '1rem'
+                    }}>
+                        <span>Menu</span>
+                    </div>
+                )}
+                <nav style={{ flex: 1, padding: '0.25rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <SidebarLink to="/dashboard" icon={<Home size={18} />} label="Dashboard" collapsed={isCollapsed} />
                     <SidebarLink to="/dashboard/transactions" icon={<ArrowLeftRight size={18} />} label="Transactions" collapsed={isCollapsed} />
                     <SidebarLink to="/dashboard/budget" icon={<Wallet size={18} />} label="Budget" collapsed={isCollapsed} />
@@ -183,8 +200,8 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     <SidebarLink to="/dashboard/analytics" icon={<BarChart3 size={18} />} label="Analytics" collapsed={isCollapsed} />
                 </nav>
 
-                <div style={{ padding: '1rem 0.75rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <button 
+                <div style={{ padding: '1rem 0.75rem', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <button
                         onClick={logout}
                         style={{
                             display: 'flex',
@@ -248,14 +265,14 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 marginLeft: sidebarWidth,
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'var(--background)',
+                background: 'var(--color-background)',
                 transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 minHeight: '100vh'
             }}>
                 {/* Header */}
                 <header style={{
                     height: '64px',
-                    background: 'var(--surface)',
+                    background: 'var(--color-surface)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -263,7 +280,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     position: 'sticky',
                     top: 0,
                     zIndex: 90,
-                    borderBottom: '1px solid var(--border)'
+                    borderBottom: '1px solid #e2e8f0'
                 }}>
                     <div style={{ position: 'relative', width: '300px' }}>
                         <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -271,17 +288,66 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                             type="text"
                             placeholder="Search anything..."
                             value={searchQuery}
+                            onFocus={() => setShowResults(true)}
+                            onBlur={() => setTimeout(() => setShowResults(false), 200)}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={handleSearch}
+                            onKeyDown={handleSearchKeyDown}
                             style={{
                                 width: '100%',
                                 padding: '8px 12px 8px 40px',
                                 border: '1px solid var(--border)',
-                                borderRadius: '4px',
-                                background: 'var(--surface)',
-                                fontSize: '0.875rem'
+                                borderRadius: '6px',
+                                background: 'var(--color-background)',
+                                color: '#1a1a1a',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                outline: 'none'
                             }}
                         />
+
+                        {showResults && filteredResults.length > 0 && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                right: 0,
+                                marginTop: '8px',
+                                background: 'white',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '8px',
+                                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                zIndex: 1000,
+                                overflow: 'hidden'
+                            }}>
+                                {filteredResults.map((item, idx) => (
+                                    <div
+                                        key={idx}
+                                        onClick={() => selectResult(item)}
+                                        style={{
+                                            padding: '12px 16px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                            fontWeight: '600',
+                                            color: '#1e293b',
+                                            borderBottom: idx === filteredResults.length - 1 ? 'none' : '1px solid #f1f5f9',
+                                            transition: 'background 0.2s',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '2px'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span>{item.label}</span>
+                                        </div>
+                                        <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: '500' }}>
+                                            Go to {item.path.split('/')[2]?.split('#')[0] || 'Dashboard'}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -293,10 +359,12 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                                 alignItems: 'center',
                                 gap: '0.5rem',
                                 padding: '0.4rem 1rem',
-                                fontSize: '0.875rem',
+                                fontSize: '0.9rem',
+                                color: '#1a1a1a',
+                                fontWeight: '600',
                                 height: '36px',
-                                borderRadius: '4px',
-                                background: 'white'
+                                borderRadius: '6px',
+                                background: 'var(--color-background)'
                             }}
                         >
                             <FileText size={16} />
@@ -310,9 +378,9 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 </main>
             </div>
 
-            <ReportModal 
-                isOpen={isReportModalOpen} 
-                onClose={() => setIsReportModalOpen(false)} 
+            <ReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
             />
         </div>
     );
@@ -331,8 +399,8 @@ const SidebarLink = ({ to, icon, label, collapsed, badge }: { to: string, icon: 
             gap: '0.75rem',
             padding: '0.625rem 0.75rem',
             borderRadius: '4px',
-            color: isActive ? '#0f172a' : 'var(--text-muted)',
-            fontWeight: '500',
+            color: isActive ? '#0f172a' : '#475569',
+            fontWeight: isActive ? '600' : '500',
             background: isActive ? '#f8fafc' : 'transparent',
             border: isActive ? '1px solid #e2e8f0' : '1px solid transparent',
             boxShadow: isActive ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
