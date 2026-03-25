@@ -8,9 +8,12 @@ The **Smart Expense Tracker** is a premium, modern fintech application built wit
 
 -   **Rupee-First Dashboard**: All monetary values are standardized to the Indian Rupee symbol (₹) using `en-IN` numbering for a localized financial experience.
 -   **Premium Tile-Based UI**: A modern, airy design featuring white Sidebar and Header tiles against a light neutral grey background for maximum focus.
+-   **Real-time Search & Filter**: Instant, case-insensitive search for expenses and transactions across the dashboard and dedicated history tab.
 -   **Local Real-time Expenses**: Full CRUD for expenses, powered by a local **PostgreSQL** database for privacy and performance.
--   **Income & Recurring Tracking**: Built-in management for salary/revenue streams and automated subscription tracking with due reminders.
+-   **Dynamic Income Management**: Manage multiple revenue streams with full edit/delete capabilities via a modern modal interface on the Analytics page.
+-   **Precision Wealth Tracking**: Reconstructed historical net worth visualization with corrected area-fill logic for both positive and negative financial states.
 -   **Financial Forecasting**: Live net worth projections and burn-rate analytics using **Recharts** to predict future savings.
+-   **Enhanced About Page**: Detailed profiles of the founding team with social media integration (LinkedIn/X) and professional high-fidelity visuals.
 -   **Advanced Analytics Suite**: Multi-KPI metrics, currency conversion tools, and market intelligence at a glance.
 -   **Secure Hybrid Authentication**: Powered by **Clerk** with manual integration for custom backend data isolation.
 
