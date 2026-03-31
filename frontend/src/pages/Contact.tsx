@@ -1,13 +1,10 @@
 import { useState, useRef } from 'react';
-import emailjs from '@emailjs/browser';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Check, Loader2, ArrowRight } from 'lucide-react';
 import { SiteFooter } from '@/components/SiteFooter';
 import './Contact.css';
 
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT;
 
 const Contact = () => {
     const formRef = useRef<HTMLFormElement>(null);
@@ -30,18 +27,31 @@ const Contact = () => {
         if (!formRef.current) return;
 
         setStatus('sending');
+
+        const formData = new FormData(formRef.current);
+        // Ensure hidden field is manually updated if not already captured
+        formData.set('existing_customer', existingCustomer || 'not specified');
+
         try {
-            await emailjs.sendForm(
-                EMAILJS_SERVICE_ID,
-                EMAILJS_TEMPLATE_ID,
-                formRef.current,
-                EMAILJS_PUBLIC_KEY
-            );
-            setStatus('success');
-            formRef.current.reset();
-            setExistingCustomer('');
+            const response = await fetch(FORMSPREE_ENDPOINT, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                setStatus('success');
+                formRef.current.reset();
+                setExistingCustomer('');
+            } else {
+                const errorData = await response.json();
+                console.error('Formspree error:', errorData);
+                setStatus('error');
+            }
         } catch (err) {
-            console.error('EmailJS error:', err);
+            console.error('Network error:', err);
             setStatus('error');
         }
     };
@@ -100,7 +110,7 @@ const Contact = () => {
                                     <input
                                         type="text"
                                         id="name"
-                                        name="from_name"
+                                        name="name"
                                         placeholder="Eg. Jane Smith"
                                         required
                                     />
@@ -110,7 +120,7 @@ const Contact = () => {
                                     <input
                                         type="email"
                                         id="email"
-                                        name="from_email"
+                                        name="email"
                                         placeholder="jane@framer.com"
                                         required
                                     />
