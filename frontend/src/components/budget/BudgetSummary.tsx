@@ -406,9 +406,8 @@ export const RecurringPayments = () => {
             padding: '1.25rem', 
             borderRadius: '4px', 
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-            marginLeft: '-2mm',
-            height: '100%',
-            minHeight: '260px'
+            minHeight: '260px',
+            height: '100%'
         }}>
             <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Recurring Payments</h3>

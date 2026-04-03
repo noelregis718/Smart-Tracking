@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (credential: string) => void;
+    login: (params: { credential?: string; code?: string; redirectUri?: string }) => Promise<boolean>;
     loginWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     registerWithEmail: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
@@ -26,9 +26,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-    const loginWithBackend = async (credential: string) => {
+    const loginWithBackend = async (params: { credential?: string; code?: string; redirectUri?: string }) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/google`, { credential });
+            const response = await axios.post(`${API_URL}/auth/google`, params);
             const { token, user: userData } = response.data;
             localStorage.setItem('token', token);
             setUser(userData);
@@ -41,13 +41,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const handleLoginSuccess = async (credential: string) => {
+    const handleLoginSuccess = async (params: { credential?: string; code?: string; redirectUri?: string }) => {
         setLoading(true);
-        const success = await loginWithBackend(credential);
+        const success = await loginWithBackend(params);
         setLoading(false);
-        if (success) {
-            window.location.href = '/dashboard';
-        }
+        return success;
     };
 
     const loginWithEmail = async (email: string, password: string) => {

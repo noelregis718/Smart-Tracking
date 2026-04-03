@@ -6,33 +6,29 @@ export const Budget = () => {
     return (
         <div style={{
             maxWidth: '1600px',
-            display: 'flex',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 0.8fr',
             gap: '2rem',
-            minHeight: '100vh'
+            minHeight: '100vh',
+            marginTop: 'calc(-0.5rem + 3mm)'
         }}>
-            {/* Main Content (4 / 5) */}
-            <div style={{ flex: '3', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: 'calc(-0.5rem + 3mm)' }}>
-                <div id="spending-analysis">
-                    <SpendingByCategory />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                    <div id="loan-details" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                        <LoanBook />
-                    </div>
-                    <div id="investment-portfolio" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                        <Investments />
-                    </div>
-                </div>
+            {/* Top Row: Analysis on the left, Summary on the right */}
+            <div id="spending-analysis" style={{ gridColumn: 'span 2' }}>
+                <SpendingByCategory />
+            </div>
+            <div id="budget-summary">
+                <LeftToBudget />
             </div>
 
-            {/* Sidebar (1 / 5) */}
-            <div style={{ flex: '1.2', display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: 'calc(-0.5rem + 3mm)' }}>
-                <div id="budget-summary">
-                    <LeftToBudget />
-                </div>
-                <div id="monthly-subscriptions" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <RecurringPayments />
-                </div>
+            {/* Bottom Row: All tracking boxes forced into vertical alignment */}
+            <div id="loan-details">
+                <LoanBook />
+            </div>
+            <div id="investment-portfolio">
+                <Investments />
+            </div>
+            <div id="monthly-subscriptions">
+                <RecurringPayments />
             </div>
         </div>
     );

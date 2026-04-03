@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 // Helper function to merge class names
 const cn = (...classes: string[]) => {
@@ -70,6 +70,40 @@ export const Auth = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [searchParams] = useSearchParams();
+
+    // Configure Google Login with Redirect Flow
+    const googleLoginTrigger = useGoogleLogin({
+        flow: 'auth-code',
+        ux_mode: 'redirect',
+        redirect_uri: window.location.origin + '/auth',
+    });
+
+    const loginAttempted = React.useRef(false);
+
+    // Handle the redirect callback
+    useEffect(() => {
+        const handleRedirect = async () => {
+            const code = searchParams.get('code');
+            if (code && !loginAttempted.current) {
+                loginAttempted.current = true;
+                setLoading(true);
+                const success = await login({
+                    code,
+                    redirectUri: window.location.origin + '/auth'
+                });
+                
+                if (success) {
+                    navigate('/dashboard', { replace: true });
+                } else {
+                    setError('Google login failed. Please try again.');
+                    setLoading(false);
+                }
+            }
+        };
+
+        handleRedirect();
+    }, [searchParams, login, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -142,14 +176,28 @@ export const Auth = () => {
                 </div>
 
                 {/* Right side - Sign In Form */}
-                <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-start pt-8 bg-white" style={{ paddingLeft: '8mm' }}>
-                    <div className="h-6 md:h-8" />
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="w-full max-w-sm mx-auto pl-[57px] pr-[10px] text-left"
-                    >
+                <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col bg-white">
+                    {searchParams.get('code') ? (
+                        <div className="flex flex-col items-center justify-center h-full space-y-6 text-center">
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full"
+                            />
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-800">Authenticating...</h2>
+                                <p className="text-gray-500 mt-2 text-sm">Please wait while we secure your connection</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col justify-start pt-8" style={{ paddingLeft: '8mm', paddingTop: 'calc(2rem + 3mm)' }}>
+                            <div className="h-6 md:h-8" />
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="w-full max-w-sm mx-auto pl-[57px] pr-[10px] text-left"
+                            >
                         <h1 className="text-2xl md:text-3xl font-bold mb-0 text-gray-800 text-left whitespace-nowrap">
                             {isLogin ? 'Welcome back' : 'Get started'}
                         </h1>
@@ -164,9 +212,7 @@ export const Auth = () => {
                                 type="button"
                                 className="w-full h-10 flex items-center justify-center gap-3 bg-white border border-gray-200 rounded-md px-8 hover:bg-gray-50 transition-all duration-300 text-gray-800 font-bold shadow-md text-lg"
                                 onClick={() => {
-                                    // Trigger Google Login - we'll use a hidden GoogleLogin for simplicity 
-                                    const googleButton = document.querySelector('[role="button"]') as HTMLElement;
-                                    if (googleButton) googleButton.click();
+                                    googleLoginTrigger();
                                 }}
                             >
                                 <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -192,19 +238,6 @@ export const Auth = () => {
                                 <span className="text-sm font-medium">Login with Google</span>
 
                             </button>
-                        </div>
-
-                        <div style={{ display: 'none' }}>
-                            <GoogleLogin
-                                onSuccess={credentialResponse => {
-                                    if (credentialResponse.credential) {
-                                        login(credentialResponse.credential);
-                                    }
-                                }}
-                                onError={() => {
-                                    setError('Google login failed');
-                                }}
-                            />
                         </div>
 
                         <div className="h-4" />
@@ -346,6 +379,8 @@ export const Auth = () => {
                             </div>
                         </form>
                     </motion.div>
+                        </div>
+                    )}
                 </div>
             </motion.div>
         </div>

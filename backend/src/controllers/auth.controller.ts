@@ -3,20 +3,38 @@ import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma';
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+);
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 export const googleLogin = async (req: Request, res: Response) => {
-    const { credential } = req.body;
+    const { credential, code, redirectUri } = req.body || {};
 
-    if (!credential) {
-        return res.status(400).json({ error: 'Google credential is required' });
+    if (!credential && !code) {
+        return res.status(400).json({ error: 'Google credential or code is required' });
     }
 
     try {
+        let idToken = credential;
+
+        // If code is provided, exchange it for tokens
+        if (code) {
+            const { tokens } = await client.getToken({
+                code,
+                redirect_uri: redirectUri || 'postmessage' // fallback if not provided
+            });
+            idToken = tokens.id_token as string;
+        }
+
+        if (!idToken) {
+            return res.status(400).json({ error: 'Failed to retrieve Google ID token' });
+        }
+
         // 1. Verify Google ID Token
         const ticket = await client.verifyIdToken({
-            idToken: credential,
+            idToken: idToken,
             audience: process.env.GOOGLE_CLIENT_ID,
         });
 

@@ -179,10 +179,9 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 {!isCollapsed && (
                     <div style={{
                         padding: '1rem 0.75rem 0.5rem 1.80rem',
-                        fontSize: '0.75rem',
+                        fontSize: '0.99rem',
                         fontWeight: '700',
                         color: '#64748b',
-                        textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                         display: 'flex',
                         alignItems: 'center',

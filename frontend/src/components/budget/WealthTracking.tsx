@@ -75,7 +75,7 @@ export const LoanBook = () => {
         }}>
             {/* Modal */}
             {isIdOpen && (
-                <div 
+                <div
                     onClick={() => setIsIdOpen(false)}
                     style={{
                         position: 'fixed',
@@ -92,25 +92,25 @@ export const LoanBook = () => {
                         padding: '20px'
                     }}
                 >
-                    <div 
+                    <div
                         onClick={(e) => e.stopPropagation()}
                         style={{
-                        background: 'white',
-                        width: '100%',
-                        maxWidth: '450px',
-                        borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
-                    }}>
+                            background: 'white',
+                            width: '100%',
+                            maxWidth: '450px',
+                            borderRadius: '4px',
+                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
+                        }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
                             <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add New Loan</h3>
                         </div>
-                        
+
                         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                 <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Loan Name</label>
-                                <input 
+                                <input
                                     value={formData.name}
-                                    onChange={e => setFormData({...formData, name: e.target.value})}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="e.g. Car Loan, Student Debt"
                                     style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                 />
@@ -118,20 +118,20 @@ export const LoanBook = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Paid So Far (₹)</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         value={formData.amount}
-                                        onChange={e => setFormData({...formData, amount: e.target.value})}
+                                        onChange={e => setFormData({ ...formData, amount: e.target.value })}
                                         placeholder="0.00"
                                         style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Total Amount (₹)</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         value={formData.total}
-                                        onChange={e => setFormData({...formData, total: e.target.value})}
+                                        onChange={e => setFormData({ ...formData, total: e.target.value })}
                                         placeholder="0.00"
                                         style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
@@ -140,18 +140,18 @@ export const LoanBook = () => {
                         </div>
 
                         <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                            <button 
+                            <button
                                 onClick={() => setIsIdOpen(false)}
                                 style={{ padding: '0.625rem 1.25rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={handleSave}
                                 disabled={isSaving}
                                 className="btn-premium-shine"
-                                style={{ 
-                                    padding: '0.625rem 1.25rem', 
+                                style={{
+                                    padding: '0.625rem 1.25rem',
                                     fontSize: '0.875rem'
                                 }}
                             >
@@ -164,16 +164,16 @@ export const LoanBook = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Loan Book</h3>
-                    <button 
-                        onClick={() => setIsIdOpen(true)}
-                        className="btn-premium-shine"
-                        style={{
-                            padding: '6px 12px',
-                            fontSize: '0.75rem'
-                        }}
-                    >
-                        <Plus size={14} /> Add Loan
-                    </button>
+                <button
+                    onClick={() => setIsIdOpen(true)}
+                    className="btn-premium-shine"
+                    style={{
+                        padding: '6px 12px',
+                        fontSize: '0.75rem'
+                    }}
+                >
+                    <Plus size={14} /> Add Loan
+                </button>
             </div>
 
             <div style={{
@@ -185,13 +185,13 @@ export const LoanBook = () => {
                     <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.875rem', fontStyle: 'italic' }}>No loans tracked yet</div>
                 ) : (
                     loans.map((loan, idx) => (
-                        <LoanEntry 
+                        <LoanEntry
                             key={loan.id}
                             id={loan.id}
-                            name={loan.name} 
-                            amount={loan.amount} 
-                            total={loan.total} 
-                            color={['#0ea5e9', '#f59e0b', '#22c55e', '#8b5cf6'][idx % 4]} 
+                            name={loan.name}
+                            amount={loan.amount}
+                            total={loan.total}
+                            color={['#0ea5e9', '#f59e0b', '#22c55e', '#8b5cf6'][idx % 4]}
                             last={idx === loans.length - 1}
                             onDelete={handleDelete}
                         />
@@ -263,11 +263,12 @@ export const Investments = () => {
             flexDirection: 'column',
             gap: '1rem',
             height: '100%',
+            minHeight: '260px',
             position: 'relative'
         }}>
             {/* Modal */}
             {isIdOpen && (
-                <div 
+                <div
                     onClick={() => setIsIdOpen(false)}
                     style={{
                         position: 'fixed',
@@ -284,25 +285,25 @@ export const Investments = () => {
                         padding: '20px'
                     }}
                 >
-                    <div 
+                    <div
                         onClick={(e) => e.stopPropagation()}
                         style={{
-                        background: 'white',
-                        width: '100%',
-                        maxWidth: '450px',
-                        borderRadius: '4px',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
-                    }}>
+                            background: 'white',
+                            width: '100%',
+                            maxWidth: '450px',
+                            borderRadius: '4px',
+                            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
+                        }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
                             <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Add New Investment</h3>
                         </div>
-                        
+
                         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                 <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Investment Title</label>
-                                <input 
+                                <input
                                     value={formData.title}
-                                    onChange={e => setFormData({...formData, title: e.target.value})}
+                                    onChange={e => setFormData({ ...formData, title: e.target.value })}
                                     placeholder="e.g. Stock Portfolio, Crypto"
                                     style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                 />
@@ -310,20 +311,20 @@ export const Investments = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Amount (₹)</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         value={formData.amount}
-                                        onChange={e => setFormData({...formData, amount: e.target.value})}
+                                        onChange={e => setFormData({ ...formData, amount: e.target.value })}
                                         placeholder="0.00"
                                         style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>% Change</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         value={formData.change}
-                                        onChange={e => setFormData({...formData, change: e.target.value})}
+                                        onChange={e => setFormData({ ...formData, change: e.target.value })}
                                         placeholder="+ / - 0.00"
                                         style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.875rem' }}
                                     />
@@ -332,18 +333,18 @@ export const Investments = () => {
                         </div>
 
                         <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                            <button 
+                            <button
                                 onClick={() => setIsIdOpen(false)}
                                 style={{ padding: '0.625rem 1.25rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={handleSave}
                                 disabled={isSaving}
                                 className="btn-premium-shine"
-                                style={{ 
-                                    padding: '0.625rem 1.25rem', 
+                                style={{
+                                    padding: '0.625rem 1.25rem',
                                     fontSize: '0.875rem'
                                 }}
                             >
@@ -356,16 +357,16 @@ export const Investments = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>Investments</h3>
-                    <button 
-                        onClick={() => setIsIdOpen(true)}
-                        className="btn-premium-shine"
-                        style={{
-                            padding: '6px 12px',
-                            fontSize: '0.75rem'
-                        }}
-                    >
-                        <Plus size={14} /> Add Entry
-                    </button>
+                <button
+                    onClick={() => setIsIdOpen(true)}
+                    className="btn-premium-shine"
+                    style={{
+                        padding: '6px 12px',
+                        fontSize: '0.75rem'
+                    }}
+                >
+                    <Plus size={14} /> Add Entry
+                </button>
             </div>
 
             <div style={{
@@ -404,7 +405,7 @@ const LoanEntry = ({ id, name, amount, total, color, last, onDelete }: { id: str
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', alignItems: 'flex-start' }}>
                 <div>
                     <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1e293b' }}>{name}</span>
-                    <button 
+                    <button
                         onClick={() => onDelete(id)}
                         style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', padding: '0 8px', fontSize: '0.75rem', opacity: 0.6 }}
                         title="Delete Loan"
@@ -453,9 +454,9 @@ const InvestmentCard = ({ id, title, amount, change, onDelete }: { id: string, t
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                    <div style={{ 
-                        fontSize: '0.7rem', 
-                        fontWeight: '700', 
+                    <div style={{
+                        fontSize: '0.7rem',
+                        fontWeight: '700',
                         color: isPositive ? '#16a34a' : '#ef4444',
                         background: isPositive ? '#f0fdf4' : '#fef2f2',
                         padding: '1px 6px',
@@ -475,13 +476,13 @@ const InvestmentCard = ({ id, title, amount, change, onDelete }: { id: string, t
                 <div style={{ fontSize: '1rem', fontWeight: '800', color: '#1e293b' }}>
                     ₹{amount.toLocaleString()}
                 </div>
-                <button 
+                <button
                     onClick={() => onDelete(id)}
-                    style={{ 
-                        border: 'none', 
-                        background: 'none', 
-                        color: '#cbd5e1', 
-                        cursor: 'pointer', 
+                    style={{
+                        border: 'none',
+                        background: 'none',
+                        color: '#cbd5e1',
+                        cursor: 'pointer',
                         padding: '4px',
                         borderRadius: '4px',
                         transition: 'all 0.2s',
