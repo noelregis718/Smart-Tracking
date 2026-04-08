@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import api from '../../lib/api';
 
 const currencies = [
     { code: 'INR', symbol: '₹', name: 'Indian Rupee', rateToINR: 1 },
@@ -113,9 +114,8 @@ const ConversionTool: React.FC = () => {
     useEffect(() => {
         const fetchRates = async () => {
             try {
-                // Call our internal proxy to avoid 429s and keep API key secure
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/external/exchange-rates`);
-                const data = await response.json();
+                const response = await api.get('/external/exchange-rates');
+                const data = response.data;
                 
                 if (data && typeof data === 'object') {
                     setRates(data);
