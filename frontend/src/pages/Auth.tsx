@@ -73,37 +73,38 @@ export const Auth = () => {
     const [searchParams] = useSearchParams();
 
     // Configure Google Login with Redirect Flow
+    // Configure Google Login with simpler Implicit Flow
     const googleLoginTrigger = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setLoading(true);
+            // In implicit flow with @react-oauth/google, we get an access_token.
+            // However, the backend is set up for ID Tokens (credentials).
+            // To get an ID token easily, we'll use the standard flow or fixed Auth Code.
+            // Let's fix the Auth Code redirect URI to be absolutely certain.
+            const success = await login({
+                code: tokenResponse.code,
+                redirectUri: window.location.origin === 'http://localhost:5173' 
+                    ? 'http://localhost:5173/auth' 
+                    : 'https://smart-tracking-2kvr.vercel.app/auth'
+            });
+
+            if (success) {
+                navigate('/dashboard', { replace: true });
+            } else {
+                setError('Google login failed. Please try again.');
+                setLoading(false);
+            }
+        },
+        onError: () => {
+            setError('Login failed. Please try again.');
+        },
         flow: 'auth-code',
-        ux_mode: 'redirect',
-        redirect_uri: window.location.origin + '/auth',
     });
 
-    const loginAttempted = React.useRef(false);
-
-    // Handle the redirect callback
+    // Remove unused ref and redirect handler
     useEffect(() => {
-        const handleRedirect = async () => {
-            const code = searchParams.get('code');
-            if (code && !loginAttempted.current) {
-                loginAttempted.current = true;
-                setLoading(true);
-                const success = await login({
-                    code,
-                    redirectUri: window.location.origin + '/auth'
-                });
-                
-                if (success) {
-                    navigate('/dashboard', { replace: true });
-                } else {
-                    setError('Google login failed. Please try again.');
-                    setLoading(false);
-                }
-            }
-        };
-
-        handleRedirect();
-    }, [searchParams, login, navigate]);
+        // Redirect flow logic removed in favor of direct callback
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
