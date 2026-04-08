@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import api from '../lib/api';
 
 interface User {
     id: string;
@@ -28,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const loginWithBackend = async (params: { credential?: string; code?: string; redirectUri?: string }) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/google`, params);
+            const response = await api.post(`/auth/google`, params);
             const { token, user: userData } = response.data;
             localStorage.setItem('token', token);
             setUser(userData);
@@ -50,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const loginWithEmail = async (email: string, password: string) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+            const response = await api.post(`/auth/login`, { email, password });
             const { token, user: userData } = response.data;
             localStorage.setItem('token', token);
             setUser(userData);
@@ -66,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const registerWithEmail = async (email: string, password: string, name: string) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/register`, { email, password, name });
+            const response = await api.post(`/auth/register`, { email, password, name });
             const { token, user: userData } = response.data;
             localStorage.setItem('token', token);
             setUser(userData);
