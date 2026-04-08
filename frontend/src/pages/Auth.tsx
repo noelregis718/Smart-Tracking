@@ -77,14 +77,20 @@ export const Auth = () => {
     const googleLoginTrigger = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             setLoading(true);
-            const response = await api.post(`/auth/google`, { code: tokenResponse.code });
-            
-            if (response.status === 200) {
-                const { token } = response.data;
-                localStorage.setItem('token', token);
-                navigate('/dashboard', { replace: true });
-            } else {
-                setError(response.data?.details || 'Google login failed. Please try again.');
+            try {
+                const response = await api.post(`/auth/google`, { code: tokenResponse.code });
+                
+                if (response.status === 200) {
+                    const { token } = response.data;
+                    localStorage.setItem('token', token);
+                    navigate('/dashboard', { replace: true });
+                } else {
+                    setError(response.data?.details || 'Google login failed. Please try again.');
+                    setLoading(false);
+                }
+            } catch (err: any) {
+                console.error('Core Login Error:', err.response?.data || err.message);
+                setError(err.response?.data?.details || err.response?.data?.error || 'Authentication failed. Please check your internet or try again.');
                 setLoading(false);
             }
         },
