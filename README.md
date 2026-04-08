@@ -6,38 +6,33 @@ The **Smart Expense Tracker** is a premium, modern fintech application built wit
 
 ## 🚀 Key Features
 
+-   **High-Density Vertical Rhythm**: Aggressively refined spacing across Landing, Features, and About pages to achieve a professional, punchy, and modern "breathing" layout.
+-   **Interactive Bento Grid**: A modernized, borderless visual showcase of core financial data using schematic and isometric animations.
+-   **Founding Team Hub**: Professional, high-fidelity team profiles on the About page with official photography and integrated social presence.
+-   **Budgeting Mastery Suite**: New analytical modules including **Savings Boost** (tracking surplus opportunity) and **Spending Pacing** (real-time velocity tracking).
+-   **Wealth Shielding Tools**: Goal-oriented tracking with **Inflation Leak** (purchasing power loss) and **Turbo Wealth Simulation** (future project growth).
 -   **Rupee-First Dashboard**: All monetary values are standardized to the Indian Rupee symbol (₹) using `en-IN` numbering for a localized financial experience.
--   **Premium Tile-Based UI**: A modern, airy design featuring white Sidebar and Header tiles against a light neutral grey background for maximum focus.
--   **Real-time Search & Filter**: Instant, case-insensitive search for expenses and transactions across the dashboard and dedicated history tab.
--   **Local Real-time Expenses**: Full CRUD for expenses, powered by a local **PostgreSQL** database for privacy and performance.
--   **Dynamic Income Management**: Manage multiple revenue streams with full edit/delete capabilities via a modern modal interface on the Analytics page.
--   **Precision Wealth Tracking**: Reconstructed historical net worth visualization with corrected area-fill logic for both positive and negative financial states.
--   **Financial Forecasting**: Live net worth projections and burn-rate analytics using **Recharts** to predict future savings.
--   **Enhanced About Page**: Detailed profiles of the founding team with social media integration (LinkedIn/X) and professional high-fidelity visuals.
--   **Advanced Analytics Suite**: Multi-KPI metrics, currency conversion tools, and market intelligence at a glance.
 -   **Secure Hybrid Authentication**: Powered by **Clerk** with manual integration for custom backend data isolation.
+-   **Advanced Analytics Suite**: Multi-KPI metrics, currency conversion tools, and market intelligence at a glance.
 
 ---
 
 ## 🛠️ Technology Stack
 
 ### Frontend
--   **React (Vite)**: Lightning-fast rendering and modern UX.
--   **TypeScript**: Type-safe development.
--   **Recharts**: Interactive performance and trend charts.
--   **Framer Motion**: Smooth micro-animations and transitions.
--   **Three.js & Cobe**: 3D visualization and vibrant UI elements.
--   **Lucide React**: Premium iconography.
--   **Clerk React**: Enterprise-grade user authentication.
--   **EmailJS**: Automated contact form communication.
--   **Axios**: Centralized API client for backend communication.
+-   **React (Vite 6)**: Lightning-fast rendering and modern UX built on the latest Vite standards.
+-   **TypeScript**: Type-safe development across the entire stack.
+-   **Framer Motion**: Smooth micro-animations, bento grid transitions, and state-driven UI logic.
+-   **Recharts**: Interactive performance graphs and financial trend visualizations.
+-   **Three.js & Cobe**: 3D visualization and vibrant UI elements for a premium feel.
+-   **Lucide React**: Premium, consistent iconography.
+-   **Clerk React**: Enterprise-grade user authentication and session management.
 
 ### Backend
 -   **Node.js (Express)**: Modular and scalable API architecture.
 -   **Prisma ORM**: Modern database toolkit for PostgreSQL.
--   **PostgreSQL**: Robust local data persistence.
--   **JWT & Bcrypt**: Secure password hashing and custom token management.
--   **Clerk SDK**: Integration for unified user sessions.
+-   **PostgreSQL**: Robust local data persistence for privacy-first tracking.
+-   **JWT & Bcrypt**: Secure password hashing and custom token management for hybrid auth.
 
 ---
 
@@ -76,6 +71,8 @@ The **Smart Expense Tracker** is a premium, modern fintech application built wit
 ```
 ├── backend/            # Express.js API & Prisma Schema
 ├── frontend/           # React/Vite UI Components
+│   ├── public/         # High-res assets & team photography
+│   └── src/            # Core logic & design system
 ├── scripts/            # Utility & Maintenance Scripts
 └── README.md           # Project documentation
 ```

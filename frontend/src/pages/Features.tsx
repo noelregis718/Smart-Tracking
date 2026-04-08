@@ -121,7 +121,7 @@ const Features = () => {
                     <h2 className="research-title">Accurate Research</h2>
                     <p className="research-description">
                         Run research across all internal and external data
-                        sources in a single workflow. Get AI-powered insights to make smarter financial decisions, faster.
+                        sources in a single workflow. Get comprehensive insights to make smarter financial decisions, faster.
                     </p>
                 </div>
             </section>

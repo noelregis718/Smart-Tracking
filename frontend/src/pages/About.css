@@ -159,7 +159,7 @@
 .about-team {
     background: #f3f4f6;
     /* Grey background to match features section */
-    padding: 8rem 0 4rem;
+    padding: 3rem 0 4rem; /* Reduced by another 4px to move heading further above */
     text-align: center;
 }
 

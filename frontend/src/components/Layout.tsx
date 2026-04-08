@@ -178,17 +178,16 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 
                 {!isCollapsed && (
                     <div style={{
-                        padding: '1rem 0.75rem 0.5rem 1.80rem',
-                        fontSize: '0.99rem',
-                        fontWeight: '700',
-                        color: '#64748b',
-                        letterSpacing: '0.05em',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: '1rem'
+                        padding: '0.625rem 0.75rem',
+                        margin: '1.25rem 8px 0.5rem 8px',
+                        color: '#475569',
+                        fontWeight: '500',
+                        fontSize: '1.15rem',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}>
-                        <span>Menu</span>
+                        <span style={{ paddingLeft: '.60rem' }}>Menu</span>
                     </div>
                 )}
                 <nav style={{ flex: 1, padding: '0.25rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>

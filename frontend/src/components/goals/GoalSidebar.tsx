@@ -1,4 +1,6 @@
 import React from 'react';
+import { InflationLeak } from './InflationLeak';
+import { TurboSimulation } from './TurboSimulation';
 
 interface GoalSidebarProps {
     totalAvailable: number;
@@ -99,6 +101,13 @@ const GoalSidebar: React.FC<GoalSidebarProps> = ({
                 ` }} />
             </button>
 
+            <div style={{ marginTop: 'auto', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9' }}>
+                <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#94a3b8', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
+                    Smart insights
+                </div>
+                <InflationLeak totalAvailable={totalAvailable} />
+                <TurboSimulation totalAvailable={totalAvailable} />
+            </div>
         </div>
     );
 };

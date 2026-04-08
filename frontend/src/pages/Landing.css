@@ -7,6 +7,267 @@
     overflow-x: hidden;
 }
 
+/* Schematic & Isometric Feature Refinement */
+.feature-grid-section {
+    padding: 96px 5% 120px;
+    /* Increased by another 8px to push heading further down */
+    background: transparent;
+    position: relative;
+    z-index: 5;
+}
+
+.feature-grid-header {
+    text-align: center;
+    margin-bottom: 80px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1.5rem;
+}
+
+.feature-grid-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
+
+.feature-grid-subtitle {
+    font-size: 1.25rem;
+    color: #555;
+    max-width: 700px;
+    line-height: 1.5;
+    margin: 0 auto;
+}
+
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.bento-card {
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    height: 520px;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+    /* Enable 3D for children */
+}
+
+/* No border on hover */
+
+.visual-container {
+    flex: 1;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-content {
+    text-align: left;
+}
+
+.card-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 10px;
+}
+
+.card-description {
+    font-size: 1.1rem;
+    color: #444;
+    line-height: 1.5;
+}
+
+/* Schematic Visuals */
+.schematic-window {
+    width: 220px;
+    height: 140px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    position: relative;
+    background: white;
+}
+
+.schematic-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ccc;
+    border-radius: 2px;
+}
+
+.schematic-grid {
+    position: absolute;
+    top: 55px;
+    left: 20px;
+    right: 20px;
+    bottom: 15px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.schematic-tile {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.schematic-top-bars {
+    position: absolute;
+    top: 15px;
+    left: 35px;
+    right: 35px;
+}
+
+.schematic-bar-full {
+    height: 10px;
+    background: #f1f1f1;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.schematic-bars-flex {
+    display: flex;
+    gap: 6px;
+}
+
+.schematic-bar-small {
+    flex: 1;
+    height: 6px;
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.isometric-block {
+    width: 200px;
+    height: 140px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transform: rotateX(45deg) rotateZ(35deg);
+    box-shadow: 1px 1px 0 #ccc, 2px 2px 0 #ccc, 3px 3px 0 #ccc, 4px 4px 0 #ccc, 15px 15px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.5s ease;
+    position: relative;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.iso-sidebar {
+    position: absolute;
+    left: 8px;
+    top: 30px;
+    bottom: 8px;
+    width: 35px;
+    background: #f1f5f9;
+    border-radius: 2px;
+}
+
+.iso-top-bar {
+    position: absolute;
+    top: 8px;
+    left: 45px;
+    right: 8px;
+    height: 12px;
+    background: #f1f5f9;
+    border-radius: 2px;
+}
+
+.iso-content-header {
+    position: absolute;
+    top: 25px;
+    left: 45px;
+    right: 35px;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 1px;
+}
+
+.iso-lines {
+    position: absolute;
+    top: 38px;
+    left: 50px;
+    right: 15px;
+}
+
+.iso-line {
+    height: 3px;
+    background: #f1f5f9;
+    margin-bottom: 6px;
+    border-radius: 1px;
+}
+
+.iso-dot {
+    position: absolute;
+    top: 30px;
+    right: 8px;
+    width: 4px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 50%;
+}
+
+.usage-bar-card {
+    width: 200px;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    box-shadow: 4px 4px 0 #eee;
+}
+
+.usage-progress {
+    width: 100%;
+    height: 6px;
+    background: #eee;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.usage-fill {
+    height: 100%;
+    background: #1d4ed8;
+}
+
+.hobby-badge {
+    padding: 2px 12px;
+    border: 1px solid #ddd;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #333;
+}
+
+@media (max-width: 1024px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bento-card {
+        height: auto;
+        min-height: 500px;
+    }
+
+    .feature-grid-title {
+        font-size: 2.5rem;
+    }
+}
+
 .dashboard-divider {
     display: none;
 }
@@ -487,7 +748,7 @@
 
 /* FAQ Section */
 .faq-section {
-    padding: 8rem 1rem;
+    padding: 1.25rem 1rem 10rem; /* Reduced top padding further by another 20px/5mm to 1.25rem */
     background: #f3f4f6;
     display: flex;
     flex-direction: column;
@@ -497,23 +758,24 @@
 .faq-header {
     text-align: center;
     max-width: 700px;
-    margin-bottom: 5rem;
+    margin-bottom: 0; /* Reduced margin-bottom to 0 for maximum proximity */
 }
 
 .faq-title {
-    font-size: clamp(2rem, 5vw, 3rem);
+    font-size: 3.5rem;
     font-weight: 700;
     line-height: 1.1;
     margin-bottom: 1.5rem;
     color: #000;
+    letter-spacing: -0.02em;
 }
 
 .faq-subtitle {
-    font-size: 1rem;
+    font-size: 1.25rem;
     line-height: 1.6;
     color: #666;
-    max-width: 600px;
-    margin: 0 auto;
+    max-width: 700px;
+    margin: 0 auto 40px; /* Increased by another 5mm/20px bottom margin (Total 40px) */
 }
 
 .faq-container {
@@ -600,7 +862,7 @@
 /* Final CTA Section */
 /* Final CTA Section - Minimalist */
 .final-cta-minimal {
-    padding: 8rem 9rem;
+    padding: 3rem 9rem 8rem; /* Further reduced top padding by another 12px/3mm to 3rem */
     background: transparent;
     display: flex;
     flex-direction: column;

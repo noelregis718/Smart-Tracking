@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
     ArrowRight, ChevronDown
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { SiteFooter } from '@/components/SiteFooter';
 import './Landing.css';
 
@@ -113,18 +114,197 @@ export const Landing = () => {
             </main>
 
 
-            {/* Feature Description Section */}
-            <section className="feature-description-section">
-                <div className="feature-description-container">
-                    <p className="feature-description-text">
-                        Expensify helps you make sense of your money. It uses AI to categorize your receipts and tracks your spending automatically.
-                    </p>
-                    <p className="feature-description-text">
-                        It gives you smart, simple, and actionable tips to budget better and grow your savings without the stress.
+            {/* New Feature Bento Grid Section */}
+            <section className="feature-grid-section">
+                <div className="feature-grid-header">
+                    <h2 className="feature-grid-title">Financial intelligence, visualized.</h2>
+                    <p className="feature-grid-subtitle">
+                        Every transaction, budget shift, and savings milestone — captured with rich context from your real expense traffic.
                     </p>
                 </div>
-                <div className="feature-image-container">
-                    <img src="/1-removebg-preview.png" alt="Expensify App Mockup" className="feature-main-image" />
+
+                <div className="bento-grid">
+                    {/* Card 1: Schematic Window */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                        className="bento-card"
+                    >
+                        <div className="visual-container">
+                            <div className="schematic-window">
+                                <div className="schematic-dot" style={{ top: '8px', left: '8px' }} />
+                                <div className="schematic-dot" style={{ top: '8px', right: '8px' }} />
+                                <div className="schematic-dot" style={{ bottom: '8px', left: '8px' }} />
+                                <div className="schematic-dot" style={{ bottom: '8px', right: '8px' }} />
+                                
+                                <div className="schematic-top-bars">
+                                    <div className="schematic-bar-full" />
+                                    <div className="schematic-bars-flex">
+                                        <div className="schematic-bar-small" />
+                                        <div className="schematic-bar-small" />
+                                        <div className="schematic-bar-small" />
+                                        <div className="schematic-bar-small" />
+                                    </div>
+                                </div>
+
+                                <motion.div 
+                                    className="schematic-grid"
+                                    initial="initial"
+                                    animate="animate"
+                                >
+                                    {[...Array(15)].map((_, i) => (
+                                        <motion.div 
+                                            key={i} 
+                                            className="schematic-tile"
+                                            variants={{
+                                                initial: { backgroundColor: '#f1f1f1', scale: 1 },
+                                                animate: { 
+                                                    backgroundColor: ['#f1f1f1', '#1d4ed8', '#1d4ed8', '#f1f1f1'],
+                                                    scale: [1, 1.05, 1.05, 1]
+                                                }
+                                            }}
+                                            transition={{ 
+                                                duration: 4, 
+                                                repeat: Infinity, 
+                                                delay: i * 0.15,
+                                                times: [0, 0.2, 0.8, 1]
+                                            }}
+                                        />
+                                    ))}
+                                </motion.div>
+                            </div>
+                        </div>
+                        <div className="card-content">
+                            <h3 className="card-title">Intelligent Workflow</h3>
+                            <p className="card-description">
+                                Streamline every financial movement with a centralized, AI-driven process.
+                            </p>
+                        </div>
+                    </motion.div>
+
+                    {/* Card 2: Isometric Block */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                        className="bento-card"
+                    >
+                        <div className="visual-container">
+                            <motion.div 
+                                className="isometric-block"
+                                whileHover={{ 
+                                    rotateX: 30, 
+                                    rotateZ: 45,
+                                    scale: 1.05,
+                                    boxShadow: '1px 1px 0 #ccc, 2px 2px 0 #ccc, 3px 3px 0 #ccc, 4px 4px 0 #ccc, 20px 20px 50px rgba(0,0,0,0.15)'
+                                }}
+                            >
+                                <motion.div 
+                                    className="iso-sidebar" 
+                                    animate={{ opacity: [0, 1, 1, 0], x: [-10, 0, 0, -10] }}
+                                    transition={{ duration: 6, repeat: Infinity, times: [0, 0.1, 0.9, 1] }}
+                                />
+                                <motion.div 
+                                    className="iso-top-bar" 
+                                    animate={{ opacity: [0, 0, 1, 1, 0] }}
+                                    transition={{ duration: 6, repeat: Infinity, times: [0, 0.15, 0.25, 0.9, 1] }}
+                                />
+                                <motion.div 
+                                    className="iso-content-header" 
+                                    animate={{ opacity: [0, 0, 1, 1, 0] }}
+                                    transition={{ duration: 6, repeat: Infinity, times: [0, 0.2, 0.3, 0.9, 1] }}
+                                />
+                                <div className="iso-lines">
+                                    {[...Array(6)].map((_, i) => (
+                                        <motion.div 
+                                            key={i} 
+                                            className="iso-line" 
+                                            style={{ width: `${100 - (i * 5)}%` }}
+                                            animate={{ opacity: [0, 0, 1, 1, 0], x: [10, 10, 0, 0, 10] }}
+                                            transition={{ 
+                                                duration: 6, 
+                                                repeat: Infinity, 
+                                                times: [0, 0.3 + (i * 0.05), 0.45 + (i * 0.05), 0.9, 1],
+                                                ease: "easeOut"
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                                <motion.div 
+                                    className="iso-dot" 
+                                    animate={{ opacity: [0, 0, 1, 1, 0], scale: [0, 0, 1.2, 1, 0] }}
+                                    transition={{ duration: 6, repeat: Infinity, times: [0, 0.5, 0.6, 0.9, 1] }}
+                                />
+                            </motion.div>
+                        </div>
+                        <div className="card-content">
+                            <h3 className="card-title">Unified Platform</h3>
+                            <p className="card-description">
+                                Centralized data and signals without stitching together multiple tools.
+                            </p>
+                        </div>
+                    </motion.div>
+
+                    {/* Card 3: Orange Usage Bar */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="bento-card"
+                    >
+                        <div className="visual-container">
+                            <motion.div 
+                                className="usage-bar-card"
+                                animate={{ 
+                                    opacity: [0, 0, 1, 1, 0],
+                                    scale: [0.9, 0.9, 1, 1, 0.9],
+                                    y: [20, 20, 0, 0, 20]
+                                }}
+                                transition={{ 
+                                    duration: 6, 
+                                    repeat: Infinity, 
+                                    times: [0, 0.1, 0.2, 0.9, 1],
+                                    ease: "easeInOut"
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: '700' }}>
+                                        Usage
+                                    </div>
+                                    <div className="hobby-badge">Saver</div>
+                                </div>
+                                <div className="usage-progress" style={{ marginBottom: '8px' }}>
+                                    <motion.div 
+                                        className="usage-fill"
+                                        initial={{ width: '0%', backgroundColor: '#1d4ed8' }}
+                                        animate={{ 
+                                            width: ['0%', '0%', '0%', '75%', '75%', '0%'],
+                                            backgroundColor: ['#1d4ed8', '#1d4ed8', '#1d4ed8', '#1132cb', '#1132cb', '#1d4ed8']
+                                        }}
+                                        transition={{ 
+                                            duration: 6, 
+                                            repeat: Infinity, 
+                                            times: [0, 0.2, 0.3, 0.5, 0.9, 1],
+                                            ease: 'easeInOut'
+                                        }}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.7rem', fontWeight: '700', color: '#666' }}>
+                                    750 / 1000 INR
+                                </div>
+                            </motion.div>
+                        </div>
+                        <div className="card-content">
+                            <h3 className="card-title">Predictable Budgeting</h3>
+                            <p className="card-description">
+                                Transparent consumption tracking with no hidden costs or surprises.
+                            </p>
+                        </div>
+                    </motion.div>
                 </div>
             </section>
 

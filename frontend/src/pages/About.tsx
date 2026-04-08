@@ -94,19 +94,19 @@ const About = () => {
                 <div className="team-founder-grid">
                     <div className="founder-card">
                         <div className="founder-avatar-placeholder">
-                            {/* Image placeholder - to be updated by user later */}
+                            <img src="/Mantosh Photo - About Page.png" alt="Mantosh Kumar Yadav" className="founder-avatar" />
                         </div>
                         <h3>Mantosh Kumar Yadav</h3>
                         <p className="founder-role">CEO & Founder</p>
                         <div className="founder-socials">
-                            <a href="#" className="social-link"><XIcon size={18} /></a>
+                            <a href="https://x.com/MantoshKumarya" target="_blank" rel="noopener noreferrer" className="social-link"><XIcon size={18} /></a>
                             <a href="https://www.linkedin.com/in/mantosh-kumar-yadav-b819b8291?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank" rel="noopener noreferrer" className="social-link"><Linkedin size={18} /></a>
                         </div>
                     </div>
 
                     <div className="founder-card">
                         <div className="founder-avatar-placeholder">
-                            <img src="/2.jpeg" alt="Noel Regis" className="founder-avatar" />
+                            <img src="/WhatsApp Image 2026-03-04 at 09.19.50 (1).jpeg" alt="Noel Regis" className="founder-avatar" />
                         </div>
                         <h3>Noel Regis</h3>
                         <p className="founder-role">CTO & Co-Founder</p>
@@ -118,7 +118,7 @@ const About = () => {
 
                     <div className="founder-card">
                         <div className="founder-avatar-placeholder">
-                            {/* Image placeholder - to be updated by user later */}
+                            <img src="/Raqib Photo - About Page.jpeg" alt="Md. Raqib Alam" className="founder-avatar" />
                         </div>
                         <h3>Md. Raqib Alam</h3>
                         <p className="founder-role">CTO & Co-Founder</p>

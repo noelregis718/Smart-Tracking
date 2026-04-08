@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Info, ChevronDown, Plus } from 'lucide-react';
+import { SpendingPacing } from './SpendingPacing';
+import { SavingsBoost } from './SavingsBoost';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
 
@@ -263,17 +265,19 @@ export const LeftToBudget = () => {
             {/* Category Breakdown */}
             <div style={{ padding: '1rem', flex: 1 }}>
                 {activeTab === 'Expenses' ? (
-                    stats.groups.map((group, index) => (
-                        <BudgetCategoryRow
-                            key={group.name}
-                            label={group.name}
-                            budget={group.budget}
-                            spent={group.spent}
-                            remaining={group.remaining}
-                            color="#22c55e"
-                            last={index === stats.groups.length - 1}
-                        />
-                    ))
+                    <>
+                        {stats.groups.map((group, index) => (
+                            <BudgetCategoryRow
+                                key={group.name}
+                                label={group.name}
+                                budget={group.budget}
+                                spent={group.spent}
+                                remaining={group.remaining}
+                                color="#22c55e"
+                                last={index === stats.groups.length - 1}
+                            />
+                        ))}
+                    </>
                 ) : activeTab === 'Income' ? (
                     <div>
                         {income.length === 0 ? (
@@ -308,6 +312,14 @@ export const LeftToBudget = () => {
                         No data available for {activeTab}
                     </div>
                 )}
+
+                <div style={{ marginTop: 'auto', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#94a3b8', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
+                        Smart insights
+                    </div>
+                    <SpendingPacing totalSpent={stats.totalSpent} totalBudget={stats.totalBudget} />
+                    <SavingsBoost totalLeft={stats.totalLeft} />
+                </div>
             </div>
         </div>
     );
