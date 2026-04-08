@@ -58,10 +58,12 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`\x1b[32m✔ Server is running on port ${PORT}\x1b[0m`);
-  console.log(`\x1b[36mℹ Ready to handle multi-user dashboards!\x1b[0m`);
-});
+export default app;
 
-// Explicitly keep the process alive as some environments exit prematurely
-setInterval(() => {}, 1000 * 60 * 60);
+// Conditional listener for local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`\x1b[32m✔ Server is running on port ${PORT}\x1b[0m`);
+    console.log(`\x1b[36mℹ Ready to handle multi-user dashboards!\x1b[0m`);
+  });
+}
