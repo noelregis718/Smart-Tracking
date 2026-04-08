@@ -83,14 +83,15 @@ export const Auth = () => {
                 if (response.status === 200) {
                     const { token } = response.data;
                     localStorage.setItem('token', token);
-                    navigate('/dashboard', { replace: true });
+                    // Force a full window refresh to clear all Google popup security context
+                    window.location.href = '/dashboard';
                 } else {
                     setError(response.data?.details || 'Google login failed. Please try again.');
                     setLoading(false);
                 }
             } catch (err: any) {
                 console.error('Core Login Error:', err.response?.data || err.message);
-                setError(err.response?.data?.details || err.response?.data?.error || 'Authentication failed. Please check your internet or try again.');
+                setError(err.response?.data?.details || err.response?.data?.error || 'Authentication failed. Please check your credentials.');
                 setLoading(false);
             }
         },
