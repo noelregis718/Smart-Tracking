@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import api from '../lib/api';
 
 // Helper function to merge class names
 const cn = (...classes: string[]) => {
@@ -80,19 +81,19 @@ export const Auth = () => {
             // In implicit flow with @react-oauth/google, we get an access_token.
             // However, the backend is set up for ID Tokens (credentials).
             // To get an ID token easily, we'll use the standard flow or fixed Auth Code.
-            // Let the backend use the 'postmessage' fallback which is more reliable for popups
-            const success = await login({
-                code: tokenResponse.code
-            });
-
-            if (success) {
+            const response = await api.post(`/auth/google`, { code: tokenResponse.code });
+            
+            if (response.status === 200) {
+                const { token, user: userData } = response.data;
+                localStorage.setItem('token', token);
                 navigate('/dashboard', { replace: true });
             } else {
-                setError('Google login failed. Please try again.');
+                setError(response.data?.details || 'Google login failed. Please try again.');
                 setLoading(false);
             }
         },
-        onError: () => {
+        onError: (error) => {
+            console.error('Login Error:', error);
             setError('Login failed. Please try again.');
         },
         flow: 'auth-code',

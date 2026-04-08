@@ -3,14 +3,16 @@ import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma';
-const client = new OAuth2Client(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET
-);
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 export const googleLogin = async (req: Request, res: Response) => {
     const { credential, code, redirectUri } = req.body || {};
+
+    // Initialize client inside the handler for Serverless reliability
+    const client = new OAuth2Client(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET
+    );
 
     if (!credential && !code) {
         return res.status(400).json({ error: 'Google credential or code is required' });
@@ -21,11 +23,19 @@ export const googleLogin = async (req: Request, res: Response) => {
 
         // If code is provided, exchange it for tokens
         if (code) {
-            const { tokens } = await client.getToken({
-                code,
-                redirect_uri: redirectUri || 'postmessage' // fallback if not provided
-            });
-            idToken = tokens.id_token as string;
+            try {
+                const { tokens } = await client.getToken({
+                    code,
+                    redirect_uri: redirectUri || 'postmessage'
+                });
+                idToken = tokens.id_token as string;
+            } catch (exchangeError: any) {
+                console.error('Google Exchange Error:', exchangeError.response?.data || exchangeError.message);
+                return res.status(401).json({ 
+                    error: 'Google exchange failed', 
+                    details: exchangeError.response?.data?.error_description || exchangeError.message 
+                });
+            }
         }
 
         if (!idToken) {
@@ -46,7 +56,6 @@ export const googleLogin = async (req: Request, res: Response) => {
         const { email, name, picture, sub: googleId } = payload;
 
         // 2. Upsert User in DB
-        // We use email as the unique identifier.
         let user = await prisma.user.findUnique({
             where: { email }
         });
@@ -56,18 +65,16 @@ export const googleLogin = async (req: Request, res: Response) => {
                 data: {
                     email,
                     name: name || '',
-                    // @ts-ignore - 'picture' exists in DB and generated client, but IDE may be out of sync
+                    // @ts-ignore
                     picture: picture || null
-                    // We don't have a password for OAuth users
                 }
             });
         } else {
-            // Update name and picture to keep it fresh
             user = await prisma.user.update({
                 where: { id: user.id },
                 data: {
                     name: name || user.name,
-                    // @ts-ignore - 'picture' exists in DB and generated client, but IDE may be out of sync
+                    // @ts-ignore
                     picture: picture || user.picture
                 }
             });
@@ -86,19 +93,15 @@ export const googleLogin = async (req: Request, res: Response) => {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                // @ts-ignore - 'picture' exists in DB and generated client, but IDE may be out of sync
+                // @ts-ignore
                 picture: user.picture
             }
         });
     } catch (error: any) {
-        console.error('Google login error - FULL OBJECT:', {
-            message: error.message,
-            response: error.response?.data,
-            stack: error.stack
-        });
+        console.error('Core Auth Error:', error.message);
         res.status(401).json({ 
             error: 'Authentication failed',
-            details: error.response?.data?.error_description || error.message
+            details: error.message 
         });
     }
 };
