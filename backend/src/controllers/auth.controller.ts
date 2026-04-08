@@ -90,9 +90,16 @@ export const googleLogin = async (req: Request, res: Response) => {
                 picture: user.picture
             }
         });
-    } catch (error) {
-        console.error('Google login error:', error);
-        res.status(401).json({ error: 'Authentication failed' });
+    } catch (error: any) {
+        console.error('Google login error - FULL OBJECT:', {
+            message: error.message,
+            response: error.response?.data,
+            stack: error.stack
+        });
+        res.status(401).json({ 
+            error: 'Authentication failed',
+            details: error.response?.data?.error_description || error.message
+        });
     }
 };
 

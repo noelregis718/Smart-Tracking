@@ -80,12 +80,9 @@ export const Auth = () => {
             // In implicit flow with @react-oauth/google, we get an access_token.
             // However, the backend is set up for ID Tokens (credentials).
             // To get an ID token easily, we'll use the standard flow or fixed Auth Code.
-            // Let's fix the Auth Code redirect URI to be absolutely certain.
+            // Let the backend use the 'postmessage' fallback which is more reliable for popups
             const success = await login({
-                code: tokenResponse.code,
-                redirectUri: window.location.origin === 'http://localhost:5173' 
-                    ? 'http://localhost:5173/auth' 
-                    : 'https://smart-tracking-2kvr.vercel.app/auth'
+                code: tokenResponse.code
             });
 
             if (success) {
