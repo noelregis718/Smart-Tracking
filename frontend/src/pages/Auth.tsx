@@ -59,7 +59,7 @@ const Input = ({ className = "", style = {}, ...props }: InputProps) => {
 
 
 export const Auth = () => {
-    const { login, loginWithEmail, registerWithEmail } = useAuth();
+    const { loginWithEmail, registerWithEmail } = useAuth();
     const navigate = useNavigate();
     const [isLogin, setIsLogin] = useState(true);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -73,18 +73,14 @@ export const Auth = () => {
     const [isHovered, setIsHovered] = useState(false);
     const [searchParams] = useSearchParams();
 
-    // Configure Google Login with Redirect Flow
     // Configure Google Login with simpler Implicit Flow
     const googleLoginTrigger = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             setLoading(true);
-            // In implicit flow with @react-oauth/google, we get an access_token.
-            // However, the backend is set up for ID Tokens (credentials).
-            // To get an ID token easily, we'll use the standard flow or fixed Auth Code.
             const response = await api.post(`/auth/google`, { code: tokenResponse.code });
             
             if (response.status === 200) {
-                const { token, user: userData } = response.data;
+                const { token } = response.data;
                 localStorage.setItem('token', token);
                 navigate('/dashboard', { replace: true });
             } else {
