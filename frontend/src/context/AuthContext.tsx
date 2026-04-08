@@ -81,9 +81,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
+        localStorage.clear(); // Clear EVERYTHING to be safe
         setUser(null);
-        window.location.href = '/';
+        // Force a hard reload to the landing page to reset all memory variables
+        window.location.replace('/');
     };
 
     useEffect(() => {
